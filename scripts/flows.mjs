@@ -314,8 +314,8 @@ async function pointAt(page, id) {
   await page.waitForFunction(() => document.querySelector(".miniature svg")?.dataset.phase === "done", null, { timeout: 20000 });
   check("miniature: without the burn the spacecraft is lost at the pass", (await page.locator(".mini-craft").count()) === 0 && (await page.locator(".mini-hit").count()) === 1);
 
-  await page.click(`.pager ${a("/projects/skibus")}`);
-  await page.waitForURL(at("/projects/skibus"));
+  await page.click(`.pager ${a("/projects/shell")}`);
+  await page.waitForURL(at("/projects/shell"));
   check("story page: the pager leads to the next project", true);
   check("no console errors on the story page", errors.length === 0, errors.slice(0, 2).join(" | "));
   await desktop.close();
@@ -351,14 +351,23 @@ async function pointAt(page, id) {
   // What each miniature must do when it is used.
   const uses = {
     argus: async (page) => {
-      const first = () => page.evaluate(() => [...document.querySelectorAll(".mini-argus-queue li")].find((li) => li.style.getPropertyValue("--place") === "0" && li.dataset.done === "false").querySelector(".mini-argus-title").firstChild.textContent);
-      check("argus: the queue starts with the work due soonest", (await first()) === "Homework 3");
+      const at = (id) => page.evaluate((id) => document.querySelector(`.mini-plan-task[data-task="${id}"]`)?.getAttribute("style").replace(/\s/g, "").replace(/;$/, "") ?? "none", id);
+      const deadlines = () => page.locator(".mini-plan-deadlines .mini-plan-title").allTextContents();
+      check("argus: every deadline starts as work on the calendar", (await page.locator(".mini-plan-task").count()) === 5 && (await at("exam")) === "--day:2;--start:2;--length:3");
       await act(page);
-      check("argus: a post moves the exam up the queue", (await phase(page, ".mini-argus", "data-step")) === "moved" && (await page.locator('.mini-argus-queue li[data-source="piazza"]').count()) === 1);
+      check("argus: a new assignment is listed and takes the first free time", (await deadlines()).includes("Lab 4") && (await at("lab")) === "--day:0;--start:4;--length:2" && (await at("problem-set")) === "--day:1;--start:1;--length:2");
       await act(page);
-      check("argus: finishing the first task refills the window", (await first()) === "Problem Set 6" && (await page.locator(".mini-argus-bar span").allTextContents()).join() === "Problem Set 6,Midterm 2");
+      check("argus: a moved exam jumps ahead on the calendar", (await at("exam")) === "--day:1;--start:1;--length:3" && (await page.textContent(".mini-plan-deadlines li[data-flag] .mini-plan-flag")) === "Moved");
       await act(page);
-      check("argus: then it starts over", (await phase(page, ".mini-argus", "data-step")) === "synced");
+      check("argus: a meeting pushes the work around it", (await page.locator('.mini-plan-busy[data-kind="meeting"]').count()) === 1 && (await at("quiz")) === "--day:2;--start:4;--length:1" && (await at("essay")) === "--day:3;--start:1;--length:2");
+      await page.waitForTimeout(800); // the blocks glide to their new times
+      const overlap = await page.evaluate(() => {
+        const boxes = [...document.querySelectorAll(".mini-plan-block i")].map((el) => el.getBoundingClientRect());
+        return boxes.some((p, i) => boxes.some((q, j) => j > i && p.left < q.right - 1 && q.left < p.right - 1 && p.top < q.bottom - 1 && q.top < p.bottom - 1));
+      });
+      check("argus: nothing on the calendar overlaps", !overlap);
+      await act(page);
+      check("argus: then it starts over", (await phase(page, ".mini-plan", "data-step")) === "planned" && (await page.locator(".mini-plan-task").count()) === 5);
     },
     "smart-display": async (page) => {
       const style = (id) => page.evaluate((id) => document.querySelector(`[data-widget="${id}"]`).getAttribute("style").replace(/\s/g, "").replace(/;$/, ""), id);
@@ -402,21 +411,6 @@ async function pointAt(page, id) {
       await page.click('.mini-jup-catalog button[data-course="c1"]');
       check("jupiterp: dropping a course removes it from the generator", (await listed()).join() === "MATH140,BMGT110" && (await page.locator('.mini-jup-week i[data-course="c1"]').count()) === 0);
     },
-    skibus: async (page) => {
-      const seats = (state) => page.locator(`.mini-bus-seat[data-state="${state}"]`).count();
-      check("skibus: boarding waits for a check-in", await page.isDisabled(".miniature-bar button >> nth=1"));
-      await act(page);
-      await act(page);
-      await act(page, 1);
-      check("skibus: check-in marks a seat and boarding fills it", (await seats("checked")) === 1 && (await seats("aboard")) === 1);
-      await page.click(".mini-bus-roster li:nth-child(7) button");
-      check("skibus: a rider can be checked in from the list", (await seats("checked")) === 2);
-      for (let i = 0; i < 7; i++) await act(page);
-      for (let i = 0; i < 9; i++) await act(page, 1);
-      check("skibus: the bus fills and says so", (await seats("aboard")) === 10 && (await status(page)) === "Everyone is aboard. The bus can leave.");
-      await act(page);
-      check("skibus: Start over empties the bus", (await seats("waiting")) === 10);
-    },
     shell: async (page) => {
       const typing = () => phase(page, ".mini-term", "data-typing");
       const text = () => page.evaluate(() => [...document.querySelectorAll(".mini-term p")].map((p) => p.textContent).join("\n"));
@@ -436,7 +430,7 @@ async function pointAt(page, id) {
     },
   };
 
-  for (const slug of ["argus", "smart-display", "jupiterp", "skibus", "shell"]) {
+  for (const slug of ["argus", "smart-display", "jupiterp", "shell"]) {
     const route = `/projects/${slug}`;
 
     const plainContext = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
@@ -475,18 +469,22 @@ async function pointAt(page, id) {
   check("reduced motion: the shell's next command appears at once", (await still.page.getAttribute(".mini-term", "data-typing")) === "false" && (await still.page.getAttribute(".mini-term", "data-group")) === "quoting");
   await still.context.close();
 
+  // SKIBUS is off the site for now.
+  const parked = await (await browser.newPage()).goto(base + "/projects/skibus");
+  check("a parked project has no page", parked.status() === 404);
+
   // MID has nothing built to draw: a story page without a miniature.
   const { context, page } = await open("/projects/mid");
   check("mid: a story page without a miniature still reads", (await page.locator(".miniature").count()) === 0 && (await page.textContent("main.page")).includes("What it is"));
   await page.screenshot({ path: path.join(out, "story-mid-1440x900.png") });
   // The pager walks the whole set, last to first.
   let walked = ["mid"];
-  for (const previous of ["shell", "skibus", "aegis-orbit", "jupiterp", "smart-display", "argus"]) {
+  for (const previous of ["shell", "aegis-orbit", "jupiterp", "smart-display", "argus"]) {
     await page.click(`.pager ${a("/projects/" + previous)}`);
     await page.waitForURL(at("/projects/" + previous));
     walked.push(previous);
   }
-  check("the pager walks through all seven projects", walked.length === 7 && (await page.locator(".pager a").count()) === 1);
+  check("the pager walks through all six projects", walked.length === 6 && (await page.locator(".pager a").count()) === 1);
   await context.close();
 }
 

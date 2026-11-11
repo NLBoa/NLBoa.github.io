@@ -39,7 +39,7 @@ export default function JupiterpMiniature() {
         </section>
 
         {/* The link between the two: the part the pull request added. */}
-        <div className="mini-jup-link" aria-hidden="true" key={plan.join()} />
+        <div className="mini-arrow" aria-hidden="true" key={plan.join()} />
 
         <section className="mini-jup-panel" aria-live="off">
           <h3>{copy.generator}</h3>

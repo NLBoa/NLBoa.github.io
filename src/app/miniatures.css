@@ -131,148 +131,158 @@
   margin: 0;
 }
 
-/* Argus: a ranked queue, and tonight's work window filled from its top. ------ */
-.mini-argus {
-  --row: 2.9rem;
-  padding: 1.25rem 1.5rem 1.5rem;
-  font-size: 0.9375rem;
-}
-
-.mini-argus-top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.mini-argus-heading {
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-.mini-argus-sources {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--faint);
-  font-size: 0.8125rem;
-}
-
-.mini-argus-sources li[data-source] {
-  padding: 0.05rem 0.6rem;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  color: var(--faint);
-  transition: color 0.3s, border-color 0.3s;
-}
-
-.mini-argus-sources li[data-active="true"] {
-  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
-  color: var(--paper);
-}
-
-.mini-argus-queue {
-  position: relative;
-  height: calc(var(--row) * var(--rows));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Each task keeps its element; its place in the queue moves it. */
-.mini-argus-queue li {
-  position: absolute;
-  inset: 0 0 auto;
+/* Argus: its deadlines on one side, the week they are fitted into on the other. */
+.mini-plan {
+  --slot: 2.35rem;
   display: grid;
-  grid-template-columns: 1.5rem minmax(0, 1fr) 6.5rem 5.5rem 6rem;
-  align-items: center;
-  gap: 1rem;
-  height: var(--row);
-  padding-left: 0.75rem;
-  border-top: 1px solid var(--rule);
-  box-shadow: inset 3px 0 0 transparent;
-  transform: translateY(calc(var(--row) * var(--place)));
-  transition:
-    transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
-    opacity 0.3s,
-    box-shadow 0.3s;
+  grid-template-columns: minmax(0, 5fr) 3.5rem minmax(0, 9fr);
+  padding: 1.25rem 1.5rem 1.5rem;
 }
 
-/* The bar on the left marks work that fits in tonight's window. */
-.mini-argus-queue li[data-tonight="true"] {
-  box-shadow: inset 3px 0 0 var(--accent);
+.mini-plan-panel {
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: #10151c;
 }
 
-.mini-argus-queue li[data-done="true"] {
-  opacity: 0;
-  transform: translate(1.5rem, calc(var(--row) * var(--place)));
+.mini-plan-panel h3 {
+  font-size: 1.0625rem;
 }
 
-.mini-argus-rank,
-.mini-argus-effort,
-.mini-argus-title small {
+.mini-plan-panel > p {
   color: var(--faint);
-  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.8125rem;
 }
 
-.mini-argus-title {
+.mini-plan-deadlines {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mini-plan-deadlines li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 4.4rem 1.8rem;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px var(--rule);
+  font-size: 0.875rem;
+}
+
+/* The deadline that is new or has just moved. */
+.mini-plan-deadlines li[data-flag] {
+  box-shadow: inset 0 0 0 1px var(--accent);
+  animation: page-in 0.4s ease;
+}
+
+.mini-plan-title {
   overflow: hidden;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.mini-argus-title small {
-  margin-left: 0.75rem;
-  font-weight: 400;
+.mini-plan-flag {
+  color: var(--accent);
+  font-size: 0.75rem;
 }
 
-.mini-argus-source {
+.mini-plan-due,
+.mini-plan-hours {
   color: var(--dim);
-  font-size: 0.8125rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  white-space: nowrap;
 }
 
-.mini-argus-due {
+.mini-plan-due {
+  grid-column: 3;
+}
+
+.mini-plan-hours {
+  grid-column: 4;
   text-align: right;
 }
 
-.mini-argus-window {
-  margin-top: 0.9rem;
-}
-
-.mini-argus-window p {
-  margin-bottom: 0.4rem;
+.mini-plan-days {
+  display: grid;
+  grid-template-columns: repeat(var(--days), minmax(0, 1fr));
+  margin-top: 0.8rem;
   color: var(--faint);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
 }
 
-.mini-argus-bar {
-  display: flex;
-  gap: 3px;
-  height: 2rem;
+.mini-plan-days span {
+  padding-left: 0.3rem;
+}
+
+/* The week: a column per day, an hour per row. */
+.mini-plan-week {
+  position: relative;
+  height: calc(var(--slot) * var(--slots));
+  margin-top: 0.3rem;
   border-radius: 4px;
-  background: #151b24;
+  background:
+    repeating-linear-gradient(to right, transparent 0 calc(100% / var(--days) - 1px), var(--rule) 0 calc(100% / var(--days))),
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--slot) - 1px), #171d26 0 var(--slot));
 }
 
-.mini-argus-bar span {
-  flex-basis: 0;
-  min-width: 0;
+.mini-plan-block {
+  position: absolute;
+  top: calc(var(--start) * var(--slot));
+  left: calc(var(--day) / var(--days) * 100%);
+  width: calc(100% / var(--days));
+  height: calc(var(--length) * var(--slot));
+  padding: 2px 3px 2px 2px;
+}
+
+.mini-plan-block i {
+  display: block;
+  height: 100%;
   overflow: hidden;
-  padding: 0 0.6rem;
+  padding: 0.25rem 0.4rem;
   border-radius: 4px;
+  font-size: 0.75rem;
+  font-style: normal;
+  line-height: 1.25;
+}
+
+.mini-plan-short {
+  display: none;
+}
+
+.mini-plan-busy i {
+  background: #1d2530;
+  color: var(--faint);
+}
+
+.mini-plan-busy[data-kind="meeting"] {
+  animation: page-in 0.4s ease;
+}
+
+.mini-plan-busy[data-kind="meeting"] i {
+  box-shadow: inset 0 0 0 1px var(--faint);
+  color: var(--paper);
+}
+
+/* Work glides to its new time when the week is fitted again. */
+.mini-plan-task {
+  z-index: 1;
+  transition:
+    top 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+    left 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation: page-in 0.4s ease;
+}
+
+.mini-plan-task i {
   background: var(--accent);
-  color: #14080c;
-  font-size: 0.8125rem;
+  color: #1a070d;
   font-weight: 600;
-  line-height: 2rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: flex-grow 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* Smart Display: widgets on a grid that can be moved and resized. ------------ */
@@ -528,8 +538,8 @@
   cursor: default;
 }
 
-/* The arrow from the plan to the generator. It redraws on every change. */
-.mini-jup-link {
+/* An arrow from one panel to the next. It redraws on every change. */
+.mini-arrow {
   position: relative;
   align-self: center;
   height: 2px;
@@ -539,7 +549,7 @@
   animation: mini-jup-send 0.45s ease-out;
 }
 
-.mini-jup-link::after {
+.mini-arrow::after {
   content: "";
   position: absolute;
   top: -4px;
@@ -752,26 +762,28 @@
 
 /* Small screens ----------------------------------------------------------------- */
 @media (max-width: 48rem) {
-  .mini-argus {
-    --row: 2.75rem;
-    padding: 1rem;
-    font-size: 0.875rem;
+  .mini-plan {
+    --slot: 2rem;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0.75rem;
   }
 
-  .mini-argus-collected,
-  .mini-argus-source,
-  .mini-argus-effort {
+  .mini-plan-panel {
+    padding: 0.8rem 0.75rem 0.75rem;
+  }
+
+  .mini-plan-block i {
+    padding: 0.2rem 0.25rem;
+    font-size: 0.6875rem;
+    line-height: 1.15;
+  }
+
+  .mini-plan-full {
     display: none;
   }
 
-  .mini-argus-queue li {
-    grid-template-columns: 1.25rem minmax(0, 1fr) auto;
-    gap: 0.6rem;
-    padding-left: 0.6rem;
-  }
-
-  .mini-argus-title small {
-    margin-left: 0.5rem;
+  .mini-plan-short {
+    display: inline;
   }
 
   .mini-board {
@@ -803,14 +815,14 @@
   }
 
   /* The arrow points down between the stacked panels. */
-  .mini-jup-link {
+  .mini-arrow {
     width: 2px;
     height: 1.75rem;
     margin: 0.35rem auto;
     transform-origin: top;
   }
 
-  .mini-jup-link::after {
+  .mini-arrow::after {
     top: auto;
     right: -4px;
     bottom: -1px;
@@ -851,15 +863,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mini-argus-queue li,
-  .mini-argus-bar span,
+  .mini-plan-task,
   .mini-widget,
   .mini-bus-seat,
   .mini-term p {
     transition: none;
   }
 
-  .mini-jup-link,
+  .mini-arrow,
+  .mini-plan-task,
+  .mini-plan-busy,
+  .mini-plan-deadlines li,
   .mini-jup-week i,
   .mini-term-cursor {
     animation: none;

@@ -31,34 +31,52 @@ export const aegisOrbitMiniature = {
   },
 };
 
+const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
 export const argusMiniature = {
-  label: "Schematic of the Argus work queue",
+  label: "Schematic of Argus's deadlines being scheduled in FlowSavvy",
   description:
-    "A queue of five pieces of coursework, ranked by when each is due. Under it, tonight's work window is filled from the top of the queue. A post that moves an exam date re-ranks the queue, and finishing the first task takes it off.",
-  caption: "A schematic with made-up coursework, not the real dashboard.",
-  heading: "Queue",
-  collected: "Collected from",
-  sources: { canvas: "Canvas", gradescope: "Gradescope", piazza: "Piazza" },
+    "On one side, the deadlines Argus has collected, each with the day it is due and how long it should take. On the other, a week in FlowSavvy with classes already on it and the work for each deadline fitted into free time before it is due. When a new assignment is posted, a deadline moves or a meeting is added, the work moves to fit.",
+  caption: "A schematic with made-up coursework, not the real Argus or FlowSavvy screens.",
+  argus: "Argus",
+  collected: "The deadlines it has collected",
+  planner: "FlowSavvy",
+  fitted: "The work, fitted around my week",
+  days: weekdays,
   /** The made-up coursework, by task id. */
   tasks: {
-    homework: { title: "Homework 3", course: "CMSC351" },
-    "problem-set": { title: "Problem Set 6", course: "MATH240" },
-    quiz: { title: "Quiz 2", course: "CMSC351" },
-    essay: { title: "Essay draft", course: "ENGL393" },
-    exam: { title: "Midterm 2", course: "MATH240" },
-  } as Record<string, { title: string; course: string }>,
-  due: (days: number) => (days === 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`),
-  effort: (minutes: number) => (minutes % 60 === 0 ? `${minutes / 60} h` : minutes > 60 ? `${Math.floor(minutes / 60)} h ${minutes % 60} min` : `${minutes} min`),
-  window: "Tonight's work window",
+    homework: "Homework 3",
+    "problem-set": "Problem Set 6",
+    quiz: "Quiz 2",
+    essay: "Essay draft",
+    exam: "Midterm 2",
+    lab: "Lab 4",
+  } as Record<string, string>,
+  /** Shorter names for the calendar on a narrow screen. */
+  short: {
+    homework: "HW 3",
+    "problem-set": "PS 6",
+    quiz: "Quiz 2",
+    essay: "Essay",
+    exam: "Midterm",
+    lab: "Lab 4",
+  } as Record<string, string>,
+  busy: { class: "Class", club: "Club", meeting: "Meeting" },
+  due: (day: number) => `Due ${weekdays[day]}`,
+  hours: (hours: number) => `${hours} h`,
+  flags: { added: "New", changed: "Moved" },
+  legend: { work: "Work from Argus", calendar: "Already on my calendar" },
   status: {
-    synced: "Everything collected is ranked into one queue, soonest first.",
-    moved: "A post on Piazza moved Midterm 2 to tomorrow. It climbs the queue.",
-    finished: "Homework 3 is done, so it leaves the queue and the window is refilled.",
+    planned: "Each deadline Argus collects becomes a task, fitted into free time before it is due.",
+    posted: "Lab 4 is posted, due Tuesday. It takes the first free time, and later work moves back.",
+    moved: "A post moves Midterm 2 up to Tuesday. Studying jumps ahead of everything due later.",
+    busy: "A meeting lands on Wednesday. The work moves around it.",
   },
   actions: {
-    synced: "A post moves a deadline",
-    moved: "Finish the first task",
-    finished: "Start over",
+    planned: "Post a new assignment",
+    posted: "Move the midterm",
+    moved: "Add a meeting",
+    busy: "Start over",
   },
 };
 

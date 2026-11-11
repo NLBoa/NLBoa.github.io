@@ -44,7 +44,7 @@ export const projects: Project[] = [
     story: {
       about: [
         "Argus is a personal course hub for one student that never switches off. It runs on a Raspberry Pi 4B and pulls deadlines, announcements and course materials from Canvas, Gradescope, Piazza and umd.io.",
-        "It estimates how long each piece of work should take, ranks the work into a queue for the hours I have set aside, and reminds me by text. I can answer the same way: replying DONE marks a task finished.",
+        "It estimates how long each piece of work should take, ranks the work into a queue for the hours I have set aside, and reminds me by text. Each deadline also becomes a task in FlowSavvy, my calendar planner, which fits the work into free time and moves it when something changes.",
       ],
       note: "Deadline alerts are deterministic and never depend on AI.",
       // TODO(noah): confirm the order and wording of these steps.
@@ -54,10 +54,15 @@ export const projects: Project[] = [
         { title: "Estimate", text: "Each item gets an estimate of the effort, which I can override." },
         { title: "Plan", text: "The work is ranked into a queue and split across my work windows." },
         { title: "Remind", text: "Rules decide what to send and when. It goes by SMS, or ntfy as a fallback." },
-        { title: "Share", text: "A read-only MCP server lets my AI planner read the deadlines." },
+        { title: "Schedule", text: "My AI planner reads the deadlines and schedules the work in FlowSavvy." },
       ],
       partsTitle: "What I built",
       parts: [
+        {
+          title: "From deadline to calendar",
+          // TODO(noah): confirm this description of the FlowSavvy hand-off.
+          text: "Each morning my AI planner reads what Argus has collected through a read-only MCP server and turns every deadline into a task in FlowSavvy, with its due date and Argus's estimate. FlowSavvy fits the work into my free time. When an assignment is posted or a date moves, the task changes and the week is fitted again. The connector returns deadlines and links only: never grades, scores or submissions.",
+        },
         {
           title: "The queue",
           text: "Argus works out the time left on each item, the load and the risk, and ranks everything into one queue. Each work window gets its own share of that queue, and the Workload page shows where the work due outgrows the time I have.",
@@ -71,11 +76,7 @@ export const projects: Project[] = [
         },
         {
           title: "Alerts that never depend on AI",
-          text: "What to send, and when, is decided by plain rules. Each reminder is sent once, and a moved due date arms its reminders again.",
-        },
-        {
-          title: "A read-only connector for my planner",
-          text: "A small MCP server lets my AI planner read the deadlines Argus has already collected, to plan my week. It returns deadlines and links only: never grades, scores or submissions.",
+          text: "What to send, and when, is decided by plain rules. Each reminder is sent once, and a moved due date arms its reminders again. I can answer a text, too: replying DONE marks a task finished.",
         },
         {
           title: "A dashboard on my own devices",
@@ -157,7 +158,8 @@ export const projects: Project[] = [
   {
     slug: "jupiterp",
     title: "Jupiterp",
-    summary: "Open-source course scheduler for University of Maryland students, live at jupiterp.com.",
+    // "Used each semester": Noah's own account (2026-11-11). TODO(noah): a figure from the maintainers would make this stronger; none is published.
+    summary: "Open-source course scheduler that University of Maryland students use each semester to plan their classes, live at jupiterp.com.",
     role: "Open-source contributor",
     // The pull request was merged on 2026-10-31 (from GitHub). TODO(noah): confirm this wording.
     dates: "Merged October 2026",
@@ -179,8 +181,9 @@ export const projects: Project[] = [
     // Drafted from the pull request (github.com/atcupps/Jupiterp/pull/975) and the profile README.
     story: {
       about: [
-        "Jupiterp is an open-source course scheduler for University of Maryland students, live at jupiterp.com.",
-        "It has a Course Planner, where a student lists the courses they plan to take, and a Schedule Generator. Before my change a student had to add the same courses to the generator again by hand.",
+        // Noah's own account of its reach. TODO(noah): replace with a figure if the maintainers have one.
+        "Every semester, when it is time to pick classes, a large share of Maryland's students do it in Jupiterp.",
+        "It is an open-source site for planning a schedule: students search for courses, compare sections alongside professor reviews from PlanetTerp, and see their week laid out. It is live at jupiterp.com.",
       ],
       howTitle: "How the sync works",
       how: [
@@ -192,7 +195,11 @@ export const projects: Project[] = [
       parts: [
         {
           title: "Planner to generator sync",
-          text: "My pull request takes the courses from the Course Planner and fills them into the Schedule Generator, so students do not have to add them twice. It changed six files, passed the project's checks, lint and tests, and was merged.",
+          text: "Jupiterp has a Course Planner, where a student lists the courses they plan to take, and a Schedule Generator. My pull request takes the courses from the planner and fills them into the generator, so students do not have to add them twice. It changed six files, passed the project's checks, lint and tests, and was merged.",
+        },
+        {
+          title: "Who it reaches",
+          text: "Because so many Maryland students build their schedules in Jupiterp each semester, a change to it reaches all of them. Mine removes a step every one of them used to repeat.",
         },
       ],
       team: null,
@@ -275,44 +282,6 @@ export const projects: Project[] = [
     },
   },
   {
-    slug: "skibus",
-    title: "SKIBUS",
-    summary: "Check-in and boarding system in C#, Razor Pages and SQL that ran for four years with real users.",
-    role: "Led a 5-person student team over 4 seasons",
-    // TODO(noah): dates
-    dates: DATES_PLACEHOLDER,
-    stack: ["C#", "Razor Pages", "SQL"],
-    built: [
-      "Cut student check-in time roughly 10x across 180+ person-trips.",
-      "Led a 5-person student team over 4 seasons.",
-    ],
-    links: [],
-    // TODO(noah): up to three images
-    images: [],
-    featured: false,
-    // School-bus yellow.
-    accent: "#f0cf4f",
-    // Only what the profile README says. The SKIBUS repositories are private, so nothing is taken from them.
-    // TODO(noah): what it replaced, how check-in and boarding worked, who used it, and screenshots.
-    story: {
-      about: [
-        "SKIBUS is a check-in and boarding system written in C#, Razor Pages and SQL. It ran for four seasons with real users.",
-      ],
-      how: [],
-      parts: [
-        {
-          title: "Faster check-in",
-          text: "Student check-in time fell roughly 10x across 180+ person-trips.",
-        },
-        {
-          title: "Leading the team",
-          text: "I led a 5-person student team over 4 seasons.",
-        },
-      ],
-      team: null,
-    },
-  },
-  {
     slug: "shell",
     title: "Shell",
     summary: "A shell written in Java, with builtins, quoting, pipelines, redirection and background jobs.",
@@ -383,6 +352,52 @@ export const projects: Project[] = [
       ],
       how: [],
       parts: [],
+      team: null,
+    },
+  },
+];
+
+/**
+ * Off the site for now, at Noah's request (2026-11-11). Nothing links to these
+ * and no page is built for them. To bring one back, move its entry into
+ * `projects` above. SKIBUS's miniature is still in src/miniatures/skibus.
+ */
+export const parkedProjects: Project[] = [
+  {
+    slug: "skibus",
+    title: "SKIBUS",
+    summary: "Check-in and boarding system in C#, Razor Pages and SQL that ran for four years with real users.",
+    role: "Led a 5-person student team over 4 seasons",
+    // TODO(noah): dates
+    dates: DATES_PLACEHOLDER,
+    stack: ["C#", "Razor Pages", "SQL"],
+    built: [
+      "Cut student check-in time roughly 10x across 180+ person-trips.",
+      "Led a 5-person student team over 4 seasons.",
+    ],
+    links: [],
+    // TODO(noah): up to three images
+    images: [],
+    featured: false,
+    // School-bus yellow.
+    accent: "#f0cf4f",
+    // Only what the profile README says. The SKIBUS repositories are private, so nothing is taken from them.
+    // TODO(noah): what it replaced, how check-in and boarding worked, who used it, and screenshots.
+    story: {
+      about: [
+        "SKIBUS is a check-in and boarding system written in C#, Razor Pages and SQL. It ran for four seasons with real users.",
+      ],
+      how: [],
+      parts: [
+        {
+          title: "Faster check-in",
+          text: "Student check-in time fell roughly 10x across 180+ person-trips.",
+        },
+        {
+          title: "Leading the team",
+          text: "I led a 5-person student team over 4 seasons.",
+        },
+      ],
       team: null,
     },
   },
