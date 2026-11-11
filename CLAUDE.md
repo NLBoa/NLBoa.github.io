@@ -15,7 +15,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - **Live at https://nlboa.github.io/** since 2026-11-10. Repository: https://github.com/NLBoa/NLBoa.github.io (public). It is a user site, so there is no base path. Everything is merged into `main`; every push to `main` rebuilds and republishes through `.github/workflows/pages.yml`.
 - The phase branches (`phase-0-blockout` … `github-pages`) exist only locally and are fully contained in `main`.
 - Work from here on: small changes can go straight to `main` if Noah asks for them to be published; otherwise use a branch and ask before pushing, because a push to `main` goes live.
-- **Project pages as stories (branch `project-pages`, committed locally, not published).** Six projects are on the site, each with a story page; five have a miniature (MID has none). SKIBUS is parked. Noah approved Aegis Orbit ("This is perfect") and asked for the rest in one go, to review at the end. Waiting for that review; do not push to `main` until he says to publish.
+- **Project pages as stories: published 2026-11-11** (Noah: "Publish it"). Six projects are on the site, each with a story page; five have a miniature (MID has none). SKIBUS is parked. The branch `project-pages` is merged into `main`. The story texts are still drafts that Noah has not confirmed line by line; see the open questions.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
