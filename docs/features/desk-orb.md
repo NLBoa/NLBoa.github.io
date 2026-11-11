@@ -2,11 +2,11 @@
 
 Branch: `feature/desk-orb` (from `main`, 2026-11-11).
 
-Noah: "on the right corner of the desk maybe make a little AI ball thing that watches the mouse."
+Noah: "on the right corner of the desk maybe make a little AI ball thing that watches the mouse." After seeing it: "I like the robot, but move it to the left corner side."
 
 ## What it does
 
-A black glass ball, 8 cm across, sits in a small dock near the desk's right end. It has one glowing eye. The eye turns to follow the pointer, opens a little wider when the pointer is over something that can be clicked, and blinks when you click anywhere.
+A black glass ball, 8 cm across, sits in a small dock at the desk's left corner. It has one glowing eye. The eye turns to follow the pointer, opens a little wider when the pointer is over something that can be clicked, and blinks when you click anywhere.
 
 ## Decisions
 
@@ -21,7 +21,7 @@ A black glass ball, 8 cm across, sits in a small dock near the desk's right end.
 
 ## To confirm with Noah
 
-- Its place: right end of the desk, level with the gap between the keyboard and the monitors. "Right corner" could also mean the front corner.
+- Its place: the left end of the desk, a little in front of the middle. "Left corner" could also mean right at the front edge.
 - Its look: black ball, pale blue eye (the color of the screens' light).
 
 ## To keep or drop

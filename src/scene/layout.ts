@@ -197,10 +197,10 @@ export const PEN_CUP = {
   penRadius: 0.004,
 };
 
-// The orb: a small ball with one eye, near the desk's right end ---------------
+// The orb: a small ball with one eye, at the desk's left corner ---------------
 
 export const ORB = {
-  position: onDesk(0.9, 0.56),
+  position: onDesk(0.085, 0.6),
   radius: 0.04,
   /** The dock it sits in: a low tapered disc. */
   base: { top: 0.03, bottom: 0.036, height: 0.012 },
