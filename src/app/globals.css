@@ -1,49 +1,75 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #1c1c1e;
+  --text: #ecebe8;
+  --text-dim: #a3a19c;
+  --rule: #38383a;
+  --space: 1.5rem;
+  --measure: 62ch;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  height: 100%;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* The 3D layer. Fixed behind nothing yet; Phase 2 adds the header and pages. */
+.scene {
+  position: fixed;
+  inset: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+.page {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: calc(var(--space) * 3) var(--space);
+}
+
+.page h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.page h2 {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: calc(var(--space) * 2) 0 var(--space);
+}
+
+.page p {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.project-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-list li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.project-list span {
+  color: var(--text-dim);
 }
