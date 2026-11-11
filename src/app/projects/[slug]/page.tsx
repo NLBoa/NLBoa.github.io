@@ -5,6 +5,7 @@ import Page from "@/components/Page";
 import ProjectStory from "@/components/project/ProjectStory";
 import { getProject, projects } from "@/content/projects";
 import { asset } from "@/lib/paths";
+import "./room.css";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));

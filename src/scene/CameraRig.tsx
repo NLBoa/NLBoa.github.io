@@ -3,6 +3,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { Camera, PerspectiveCamera } from "three";
+import { isStoryPath, rootRem, sideBand } from "./band";
 import { poseFor, type CameraPose } from "./camera";
 import type { View } from "./interactive";
 import type { Vec3 } from "./layout";
@@ -11,9 +12,9 @@ import { FLIGHT_MS, selectView, useScene } from "./store";
 /** Idle drift: the camera leans this far toward the pointer, in degrees. */
 const DRIFT = { yaw: 3, pitch: 1.5 };
 
-type Pose = { position: Vec3; target: Vec3; fov: number; shiftY: number };
+type Pose = { position: Vec3; target: Vec3; fov: number; shiftX: number; shiftY: number };
 
-const full = (pose: CameraPose): Pose => ({ ...pose, shiftY: pose.shiftY ?? 0 });
+const full = (pose: CameraPose): Pose => ({ ...pose, shiftX: pose.shiftX ?? 0, shiftY: pose.shiftY ?? 0 });
 const mix = (a: number, b: number, k: number) => a + (b - a) * k;
 const mix3 = (a: Vec3, b: Vec3, k: number): Vec3 => [mix(a[0], b[0], k), mix(a[1], b[1], k), mix(a[2], b[2], k)];
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -35,9 +36,10 @@ function apply(camera: Camera, pose: Pose, drift: { x: number; y: number }, widt
   cam.position.set(pose.target[0] + x * scale, pose.target[1] + y, pose.target[2] + z * scale);
   cam.lookAt(...pose.target);
   cam.fov = pose.fov;
-  // Lens shift: slides the picture up or down without changing perspective.
-  if (Math.abs(pose.shiftY) > 1e-4) cam.setViewOffset(width, height, 0, pose.shiftY * height, width, height);
-  else cam.clearViewOffset();
+  // Lens shift: slides the picture up, down or sideways without changing perspective.
+  if (Math.abs(pose.shiftY) > 1e-4 || Math.abs(pose.shiftX) > 1e-4) {
+    cam.setViewOffset(width, height, -pose.shiftX * width, pose.shiftY * height, width, height);
+  } else cam.clearViewOffset();
   cam.updateProjectionMatrix();
   cam.updateMatrixWorld();
 }
@@ -52,7 +54,12 @@ export default function CameraRig() {
   const get = useThree((s) => s.get);
   const width = useThree((s) => s.size.width);
   const height = useThree((s) => s.size.height);
-  const view = useScene(selectView);
+  const routeView = useScene(selectView);
+  const story = useScene((s) => isStoryPath(s.path));
+  // Beside an open project page the camera turns to the room, if the window is wide enough.
+  const band = story ? sideBand(width, height, rootRem()) : null;
+  const view: View = band ? "story" : routeView;
+  const bandLeft = band?.left ?? 0;
   const reducedMotion = useScene((s) => s.reducedMotion);
 
   const rig = useRef({
@@ -66,7 +73,7 @@ export default function CameraRig() {
 
   useLayoutEffect(() => {
     const r = rig.current;
-    const desired = full(poseFor(view, width / height));
+    const desired = full(poseFor(view, width / height, { width, height, band: bandLeft ? { left: bandLeft, width: width - bandLeft } : null }));
     const sameView = r.view === view;
     if (!r.current || reducedMotion || sameView) {
       // First frame, a resize, or reduced motion: cut, don't fly.
@@ -78,10 +85,13 @@ export default function CameraRig() {
       r.t = 0;
     }
     r.view = view;
+    // The monitors light up beside a project page only once the camera rests there.
+    const beside = view === "story" && r.t === 1;
+    if (useScene.getState().beside !== beside) useScene.setState({ beside });
     const { camera, invalidate } = get();
     apply(camera, r.current, r.drift, width, height);
     invalidate();
-  }, [get, view, width, height, reducedMotion]);
+  }, [get, view, width, height, bandLeft, reducedMotion]);
 
   // Pointer drift, for mice and trackpads only.
   useEffect(() => {
@@ -110,9 +120,11 @@ export default function CameraRig() {
         position: mix3(r.from.position, r.to.position, k),
         target: mix3(r.from.target, r.to.target, k),
         fov: mix(r.from.fov, r.to.fov, k),
+        shiftX: mix(r.from.shiftX, r.to.shiftX, k),
         shiftY: mix(r.from.shiftY, r.to.shiftY, k),
       };
       moving = true;
+      if (r.t === 1 && r.view === "story") useScene.setState({ beside: true });
     }
 
     // Drift only on the desk view; close-ups hold still.

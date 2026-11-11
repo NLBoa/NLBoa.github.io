@@ -1,5 +1,6 @@
+import type { Band } from "./band";
 import type { View } from "./interactive";
-import { FRAME_POINTS, MONITORS, PEN_CUP, STREAM_DECK, monitorCorners, type Vec3 } from "./layout";
+import { FRAME_POINTS, MONITORS, PEN_CUP, STREAM_DECK, WALL_Z, WINDOW, monitorCorners, type Vec3 } from "./layout";
 
 export type CameraPose = {
   position: Vec3;
@@ -7,7 +8,12 @@ export type CameraPose = {
   fov: number; // vertical, degrees
   /** Fraction of the viewport height to slide the picture up by. */
   shiftY?: number;
+  /** Fraction of the viewport width to slide the picture right by. */
+  shiftX?: number;
 };
+
+/** The window a pose is for: its size in pixels and the band beside the page, if any. */
+export type Viewport = { width: number; height: number; band: Band | null };
 
 type FitInput = {
   target: Vec3;
@@ -94,9 +100,49 @@ const center = (points: Vec3[]): Vec3 => {
 
 const deg = (r: number) => (r * 180) / Math.PI;
 
+/**
+ * The room beside an open project page. The picture is a tall slice that runs
+ * from the desk top to above the window's head, and it starts at the wall just
+ * left of the window: a narrow band shows one pane and the edge of the left
+ * monitor, a wider one shows the whole window, then the curtain and the desk.
+ */
+const STORY = {
+  left: WINDOW.left - WINDOW.trim - 0.12,
+  top: WINDOW.top + WINDOW.trim + 0.07,
+  /** The lowest point kept in frame: the desk top, part-way to its front edge. */
+  foot: [0, 0, 0.05] as Vec3,
+  pitch: 7,
+  fov: 30,
+};
+
+function storyPose({ width, height, band }: Viewport & { band: Band }): CameraPose {
+  const aspect = band.width / height;
+  const fit = fitCamera({
+    target: [0, STORY.top / 2, WALL_Z],
+    pitch: STORY.pitch,
+    fov: STORY.fov,
+    aspect,
+    points: [[0, STORY.top, WALL_Z], STORY.foot],
+    fill: 0.94,
+  });
+  // The two points only set the distance. Now slide the camera sideways until
+  // the band's left edge meets the wall beside the window.
+  const distance = Math.hypot(...fit.position.map((v, i) => v - fit.target[i]));
+  const x = STORY.left + distance * Math.tan(rad(STORY.fov) / 2) * aspect;
+  return {
+    position: [x, fit.position[1], fit.position[2]],
+    target: [x, fit.target[1], fit.target[2]],
+    fov: STORY.fov,
+    shiftX: (band.left + band.width / 2) / width - 0.5,
+  };
+}
+
 /** Where the camera sits for each view. Close-ups face their object. */
-export function poseFor(view: View, aspect: number): CameraPose {
+export function poseFor(view: View, aspect: number, viewport?: Viewport): CameraPose {
   switch (view) {
+    case "story":
+      // Without a band there is nothing to show beside the page: stay on the monitor.
+      return viewport?.band ? storyPose({ ...viewport, band: viewport.band }) : poseFor("projects", aspect);
     case "projects":
     case "about": {
       const monitor = MONITORS[view === "projects" ? 0 : 1];

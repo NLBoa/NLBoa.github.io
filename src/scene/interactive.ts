@@ -3,8 +3,11 @@ import { projects } from "@/content/projects";
 import { deckKeys, type DeckKey } from "@/lib/deck";
 import { MONITOR, MONITORS, PEN_CUP, STREAM_DECK, streamDeckBodyY, type Vec3 } from "./layout";
 
-/** Where the camera can be. `deck` is only used while flying to a pressed key. */
-export type View = "home" | "projects" | "about" | "contact" | "deck";
+/**
+ * Where the camera can be. `deck` is only used while flying to a pressed key;
+ * `story` is the room beside an open project page (see band.ts).
+ */
+export type View = "home" | "projects" | "about" | "contact" | "deck" | "story";
 
 export type Interactive = {
   id: string;
