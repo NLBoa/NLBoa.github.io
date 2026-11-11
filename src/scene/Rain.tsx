@@ -1,3 +1,4 @@
+import City from "./City";
 import "./rain.css";
 
 /** Drops that run down the glass: where each starts, how long it takes, and when. */
@@ -17,7 +18,7 @@ const DROPS = [
 ];
 
 /**
- * A rainy night outside the window. It is a plain page layer behind the 3D
+ * A rainy night over the city outside the window. It is a plain page layer behind the 3D
  * canvas, animated by CSS alone, so the scene still draws no frames while
  * idle. Every layer fills the whole view; the window in the scene decides
  * how much of it shows.
@@ -25,6 +26,7 @@ const DROPS = [
 export default function Rain() {
   return (
     <div className="rain">
+      <City />
       <div className="rain-lights" />
       <div className="rain-car" />
       <div className="rain-far" />

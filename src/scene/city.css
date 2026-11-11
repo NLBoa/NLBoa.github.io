@@ -1,0 +1,149 @@
+/*
+ * The city outside the window (see City.tsx and skyline.ts). It sits in the rain
+ * layer, behind the rain itself. The city is a square as wide as the longer
+ * side of the browser window, centered, so it always covers the whole view.
+ *
+ * What moves, moves by transform or opacity, started and stopped with the
+ * rain: the rules in rain.css that rest the weather while a page is open
+ * reach everything in here too.
+ */
+.city {
+  top: 50%;
+  left: 50%;
+  width: 100vmax;
+  height: 100vmax;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  /* Night sky over a lit city: dark above, a magenta haze low down. */
+  background:
+    radial-gradient(70% 34% at 50% 74%, rgba(255, 64, 180, 0.26), transparent 100%),
+    radial-gradient(60% 30% at 20% 58%, rgba(40, 200, 255, 0.12), transparent 100%),
+    linear-gradient(#04050d 0%, #090b25 38%, #1a1140 72%, #2c1549 100%);
+}
+
+.city-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Far towers stand in haze. */
+.city-far {
+  opacity: 0.78;
+}
+
+/* A flying car. It crosses the whole city, then comes round again. */
+.city-car {
+  position: absolute;
+  top: var(--top);
+  left: 0;
+  width: var(--length);
+  aspect-ratio: 3 / 1;
+  transform: translateX(var(--park));
+  animation: city-fly linear infinite;
+  will-change: transform;
+}
+
+.city-car-reverse {
+  animation-direction: reverse;
+}
+
+.city-car-far {
+  opacity: 0.8;
+}
+
+.city-car svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: city-hover 3.4s ease-in-out infinite alternate;
+}
+
+@keyframes city-fly {
+  from {
+    transform: translateX(-16vmax);
+  }
+
+  to {
+    transform: translateX(112vmax);
+  }
+}
+
+@keyframes city-hover {
+  from {
+    transform: translateY(-6%);
+  }
+
+  to {
+    transform: translateY(6%);
+  }
+}
+
+/* A neon sign with a bad connection: steady, then a stutter. */
+.city-flicker {
+  animation: city-flicker 7s steps(1, end) infinite;
+}
+
+.city-flicker:nth-of-type(odd) {
+  animation-duration: 11s;
+  animation-delay: -4s;
+}
+
+@keyframes city-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  61% {
+    opacity: 0.25;
+  }
+
+  62% {
+    opacity: 1;
+  }
+
+  64% {
+    opacity: 0.4;
+  }
+
+  66% {
+    opacity: 1;
+  }
+
+  88% {
+    opacity: 0.15;
+  }
+
+  89% {
+    opacity: 1;
+  }
+}
+
+/* The red light on a mast. */
+.city-beacon {
+  animation: city-beacon 2.6s steps(1, end) infinite;
+}
+
+@keyframes city-beacon {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  55% {
+    opacity: 0.12;
+  }
+}
+
+/* Reduced motion: the city is a still picture, with each car parked in the air. */
+@media (prefers-reduced-motion: reduce) {
+  .city-car,
+  .city-car svg,
+  .city-flicker,
+  .city-beacon {
+    animation: none;
+  }
+}
