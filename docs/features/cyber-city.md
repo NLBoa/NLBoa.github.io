@@ -12,7 +12,7 @@ Behind the rain there is now a city at night: two rows of towers with lit window
 
 - **It is page art, not 3D.** `src/scene/City.tsx` draws SVG inside the rain layer (`Rain.tsx`), so it sits behind the rain and shows through the hole in the wall like the weather does. Everything that moves is a CSS animation, so the 3D scene still draws no frames while idle.
 - **Layout comes from `src/scene/skyline.ts`**, a pure function with a fixed seed: the same city on every visit, and it is unit-tested. Change the seed (`buildCity(seed)`) for a different skyline.
-- **The city is a square as wide as the longer side of the browser window**, centered. Towers run off the bottom and some off the top, so whichever part shows through the window in any camera view is full of buildings. Car lanes sit in the band a laptop window sees.
+- **The city is a square as wide as the longer side of the browser window**, centered. Towers run off the bottom and their roofs sit at many heights, so whichever part shows through the window in any camera view has a skyline in it. Car lanes sit in the band a laptop window sees.
 - **Signs and adverts carry shapes, not words**, so nothing is written that is not true.
 - The cars and signs stop with the rain while a page is open (the rule in `rain.css` covers them). Under reduced motion nothing moves and each car is parked in the air.
 - The old blurred street lights and the passing headlight glow from the rain layer are kept in front of the city: they read as lights out of focus on wet glass.

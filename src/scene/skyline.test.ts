@@ -17,19 +17,19 @@ describe("the city outside the window", () => {
     }
   });
 
-  it("never overlaps two near towers, and never leaves a gap wider than a tower", () => {
+  it("never overlaps two near towers, and never leaves a gap much wider than a tower", () => {
     for (let i = 1; i < city.near.length; i++) {
       const gap = city.near[i].x - (city.near[i - 1].x + city.near[i - 1].width);
       expect(gap).toBeGreaterThanOrEqual(-0.11);
-      expect(gap).toBeLessThan(60);
+      expect(gap).toBeLessThan(125);
     }
   });
 
-  it("has rooftops at many heights, and some towers that run off the top", () => {
+  it("has rooftops at many heights, so there is a skyline wherever the window looks", () => {
     const tops = city.near.map((tower) => tower.top);
-    expect(tops.some((top) => top < 0)).toBe(true);
-    expect(tops.some((top) => top > 0.4 * CITY_SIZE)).toBe(true);
-    expect(tops.some((top) => top > 0 && top < 0.3 * CITY_SIZE)).toBe(true);
+    expect(tops.some((top) => top < 0.38 * CITY_SIZE)).toBe(true);
+    expect(tops.some((top) => top > 0.5 * CITY_SIZE)).toBe(true);
+    expect(tops.every((top) => top < 0.7 * CITY_SIZE)).toBe(true);
   });
 
   it("hangs every sign on a near tower's face, in the band most windows see", () => {

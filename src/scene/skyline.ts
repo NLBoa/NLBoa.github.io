@@ -167,21 +167,21 @@ export function buildCity(seed = 2049): City {
     far.push({
       x: round(x),
       width: round(width),
-      top: round(between(0.17, 0.52) * CITY_SIZE),
+      top: round(between(0.22, 0.6) * CITY_SIZE),
       tone: Math.floor(random() * 3),
       windows: 4,
       cap: random() < 0.3 ? { inset: round(between(6, 12)), height: round(between(20, 60)) } : null,
       mast: random() < 0.25 ? { x: round(width / 2), height: round(between(30, 80)), beacon: false } : null,
       edge: null,
     });
-    x += width + (random() < 0.4 ? 0 : between(4, 24));
+    x += width + (random() < 0.3 ? 0 : between(8, 44));
   }
 
   const near: Tower[] = [];
   for (let x = -30; x < CITY_SIZE + 30; ) {
     const width = between(72, 158);
-    const tall = random() < 0.14;
-    const top = tall ? -40 : between(0.2, 0.64) * CITY_SIZE;
+    const tall = random() < 0.1;
+    const top = tall ? -40 : between(0.24, 0.68) * CITY_SIZE;
     near.push({
       x: round(x),
       width: round(width),
@@ -192,13 +192,13 @@ export function buildCity(seed = 2049): City {
       mast: !tall && random() < 0.6 ? { x: round(between(0.25, 0.75) * width), height: round(between(34, 96)), beacon: random() < 0.6 } : null,
       edge: random() < 0.35 ? NEONS[Math.floor(random() * NEONS.length)] : null,
     });
-    x += width + (random() < 0.25 ? 0 : between(14, 58));
+    x += width + (random() < 0.12 ? 0 : between(34, 120));
   }
 
   // Signs hang on a tower's face, in the band of the city most windows see.
   const signs: Sign[] = [];
   near.forEach((tower, index) => {
-    if (tower.width < 84 || tower.top > 0.56 * CITY_SIZE || index % 2 === 1) return;
+    if (tower.width < 84 || tower.top > 0.6 * CITY_SIZE || index % 2 === 1) return;
     const width = round(between(18, 24));
     const height = round(between(100, 190));
     const left = random() < 0.5;
