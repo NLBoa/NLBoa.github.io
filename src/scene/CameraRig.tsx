@@ -100,7 +100,8 @@ export default function CameraRig() {
     const onMove = (event: PointerEvent) => {
       drift.targetX = (event.clientX / window.innerWidth) * 2 - 1;
       drift.targetY = (event.clientY / window.innerHeight) * 2 - 1;
-      get().invalidate();
+      // Only the desk view leans; a close-up behind an open page has nothing to redraw.
+      if (rig.current.view === "home") get().invalidate();
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
