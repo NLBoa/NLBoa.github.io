@@ -30,6 +30,8 @@ export const light = {
   bar: "#ffdfba",
   room: "#ffd9b5",
   fill: "#ffb680",
+  /** Hover and focus outlines: the color of the screens' light. */
+  outline: "#cfe0ff",
   skyTint: "#56607a",
   groundTint: "#3a302a",
 };

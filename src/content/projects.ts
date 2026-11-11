@@ -26,6 +26,7 @@ export const projects: Project[] = [
     // TODO(noah): up to three images
     images: [],
     featured: true,
+    icon: "eye",
   },
   {
     slug: "smart-display",
@@ -52,6 +53,7 @@ export const projects: Project[] = [
     // TODO(noah): up to three images
     images: [],
     featured: true,
+    icon: "bulb",
   },
   {
     slug: "jupiterp",
@@ -72,6 +74,7 @@ export const projects: Project[] = [
     // TODO(noah): up to three images
     images: [],
     featured: true,
+    icon: "planet",
   },
   {
     slug: "aegis-orbit",
@@ -94,6 +97,7 @@ export const projects: Project[] = [
     // TODO(noah): up to three images
     images: [],
     featured: true,
+    icon: "orbit",
   },
   {
     slug: "skibus",

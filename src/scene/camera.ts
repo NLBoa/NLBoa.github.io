@@ -1,4 +1,5 @@
-import { FRAME_POINTS, type Vec3 } from "./layout";
+import type { View } from "./interactive";
+import { FRAME_POINTS, MONITORS, PEN_CUP, STREAM_DECK, monitorCorners, type Vec3 } from "./layout";
 
 export type CameraPose = {
   position: Vec3;
@@ -12,6 +13,8 @@ type FitInput = {
   target: Vec3;
   /** Degrees the camera looks down from horizontal. */
   pitch: number;
+  /** Degrees the camera stands round to the right of straight-on. */
+  yaw?: number;
   fov: number;
   aspect: number;
   points: Vec3[];
@@ -22,24 +25,28 @@ type FitInput = {
 const rad = (d: number) => (d * Math.PI) / 180;
 
 /**
- * Places a camera in front of the desk (no yaw) looking at `target` from
- * `pitch` degrees above, at the smallest distance that keeps every point in
- * frame.
+ * Places a camera looking at `target` from `pitch` degrees above and `yaw`
+ * degrees round, at the smallest distance that keeps every point in frame.
  */
-export function fitCamera({ target, pitch, fov, aspect, points, fill = 0.9 }: FitInput): CameraPose {
+export function fitCamera({ target, pitch, yaw = 0, fov, aspect, points, fill = 0.9 }: FitInput): CameraPose {
   const p = rad(pitch);
-  const forward: Vec3 = [0, -Math.sin(p), -Math.cos(p)];
-  const up: Vec3 = [0, Math.cos(p), -Math.sin(p)];
+  const y = rad(yaw);
+  const forward: Vec3 = [-Math.sin(y) * Math.cos(p), -Math.sin(p), -Math.cos(y) * Math.cos(p)];
+  const right: Vec3 = [Math.cos(y), 0, -Math.sin(y)];
+  const up: Vec3 = [
+    right[1] * forward[2] - right[2] * forward[1],
+    right[2] * forward[0] - right[0] * forward[2],
+    right[0] * forward[1] - right[1] * forward[0],
+  ];
+  const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
   const tanV = Math.tan(rad(fov) / 2) * fill;
   const tanH = Math.tan(rad(fov) / 2) * aspect * fill;
 
   let distance = 0;
   for (const point of points) {
     const r: Vec3 = [point[0] - target[0], point[1] - target[1], point[2] - target[2]];
-    const x = r[0];
-    const y = r[1] * up[1] + r[2] * up[2];
-    const z = r[1] * forward[1] + r[2] * forward[2];
-    distance = Math.max(distance, Math.abs(x) / tanH - z, Math.abs(y) / tanV - z);
+    const z = dot(r, forward);
+    distance = Math.max(distance, Math.abs(dot(r, right)) / tanH - z, Math.abs(dot(r, up)) / tanV - z);
   }
 
   return {
@@ -78,4 +85,46 @@ export function homePose(aspect: number): CameraPose {
     aspect,
     points: FRAME_POINTS.desk,
   });
+}
+
+const center = (points: Vec3[]): Vec3 => {
+  const sum = points.reduce((a, p) => [a[0] + p[0], a[1] + p[1], a[2] + p[2]], [0, 0, 0]);
+  return [sum[0] / points.length, sum[1] / points.length, sum[2] / points.length];
+};
+
+const deg = (r: number) => (r * 180) / Math.PI;
+
+/** Where the camera sits for each view. Close-ups face their object. */
+export function poseFor(view: View, aspect: number): CameraPose {
+  switch (view) {
+    case "projects":
+    case "about": {
+      const monitor = MONITORS[view === "projects" ? 0 : 1];
+      const points = monitorCorners(monitor);
+      return fitCamera({ target: center(points), pitch: 5, yaw: deg(monitor.yaw), fov: 35, aspect, points, fill: 0.82 });
+    }
+    case "contact": {
+      const [x, , z] = PEN_CUP.position;
+      const r = PEN_CUP.radius;
+      const points: Vec3[] = [
+        [x - r, 0, z],
+        [x + r, 0, z],
+        [x - r, 0.18, z],
+        [x + r, 0.18, z],
+      ];
+      return fitCamera({ target: [x, 0.08, z], pitch: 20, yaw: -12, fov: 35, aspect, points, fill: 0.5 });
+    }
+    case "deck": {
+      const [x, , z] = STREAM_DECK.position;
+      const points: Vec3[] = [
+        [x - 0.06, 0, z + 0.04],
+        [x + 0.06, 0, z + 0.04],
+        [x - 0.06, 0.09, z - 0.03],
+        [x + 0.06, 0.09, z - 0.03],
+      ];
+      return fitCamera({ target: [x, 0.045, z], pitch: 32, fov: 35, aspect, points, fill: 0.5 });
+    }
+    default:
+      return homePose(aspect);
+  }
 }

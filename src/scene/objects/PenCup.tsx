@@ -2,10 +2,11 @@
 
 import { useMemo } from "react";
 import { DoubleSide } from "three";
+import { OutlineHull, pointerHandlers } from "../Highlight";
 import { PEN_CUP } from "../layout";
 import { materials } from "../materials";
 
-/** A hexagonal paper cup in flat cream, holding a few pens. */
+/** A hexagonal paper cup in flat cream, holding a few pens. Opens Contact. */
 export function PenCup() {
   const [x, , z] = PEN_CUP.position;
   const paper = useMemo(() => {
@@ -16,10 +17,13 @@ export function PenCup() {
   }, []);
 
   return (
-    <group position={[x, 0, z]}>
+    <group position={[x, 0, z]} {...pointerHandlers("pen-cup")}>
       <mesh position={[0, PEN_CUP.height / 2, 0]} material={paper}>
         <cylinderGeometry args={[PEN_CUP.radius, PEN_CUP.radius, PEN_CUP.height, 6, 1, true]} />
       </mesh>
+      <OutlineHull id="pen-cup" position={[0, PEN_CUP.height / 2, 0]}>
+        <cylinderGeometry args={[PEN_CUP.radius + 0.0022, PEN_CUP.radius + 0.0022, PEN_CUP.height + 0.004, 6]} />
+      </OutlineHull>
       <mesh position={[0, 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} material={paper}>
         {/* Starts a quarter turn round so its corners meet the walls'. */}
         <circleGeometry args={[PEN_CUP.radius, 6, Math.PI / 2]} />

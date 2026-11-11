@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { fitCamera, homePose } from "./camera";
+import { fitCamera, homePose, poseFor } from "./camera";
+import { INTERACTIVES, viewForPath } from "./interactive";
 import { FRAME_POINTS, KEYBOARD, MONITOR, MONITORS, PEN_CUP, onDesk, type Vec3 } from "./layout";
 
 /** Projects a point into normalized device coordinates for a pose. */
@@ -72,5 +73,44 @@ describe("homePose", () => {
     const extents = FRAME_POINTS.desk.map((pt) => project(pose, 1.6, pt));
     const max = Math.max(...extents.flatMap((p) => [Math.abs(p.x), Math.abs(p.y)]));
     expect(max).toBeCloseTo(1, 5);
+  });
+});
+
+describe("poseFor", () => {
+  it("stands straight in front of the left monitor and square to the angled right one", () => {
+    const left = poseFor("projects", 1.6);
+    expect(left.position[0]).toBeCloseTo(left.target[0], 5);
+    const right = poseFor("about", 1.6);
+    // The right monitor is turned 20 degrees inward, so the camera stands to its left.
+    expect(right.position[0]).toBeLessThan(right.target[0]);
+    const dx = right.position[0] - right.target[0];
+    const dz = right.position[2] - right.target[2];
+    expect((Math.atan2(dx, dz) * 180) / Math.PI).toBeCloseTo(-20, 3);
+  });
+
+  it("gets closer than the home view for every close-up", () => {
+    const home = poseFor("home", 1.6);
+    const distance = (p: typeof home) => Math.hypot(...[0, 1, 2].map((i) => p.position[i] - p.target[i]));
+    for (const view of ["projects", "about", "contact", "deck"] as const) {
+      expect(distance(poseFor(view, 1.6))).toBeLessThan(distance(home));
+    }
+  });
+});
+
+describe("interactive objects", () => {
+  it("tabs through monitors, then the lit keys, then the pen cup", () => {
+    const ids = INTERACTIVES.map((item) => item.id);
+    expect(ids.slice(0, 2)).toEqual(["monitor-left", "monitor-right"]);
+    expect(ids.at(-1)).toBe("pen-cup");
+    expect(ids.slice(2, -1).every((id) => id.startsWith("key-"))).toBe(true);
+  });
+
+  it("maps URLs to camera views", () => {
+    expect(viewForPath("/")).toBe("home");
+    expect(viewForPath("/projects")).toBe("projects");
+    expect(viewForPath("/projects/argus")).toBe("projects");
+    expect(viewForPath("/about")).toBe("about");
+    expect(viewForPath("/contact")).toBe("contact");
+    expect(viewForPath("/credits")).toBe("home");
   });
 });

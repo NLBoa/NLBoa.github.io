@@ -9,8 +9,9 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 ## Status
 
 - Phase 0 (blockout): done and approved. Branch `phase-0-blockout`.
-- **Phase 1 (look): done, waiting for Noah's review.** Branch `phase-1-look` (stacked on phase 0).
-- Phase 2 (function), Phase 3 (ship): not started.
+- Phase 1 (look): done and approved. Branch `phase-1-look` (stacked on phase 0).
+- **Phase 2 (function): done, waiting for Noah's review.** Branch `phase-2-function` (stacked on phase 1).
+- Phase 3 (ship): not started. It covers the `/credits` page and footer link, page titles and share images, 404 page, README, Vercel deploy.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -18,7 +19,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - Next.js 16.4 (App Router, `cacheComponents`), React 19.3, TypeScript 5.9 (what `create-next-app` pins; move to 7 only if Next supports it cleanly).
 - three 0.187, @react-three/fiber 9.8, @react-three/drei 10.7 (fiber 9 needs react `>=19 <19.4`). zustand 5 is installed for scene state (unused until Phase 2).
 - Plain CSS with variables in `src/app/globals.css`. No component kit, no Tailwind.
-- Fonts: Geist and Geist Mono via `next/font` (scaffold default; to be confirmed with Noah in Phase 2).
+- Fonts: Schibsted Grotesk (everything) and IBM Plex Mono (stack, dates, small data) via `next/font`. The monitor screens and Stream Deck keys draw with the same fonts.
 - npm. Node 24.
 - Latest stable releases only. Read the current docs before using a three / R3F / drei / Next API (Next's are in `node_modules/next/dist/docs/`).
 
@@ -27,6 +28,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - `npm run dev` — dev server on :3000
 - `npm run build`, `npm run lint`, `npm test` (vitest, pure logic only)
 - `npm run checkpoint -- <label> [route]` — with the dev server running: screenshots at both review sizes into `docs/checkpoints/`, triangles, draw calls, frames drawn while idle, 3D asset bytes, open TODOs. Uses the installed Google Chrome through playwright-core.
+- `npm run flows` — with the dev server running: 27 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
 - `npm run todos` — list every `TODO(noah)` in the content files
 - `npm run assets:models` — `assets-src/keyboard.glb` → `public/models/keyboard-keys.glb` (crop, normalize, meshopt, WebP ≤ 1024 px)
 - `npm run assets:textures` — downloads the Poly Haven walnut maps into `assets-src/textures/` and writes WebP into `public/textures/`
@@ -34,25 +36,29 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 ## Layout
 
 ```
-src/app/         layout.tsx mounts <SceneMount/> once so the canvas persists across routes;
-                 page.tsx is the Projects index as plain HTML (the no-WebGL fallback)
-src/content/     all site copy, typed (types.ts, projects.ts, about.ts, contact.ts)
-src/scene/       layout.ts    every size and position in meters (single source of truth)
-                 camera.ts    fitCamera / homePose: framing per aspect ratio (tested)
-                 Scene.tsx    the <Canvas>, lights, camera rig, dev stats (window.__scene)
-                 SceneMount.tsx  WebGL check + dynamic import with ssr: false
-                 Lights.tsx   hemisphere, light-bar spot, room bounce, warm fill
-                 materials.ts the shared palette (matte/satin) and the light colors
-                 geometry.ts  rounded slabs, real-unit UVs for the wood
-                 objects/     Room (desk, legs, wall), Monitors (+ arms, base, light bar),
-                              StreamDeck, PenCup, Keyboard (+ Trackpad)
-                 textures/    screens.ts draws the monitor content from src/content;
-                              useScreenTexture.ts turns a drawer into a texture
-scripts/         checkpoint.mjs, optimize-models.mjs, fetch-textures.mjs
+src/app/         layout.tsx: header, <SceneMount/> (once, so the canvas persists), scrim, page
+                 page.tsx (home: the Projects index, hidden while the desk is up),
+                 projects/, projects/[slug]/, about/, contact/   — all static HTML
+src/components/  Header, NavLinks, Page (frame with Close), ProjectList, RouteSync
+src/content/     all site copy, typed (types, projects, about, contact, site)
+src/lib/         deck.ts: the Stream Deck's 15 keys generated from content (tested)
+src/scene/       layout.ts      every size and position in meters (single source of truth)
+                 interactive.ts the objects that react, in Tab order; URL -> camera view
+                 store.ts       zustand: path, flight, hovered, focused, pressed, pulse, activate()
+                 camera.ts      fitCamera / homePose / poseFor (tested)
+                 CameraRig.tsx  owns the camera: poses, flights, pointer drift
+                 Highlight.tsx  outline frames, pointer handlers
+                 Scene.tsx      the <Canvas>, label anchor, ready flag, pulse, dev stats
+                 SceneUI.tsx    DOM beside the canvas: label, hotspot links, phone dock
+                 SceneMount.tsx WebGL check, error boundary, dynamic import with ssr: false
+                 Lights.tsx, materials.ts, geometry.ts
+                 objects/       Room, Monitors, StreamDeck, PenCup, Keyboard
+                 textures/      screens.ts, useScreenTexture.ts, keyIcons.ts
+scripts/         checkpoint.mjs, flows.mjs, optimize-models.mjs, fetch-textures.mjs
 public/models/   keyboard-keys.glb      public/textures/  walnut-diff.webp, walnut-normal.webp
 docs/checkpoints/ screenshots from each phase
 reference/       desk-reference.jpg (+ original HEIC)   — git-ignored
-assets-src/      keyboard.glb (raw Sketchfab download)  — git-ignored
+assets-src/      keyboard.glb, textures/                — git-ignored
 ```
 
 ## Scene conventions
@@ -92,6 +98,17 @@ assets-src/      keyboard.glb (raw Sketchfab download)  — git-ignored
 - 2026-11-10 — `useGLTF(url, false, true)`: Draco off (it would fetch a decoder from a CDN), meshopt on. Meshopt quantizes positions, so use the mesh's world matrix, not the bare geometry.
 - 2026-11-10 — Measured on Noah's M3 Pro MacBook (dev build, Chrome, Metal): 60 fps while redrawing every frame at 1440×900 @2x and at 390×844 @1.5x. **Not measured on a real phone yet.**
 
+- 2026-11-10 — **How navigation works.** Every route is a real static page. The store's `view` is `flight?.view ?? viewForPath(path)`. Clicking an object calls `activate(id)`: the camera eases there (700 ms), then `router.push`. Header links and direct loads skip the flight; a direct load starts with the camera already on that route's pose. Esc pushes `/`. Under reduced motion `activate` pushes at once and the camera cuts.
+- 2026-11-10 — **Accessibility model.** `SceneUI.Hotspots` renders a real link for each interactive object (visually hidden, in Tab order: monitors, lit keys, pen cup). Focus on one outlines and labels its object in the scene; Enter is an ordinary link activation. The canvas itself is `aria-hidden`. Keyboard and trackpad have no handlers.
+- 2026-11-10 — **Fallbacks.** An inline head script sets `html[data-webgl]` when the browser has WebGL2; that hides the home page's HTML index. `SceneMount` removes the mark if the context cannot be created or the scene throws, so the index comes back. Header and pages never depend on the scene.
+- 2026-11-10 — **Phones.** Stream Deck keys are too small to tap, so on portrait screens the four featured projects are listed as links under the desk (`SceneUI.Dock`). Pixel ratio 1.5, shadows baked once.
+- 2026-11-10 — Outlines are explicit geometry (`OutlineFrame` rings, `OutlineHull` for the cup). drei's `<Outlines>` rendered nothing visible here; do not go back to it without checking a screenshot.
+- 2026-11-10 — With a page open the scrim is 94% and the monitor screens go dark, otherwise the screen text ghosts behind the page text.
+- 2026-11-10 — `/projects/[slug]` sets `export const instant = false` and awaits `params` at the top, so an unknown slug is a real 404. Under `<Suspense>` it streamed a 200. `dynamicParams` is unavailable with Cache Components.
+- 2026-11-10 — Stream Deck icons are generic line drawings (eye, bulb, planet, orbit, person, envelope, document, branch, briefcase), not brand logos. A project picks its icon with `icon` in the content file; without one the key shows the title's first letter.
+- 2026-11-10 — Design tokens: wall `#121110`, paper `#ece6da`, dim `#a8a093`, faint `#756e63`, screen light `#cfe0ff` (focus rings and outlines). Left-aligned single column, no cards, no all-caps labels, no rules between rows.
+- 2026-11-10 — The idle camera drift (3° yaw, 1.5° pitch) is for mouse and trackpad only, only on the desk view.
+
 ## Open questions for Noah
 
-See `npm run todos` for content gaps (dates, some roles, images, 7SM title, "Outside of code", résumé PDF, MID details). Beyond those: the font choice, whether to keep the cropped full-size keyboard model or supply a compact one, an optional `assets-src/pencup.jpg` pattern for the pen cup, and a frame-rate check on a real phone.
+See `npm run todos` for content gaps (dates, some roles, images, 7SM title, "Outside of code", résumé PDF, MID details). Beyond those: whether to keep the cropped full-size keyboard model or supply a compact one, an optional `assets-src/pencup.jpg` pattern for the pen cup, and a frame-rate check on a real phone.

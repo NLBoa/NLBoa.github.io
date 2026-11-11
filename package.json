@@ -11,7 +11,8 @@
     "todos": "grep -rn 'TODO(noah)' src/content",
     "checkpoint": "node scripts/checkpoint.mjs",
     "assets:models": "node scripts/optimize-models.mjs",
-    "assets:textures": "node scripts/fetch-textures.mjs"
+    "assets:textures": "node scripts/fetch-textures.mjs",
+    "flows": "node scripts/flows.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

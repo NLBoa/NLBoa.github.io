@@ -45,11 +45,9 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, max
 }
 
 function label(ctx: CanvasRenderingContext2D, fonts: ScreenFonts, text: string, x: number, y: number) {
-  ctx.font = `500 20px ${fonts.mono}`;
+  ctx.font = `500 22px ${fonts.mono}`;
   ctx.fillStyle = ink.faint;
-  ctx.letterSpacing = "2px";
-  ctx.fillText(text.toUpperCase(), x, y);
-  ctx.letterSpacing = "0px";
+  ctx.fillText(text, x, y);
 }
 
 /** Left monitor: the project grid. */
@@ -63,7 +61,7 @@ export function projectGrid(projects: Project[]): ScreenDrawer {
     const pad = 56;
     label(ctx, fonts, "Projects", pad, 78);
     ctx.textAlign = "right";
-    label(ctx, fonts, String(projects.length).padStart(2, "0"), width - pad, 78);
+    label(ctx, fonts, `${projects.length} projects`, width - pad, 78);
     ctx.textAlign = "left";
 
     const cols = 3;
@@ -97,7 +95,7 @@ export function projectGrid(projects: Project[]): ScreenDrawer {
       if (project.stack.length) {
         ctx.font = `400 15px ${fonts.mono}`;
         ctx.fillStyle = ink.faint;
-        const stack = wrap(ctx, project.stack.join("  ·  "), cardW - 44, 1)[0];
+        const stack = wrap(ctx, project.stack.join(", "), cardW - 44, 1)[0];
         ctx.fillText(stack, x + 22, y + cardH - 20);
       }
     });
@@ -133,7 +131,7 @@ export function intro(about: About): ScreenDrawer {
 
     ctx.font = `400 22px ${fonts.mono}`;
     ctx.fillStyle = ink.faint;
-    ctx.fillText(about.education.honors.join("  ·  "), pad, y + 70);
+    ctx.fillText(about.education.honors.join(", "), pad, y + 70);
     void height;
   };
 }

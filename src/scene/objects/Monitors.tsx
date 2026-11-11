@@ -6,8 +6,10 @@ import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLigh
 import { about } from "@/content/about";
 import { projects } from "@/content/projects";
 import { slab } from "../geometry";
+import { OutlineFrame, pointerHandlers } from "../Highlight";
 import { ARM_BASE, LIGHT_BAR, MONITOR, MONITORS, type MonitorPlacement, type Vec3 } from "../layout";
 import { light, materials } from "../materials";
+import { useScene } from "../store";
 import { intro, projectGrid, type ScreenDrawer } from "../textures/screens";
 import { useScreenTexture } from "../textures/useScreenTexture";
 
@@ -24,6 +26,8 @@ const MOUNT_DEPTH = 0.045;
 
 function Monitor({ placement, screenLight }: { placement: MonitorPlacement; screenLight: number }) {
   const texture = useScreenTexture(screens[placement.id]);
+  // With a page open the screens go dark, so their text never shows through behind the page's own.
+  const pageOpen = useScene((s) => s.path !== "/");
   const shell = useMemo(
     () =>
       slab({
@@ -40,8 +44,16 @@ function Monitor({ placement, screenLight }: { placement: MonitorPlacement; scre
   const front = MONITOR.body.depth / 2;
 
   return (
-    <group position={placement.position} rotation={[0, placement.yaw, 0]}>
+    <group position={placement.position} rotation={[0, placement.yaw, 0]} {...pointerHandlers(placement.id)}>
       <mesh geometry={shell} material={materials.blackSatin} />
+      <OutlineFrame
+        id={placement.id}
+        width={MONITOR.body.width}
+        height={MONITOR.body.height}
+        radius={0.006}
+        thickness={0.0028}
+        position={[0, 0, front]}
+      />
       {/* Electronics bulge and mount on the back. */}
       <mesh position={[0, 0, -front - 0.012]} material={materials.blackSatin}>
         <boxGeometry args={[0.32, 0.2, 0.024]} />
@@ -49,7 +61,7 @@ function Monitor({ placement, screenLight }: { placement: MonitorPlacement; scre
       {/* The screen: a plane of exactly 27 inches, 16:9. */}
       <mesh position={[0, MONITOR.screenOffsetY, front + 0.0004]}>
         <planeGeometry args={[MONITOR.screen.width, MONITOR.screen.height]} />
-        <meshBasicMaterial map={texture} toneMapped={false} />
+        <meshBasicMaterial map={texture} color={pageOpen ? "#262626" : "#ffffff"} toneMapped={false} />
       </mesh>
       {/* Cool light the screen throws on the desk. */}
       <rectAreaLight

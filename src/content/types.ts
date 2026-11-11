@@ -6,7 +6,19 @@
 
 export type Link = { label: string; href: string };
 
-export type ProjectImage = { src: string; alt: string };
+export type ProjectImage = { src: string; alt: string; width: number; height: number };
+
+/** The one-color icons a Stream Deck key can show. */
+export type KeyIcon =
+  | "eye"
+  | "bulb"
+  | "planet"
+  | "orbit"
+  | "person"
+  | "envelope"
+  | "document"
+  | "branch"
+  | "briefcase";
 
 export type Project = {
   slug: string;
@@ -23,6 +35,8 @@ export type Project = {
   images: ProjectImage[];
   /** Featured projects get a Stream Deck key, in the order listed. */
   featured: boolean;
+  /** Icon on that key. Without one the key shows the title's first letter. */
+  icon?: KeyIcon;
 };
 
 export type Experience = {

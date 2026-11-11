@@ -67,7 +67,8 @@ for (const { width, height, isMobile, dpr } of sizes) {
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
   await page.goto(`http://localhost:3000${route}`, { waitUntil: "networkidle" });
   await page.waitForFunction(() => (window.__scene?.frames ?? 0) > 0, null, { timeout: 15000 });
-  await page.waitForTimeout(500);
+  // Let the fade-in and the one-time pulse finish before measuring idle.
+  await page.waitForTimeout(3500);
   const before = await page.evaluate(() => window.__scene.frames);
   await page.waitForTimeout(2000);
   const stats = await page.evaluate(() => ({
