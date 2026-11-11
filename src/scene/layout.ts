@@ -197,6 +197,19 @@ export const PEN_CUP = {
   penRadius: 0.004,
 };
 
+// The orb: a small ball with one eye, near the desk's right end ---------------
+
+export const ORB = {
+  position: onDesk(0.9, 0.56),
+  radius: 0.04,
+  /** The dock it sits in: a low tapered disc. */
+  base: { top: 0.03, bottom: 0.036, height: 0.012 },
+  /** How far the ball sinks into the dock. */
+  sink: 0.005,
+  /** It looks at a point this far in front of itself, toward the viewer. */
+  reach: 0.45,
+};
+
 // Keyboard and trackpad (decoration) ----------------------------------------
 
 export const KEYBOARD = {

@@ -9,6 +9,7 @@ import { byId } from "./interactive";
 import { DESK } from "./layout";
 import Lights from "./Lights";
 import { Keyboard, Trackpad } from "./objects/Keyboard";
+import { Orb } from "./objects/Orb";
 import { Monitors } from "./objects/Monitors";
 import { PenCup } from "./objects/PenCup";
 import { Desk, Room } from "./objects/Room";
@@ -178,6 +179,7 @@ export default function Scene() {
             <PenCup />
             <Keyboard />
             <Trackpad />
+            <Orb />
             <ContactShadows
               position={[0, 0.0008, 0]}
               scale={[DESK.width, DESK.depth]}
