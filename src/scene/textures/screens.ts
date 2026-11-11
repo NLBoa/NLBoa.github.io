@@ -122,8 +122,13 @@ export function projectGrid(projects: Project[]): ScreenDrawer {
   };
 }
 
-/** Right monitor: a few lines of intro. */
-export function intro(about: About): ScreenDrawer {
+const card = { accent: "#ff6b78", section: "#ffd24a", good: "#5dd68a" };
+
+/**
+ * Right monitor: the profile card from the About page. The ASCII portrait is
+ * on the left and the facts are on the right, like a terminal's output.
+ */
+export function profile(about: About, portrait: string[], building: Project[]): ScreenDrawer {
   return (ctx, fonts) => {
     const { width, height } = SCREEN_SIZE;
     ctx.fillStyle = ink.bg;
@@ -131,27 +136,59 @@ export function intro(about: About): ScreenDrawer {
     ctx.textBaseline = "alphabetic";
     ctx.textAlign = "left";
 
-    const pad = 96;
-    label(ctx, fonts, "About", pad, 150);
-
-    ctx.font = `600 84px ${fonts.sans}`;
+    // The portrait: one character every 0.6 em, rows a little closer than a line of text.
+    const size = 15.5;
+    const row = size * 0.6 * 1.56;
+    const top = (height - portrait.length * row) / 2 + row;
+    ctx.font = `500 ${size}px ${fonts.mono}`;
     ctx.fillStyle = ink.text;
-    ctx.fillText(about.name, pad, 270);
+    portrait.forEach((line, i) => ctx.fillText(line, 64, top + i * row));
 
-    ctx.font = `400 34px ${fonts.sans}`;
-    ctx.fillStyle = ink.dim;
-    let y = 350;
-    for (const line of wrap(ctx, about.intro[0], width - pad * 2, 3)) {
-      ctx.fillText(line, pad, y);
-      y += 48;
-    }
+    const x = 600;
+    const right = width - 64;
+    let y = 150;
 
+    ctx.font = `600 60px ${fonts.sans}`;
+    ctx.fillStyle = ink.text;
+    ctx.fillText(about.name, x, y);
+
+    y += 54;
+    ctx.font = `500 22px ${fonts.mono}`;
+    ctx.fillStyle = card.accent;
+    ctx.fillText(about.handle, x, y);
     ctx.fillStyle = ink.rule;
-    ctx.fillRect(pad, y + 14, width - pad * 2, 2);
+    ctx.fillRect(x + ctx.measureText(about.handle).width + 14, y - 8, right - x - ctx.measureText(about.handle).width - 14, 2);
 
-    ctx.font = `400 22px ${fonts.mono}`;
-    ctx.fillStyle = ink.faint;
-    ctx.fillText(about.education.honors.join(", "), pad, y + 70);
-    void height;
+    const line = (label: string, value: string, color = ink.text) => {
+      y += 36;
+      ctx.font = `500 21px ${fonts.mono}`;
+      ctx.fillStyle = card.accent;
+      ctx.fillText(label, x, y);
+      ctx.fillStyle = color;
+      ctx.fillText(wrap(ctx, value, right - x - 190, 1)[0] ?? "", x + 190, y);
+    };
+    const section = (name: string) => {
+      y += 46;
+      ctx.font = `500 21px ${fonts.mono}`;
+      ctx.fillStyle = card.section;
+      ctx.fillText(name, x, y);
+      ctx.fillStyle = ink.rule;
+      ctx.fillRect(x + ctx.measureText(name).width + 14, y - 8, right - x - ctx.measureText(name).width - 14, 2);
+    };
+
+    line("School", about.education.school);
+    line("Degree", about.education.studies.join(", "));
+    line("Class", String(about.education.classOf));
+    line("Honors", about.education.honors.join(", "));
+
+    section("Building");
+    for (const project of building) line(project.title, project.summary, ink.dim);
+
+    if (about.status) {
+      section("Status");
+      y += 36;
+      ctx.fillStyle = card.good;
+      ctx.fillText(about.status, x, y);
+    }
   };
 }

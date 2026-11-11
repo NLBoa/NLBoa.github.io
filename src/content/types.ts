@@ -71,9 +71,16 @@ export type Experience = {
   company: string;
   title: string | null;
   dates: string | null;
+  /** What the work was, in a sentence or two. */
+  summary: string;
   points: string[];
   note?: string;
+  links?: Link[];
 };
+
+/** A tool in the toolbox. `match` lists the names it goes by in projects' stacks. */
+export type Tool = string | { name: string; match: string[] };
+export type ToolGroup = { name: string; tools: Tool[] };
 
 export type About = {
   name: string;
@@ -85,6 +92,11 @@ export type About = {
     honors: string[];
   };
   experience: Experience[];
+  /** The prompt name on the profile card, as on the GitHub profile. */
+  handle: string;
+  /** One line on what I am looking for, or null. */
+  status: string | null;
+  toolbox: ToolGroup[];
   /** The "Outside of code" section, #outside-code. */
   outsideOfCode: string[] | null;
 };

@@ -4,13 +4,14 @@ import { useMemo } from "react";
 import { Quaternion, Vector3 } from "three";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { about } from "@/content/about";
-import { projects } from "@/content/projects";
+import { portraitFront } from "@/content/portrait-front";
+import { featuredProjects, projects } from "@/content/projects";
 import { slab } from "../geometry";
 import { OutlineFrame, pointerHandlers } from "../Highlight";
 import { ARM_BASE, LIGHT_BAR, MONITOR, MONITORS, type MonitorPlacement, type Vec3 } from "../layout";
 import { light, materials } from "../materials";
 import { useScene } from "../store";
-import { intro, projectGrid, type ScreenDrawer } from "../textures/screens";
+import { profile, projectGrid, type ScreenDrawer } from "../textures/screens";
 import { useScreenTexture } from "../textures/useScreenTexture";
 
 // Area lights need their lookup tables registered once.
@@ -18,7 +19,7 @@ RectAreaLightUniformsLib.init();
 
 const screens: Record<MonitorPlacement["id"], ScreenDrawer> = {
   "monitor-left": projectGrid(projects),
-  "monitor-right": intro(about),
+  "monitor-right": profile(about, portraitFront, featuredProjects),
 };
 
 /** How far the mount sits behind the panel's center. */
