@@ -513,6 +513,19 @@ async function pointAt(page, id) {
   check("Esc closes the page even when only its key-up arrives", true);
   await context.close();
 
+  // Esc pressed the instant a page opens, before the page has settled.
+  const quick = await open("/");
+  await sceneReady(quick.page);
+  await quick.page.click(`.site-nav ${a("/contact")}`);
+  await quick.page.waitForURL(at("/contact"), { timeout: 3000 });
+  await quick.page.keyboard.press("Escape");
+  await quick.page.waitForURL(at("/"), { timeout: 3000 });
+  check("Esc works the instant a page opens", true);
+  await quick.page.keyboard.press("Escape");
+  await quick.page.waitForTimeout(300);
+  check("Esc on the desk does nothing", at("/")(quick.page.url()));
+  await quick.context.close();
+
   const phone = await open("/projects/argus", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   const size = await phone.page.locator(".page-close").boundingBox();
   check("phone: Close is a 44px target inside the screen", size.height >= 44 && size.x + size.width <= 390, `${size.height}px tall`);
