@@ -12,8 +12,9 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - Phase 1 (look): done and approved. Branch `phase-1-look` (stacked on phase 0).
 - Phase 2 (function): done and approved. Branch `phase-2-function` (stacked on phase 1).
 - Phase 3 (ship): built and tested. Branch `phase-3-ship` (stacked on phase 2).
-- **Hosting changed to GitHub Pages** (Noah, 2026-11-10). Branch `github-pages` (stacked on phase 3) converts the build to a static export and adds the deploy workflow. `main` still holds only the scaffold commit; none of the branches are merged.
-- **Not published yet.** There is no Git remote. Creating the GitHub repo (it must be public for Pages on a free account), merging to `main` and pushing need Noah's explicit go-ahead, including the repo name, which decides the address.
+- **Live at https://nlboa.github.io/** since 2026-11-10. Repository: https://github.com/NLBoa/NLBoa.github.io (public). It is a user site, so there is no base path. Everything is merged into `main`; every push to `main` rebuilds and republishes through `.github/workflows/pages.yml`.
+- The phase branches (`phase-0-blockout` … `github-pages`) exist only locally and are fully contained in `main`.
+- Work from here on: small changes can go straight to `main` if Noah asks for them to be published; otherwise use a branch and ask before pushing, because a push to `main` goes live.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -123,7 +124,8 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-10 — **Base path.** A project site lives under `/<repo>`. `next.config.ts` reads `NEXT_PUBLIC_BASE_PATH`; the workflow fills it from `actions/configure-pages`. Next prefixes its own links; every address written by hand to a file in `public/` (models, textures, project images, a résumé PDF) must go through `asset()` in `src/lib/paths.ts`. `usePathname()` now ends with a slash, so compare paths through `normalizePath()`.
 - 2026-11-10 — A résumé PDF, once added, is treated as an outside link: the header link and Stream Deck key open the file in a new tab instead of routing to it.
 - 2026-11-10 — `.github/workflows/pages.yml` publishes on every push to `main` (checkout v7, setup-node v7, configure-pages v6, upload-pages-artifact v5, deploy-pages v5: the current majors on 2026-11-10). The repository needs Settings > Pages > Source set to "GitHub Actions" once.
-- 2026-11-10 — Verified locally: all 36 browser checks pass against the export served under `/portfolio` by `scripts/serve-export.mjs`, and against the dev server. The live GitHub Pages site itself has not been tested because it does not exist yet.
+- 2026-11-10 — Verified: all 36 browser checks pass against the export served under `/portfolio` by `scripts/serve-export.mjs` and against the dev server. On the live site: every route answers 200, unknown addresses 404, the desk loads, hover, click, Esc, header links, a direct project URL and the phone dock all work, with no console errors (first load about 700 KB transferred).
+- 2026-11-10 — Pages setup note: for a `<user>.github.io` repository GitHub switches Pages on by itself in branch mode; it was changed to the Actions source with `gh api -X PUT repos/NLBoa/NLBoa.github.io/pages -f build_type=workflow`.
 
 ## Open questions for Noah
 
