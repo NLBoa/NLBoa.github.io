@@ -1,4 +1,5 @@
 import type { About, Project } from "@/content/types";
+import { paintCover } from "@/covers/paint";
 
 /**
  * What the monitors show while idle, drawn to a 2D canvas from the content
@@ -50,7 +51,10 @@ function label(ctx: CanvasRenderingContext2D, fonts: ScreenFonts, text: string, 
   ctx.fillText(text, x, y);
 }
 
-/** Left monitor: the project grid. */
+/**
+ * Left monitor: the project grid. Each card is the same button the Projects
+ * page shows: the project's cover in its own color, then its name.
+ */
 export function projectGrid(projects: Project[]): ScreenDrawer {
   return (ctx, fonts) => {
     const { width, height } = SCREEN_SIZE;
@@ -58,46 +62,62 @@ export function projectGrid(projects: Project[]): ScreenDrawer {
     ctx.fillRect(0, 0, width, height);
     ctx.textBaseline = "alphabetic";
 
-    const pad = 56;
-    label(ctx, fonts, "Projects", pad, 78);
+    const pad = 48;
+    label(ctx, fonts, "Projects", pad, 66);
     ctx.textAlign = "right";
-    label(ctx, fonts, `${projects.length} projects`, width - pad, 78);
+    label(ctx, fonts, `${projects.length} projects`, width - pad, 66);
     ctx.textAlign = "left";
 
     const cols = 3;
     const rows = Math.ceil(projects.length / cols);
     const gap = 20;
-    const top = 112;
+    const top = 92;
     const cardW = (width - pad * 2 - gap * (cols - 1)) / cols;
-    const cardH = (height - top - pad - gap * (rows - 1)) / rows;
+    const cardH = (height - top - pad + 12 - gap * (rows - 1)) / rows;
+    // The cover takes the top of the card; the words need about 100 px.
+    const artH = Math.max(60, cardH - 104);
 
     projects.forEach((project, i) => {
       const x = pad + (i % cols) * (cardW + gap);
       const y = top + Math.floor(i / cols) * (cardH + gap);
+      const accent = project.accent ?? ink.text;
+
       ctx.fillStyle = ink.panel;
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardW, cardH, 10);
+      ctx.fill();
+
+      // The cover, on a band tinted with the project's color.
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardW, artH, [10, 10, 0, 0]);
+      ctx.clip();
+      ctx.fillStyle = ink.bg;
+      ctx.fillRect(x, y, cardW, artH);
+      ctx.globalAlpha = 0.1;
+      ctx.fillStyle = accent;
+      ctx.fillRect(x, y, cardW, artH);
+      ctx.globalAlpha = 1;
+      paintCover(ctx, project.slug, accent, x, y + 6, cardW, artH - 12);
+      ctx.restore();
+
       ctx.strokeStyle = ink.rule;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.roundRect(x, y, cardW, cardH, 10);
-      ctx.fill();
+      ctx.moveTo(x, y + artH);
+      ctx.lineTo(x + cardW, y + artH);
       ctx.stroke();
 
-      ctx.font = `600 30px ${fonts.sans}`;
+      ctx.font = `600 28px ${fonts.sans}`;
       ctx.fillStyle = ink.text;
-      ctx.fillText(project.title, x + 22, y + 48);
+      ctx.fillText(project.title, x + 20, y + artH + 38);
 
-      ctx.font = `400 19px ${fonts.sans}`;
+      ctx.font = `400 17px ${fonts.sans}`;
       ctx.fillStyle = ink.dim;
-      wrap(ctx, project.summary, cardW - 44, 2).forEach((line, n) => {
-        ctx.fillText(line, x + 22, y + 82 + n * 26);
+      wrap(ctx, project.summary, cardW - 40, 2).forEach((line, n) => {
+        ctx.fillText(line, x + 20, y + artH + 66 + n * 23);
       });
-
-      if (project.stack.length) {
-        ctx.font = `400 15px ${fonts.mono}`;
-        ctx.fillStyle = ink.faint;
-        const stack = wrap(ctx, project.stack.join(", "), cardW - 44, 1)[0];
-        ctx.fillText(stack, x + 22, y + cardH - 20);
-      }
     });
   };
 }

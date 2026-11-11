@@ -1,18 +1,23 @@
 import type { Metadata } from "next";
 import Page from "@/components/Page";
-import ProjectList from "@/components/ProjectList";
+import ProjectTiles from "@/components/ProjectTiles";
 import { projects } from "@/content/projects";
+import "./projects.css";
 
 export const metadata: Metadata = {
   title: "Projects",
   description: "Software projects by Noah Leibovitz.",
 };
 
+/** The left monitor's screen, at full size: every project as a button. */
 export default function Projects() {
   return (
-    <Page>
-      <h1>Projects</h1>
-      <ProjectList projects={projects} />
+    <Page className="screen">
+      <header className="screen-bar">
+        <h1>Projects</h1>
+        <p>{projects.length} projects</p>
+      </header>
+      <ProjectTiles projects={projects} />
     </Page>
   );
 }

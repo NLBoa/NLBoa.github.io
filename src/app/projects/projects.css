@@ -1,0 +1,202 @@
+/*
+ * The Projects page: the grid on the left monitor's screen, at full size.
+ * Its colors are the screen's own (see src/scene/textures/screens.ts).
+ */
+.page.screen {
+  --screen-bg: #0b111c;
+  --screen-panel: #111a29;
+  --screen-rule: #1e2b40;
+  --screen-dim: #8fa1bd;
+  --screen-faint: #5d6f8c;
+  max-width: calc(84rem + var(--gutter) * 2);
+  padding-top: calc(var(--header-height) + 1.25rem);
+  padding-bottom: 4rem;
+}
+
+/* Close is fixed in the corner, so the bar that used to hold it takes no room. */
+.page.screen .page-bar {
+  margin: 0;
+}
+
+.screen-bar {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.screen-bar h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.screen-bar p {
+  margin: 0;
+  color: var(--faint);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.1rem;
+  margin: 0;
+  padding: 1.1rem;
+  border: 1px solid var(--screen-rule);
+  border-radius: 14px;
+  background: var(--screen-bg);
+  list-style: none;
+}
+
+/* A tile is one button: the cover, then the words. */
+.tile {
+  --accent: var(--screen-light);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--screen-rule);
+  border-radius: 10px;
+  background: var(--screen-panel);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.tile:hover,
+.tile:focus-visible {
+  border-color: var(--accent);
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* Pressed, like a key. */
+.tile:active {
+  transform: scale(0.985);
+}
+
+.tile-art {
+  display: block;
+  border-bottom: 1px solid var(--screen-rule);
+  background: color-mix(in srgb, var(--accent) 7%, var(--screen-bg));
+  transition: background 0.2s ease;
+}
+
+.tile:hover .tile-art,
+.tile:focus-visible .tile-art {
+  background: color-mix(in srgb, var(--accent) 14%, var(--screen-bg));
+}
+
+.cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 13.5rem;
+}
+
+.tile-text {
+  display: grid;
+  align-content: start;
+  gap: 0.3rem;
+  padding: 0.95rem 1.1rem 1.05rem;
+}
+
+.tile-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.tile:hover .tile-title,
+.tile:focus-visible .tile-title {
+  color: var(--accent);
+}
+
+.tile-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--screen-dim);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.tile-stack {
+  overflow: hidden;
+  color: var(--screen-faint);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 62rem) {
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 36rem) {
+  .tiles {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+
+  /* Cover beside the words, so more projects fit on a phone's screen. */
+  .tile {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .tile-art {
+    display: grid;
+    flex: 0 0 38%;
+    align-items: center;
+    border-right: 1px solid var(--screen-rule);
+    border-bottom: 0;
+  }
+
+  .tile-text {
+    min-width: 0;
+    padding: 0.8rem 0.85rem;
+  }
+
+  .tile-title {
+    font-size: 1.125rem;
+  }
+
+  .tile-summary {
+    font-size: 0.8125rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .tile-stack {
+    display: none;
+  }
+}
+
+/* On the narrowest phones the count would run under Close. */
+@media (max-width: 24rem) {
+  .screen-bar p {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .tile-art {
+    transition: none;
+  }
+}

@@ -236,7 +236,7 @@ async function pointAt(page, id) {
   check("phone: tapping the left monitor opens /projects", true);
   await page.waitForTimeout(700);
   await page.screenshot({ path: path.join(out, "phase-2-projects-390x844.png") });
-  await page.tap(`.project-list ${a("/projects/aegis-orbit")}`);
+  await page.tap(`.tiles ${a("/projects/aegis-orbit")}`);
   await page.waitForURL(at("/projects/aegis-orbit"));
   await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(out, "phase-2-project-390x844.png") });
