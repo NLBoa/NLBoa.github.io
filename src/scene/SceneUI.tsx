@@ -90,10 +90,9 @@ export function Dock() {
             </Link>
           </li>
         ))}
-        <li>
-          <Link href="/projects" className="dock-all">
-            All projects
-          </Link>
+        <li className="dock-more">
+          <Link href="/projects">All projects</Link>
+          <Link href="/credits">Credits</Link>
         </li>
       </ul>
     </nav>

@@ -26,6 +26,9 @@ function showHtmlIndex() {
   delete document.documentElement.dataset.webgl;
 }
 
+/** How long the home page waits for the desk before showing its HTML index. */
+const SLOW_LOAD_MS = 8000;
+
 const subscribe = () => () => {};
 
 /** If the scene throws, the site carries on as plain pages. */
@@ -51,9 +54,22 @@ export default function SceneMount() {
   // Wait for the real URL, so the camera starts on the right view.
   const synced = useScene((s) => s.synced);
 
+  const ready = useScene((s) => s.ready);
+
   useEffect(() => {
     if (!hasWebGL()) showHtmlIndex();
   }, []);
+
+  // On a slow connection the Projects index stands in until the desk arrives.
+  useEffect(() => {
+    if (!hasWebGL()) return;
+    if (ready) {
+      document.documentElement.dataset.webgl = "1";
+      return;
+    }
+    const timer = setTimeout(showHtmlIndex, SLOW_LOAD_MS);
+    return () => clearTimeout(timer);
+  }, [ready]);
 
   if (!supported || !synced) return null;
   return (

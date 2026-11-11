@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Page from "@/components/Page";
 import { about } from "@/content/about";
+
+export const metadata: Metadata = {
+  title: "About",
+  description: about.intro[0],
+};
 
 export default function About() {
   const { education, experience, outsideOfCode } = about;

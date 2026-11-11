@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Page from "@/components/Page";
 import { contact } from "@/content/contact";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Email, GitHub and LinkedIn for Noah Leibovitz.",
+};
 
 export default function Contact() {
   const handle = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");

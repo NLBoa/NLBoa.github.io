@@ -214,8 +214,14 @@ body:has(main.page) .scene {
     text-overflow: ellipsis;
   }
 
-  .dock .dock-all {
+  .dock .dock-more {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .dock .dock-more a {
     color: var(--dim);
+    font-size: 0.9375rem;
     text-decoration: underline;
     text-decoration-color: var(--faint);
   }
@@ -244,6 +250,67 @@ body:has(main.page) .scene {
 /* With WebGL the desk is the home page; this index is the fallback. */
 html[data-webgl] .home-index {
   display: none;
+}
+
+/* A quiet note while the desk loads; it only appears after a short wait. */
+.home-loading {
+  display: none;
+}
+
+html[data-webgl] .home-loading {
+  position: fixed;
+  inset: auto 0 45% 0;
+  z-index: 1;
+  display: block;
+  margin: 0;
+  text-align: center;
+  color: var(--faint);
+  font-size: 0.9375rem;
+  animation: page-in 0.5s ease 0.9s both;
+}
+
+body:has(.scene[data-ready="true"]) .home-loading {
+  display: none;
+}
+
+/* Footer: after the content on pages, tucked in the corner on the desk. */
+.site-footer {
+  position: relative;
+  z-index: 2;
+  padding: 0 var(--gutter) 3rem;
+  color: var(--faint);
+  font-size: 0.875rem;
+}
+
+.site-footer a:hover {
+  color: var(--paper);
+}
+
+html[data-webgl] body:has(main.home) .site-footer {
+  position: fixed;
+  inset: auto auto 0 0;
+  padding-bottom: 1.25rem;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  /* On phones the Credits link sits in the dock instead. */
+  html[data-webgl] body:has(main.home) .site-footer {
+    display: none;
+  }
+}
+
+.lede + .credit {
+  margin-top: 3rem;
+}
+
+.credit .facts {
+  margin-top: 0.75rem;
+}
+
+.credit .facts dd {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  padding-top: 0;
 }
 
 .page-bar {

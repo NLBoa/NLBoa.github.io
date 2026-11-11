@@ -18,7 +18,7 @@ import { selectActive, selectView, useScene } from "./store";
 
 declare global {
   interface Window {
-    /** Dev-only numbers for the checkpoint reports. */
+    /** Numbers for the checkpoint and flow scripts (see STATS). */
     __scene?: {
       readonly frames: number;
       readonly triangles: number;
@@ -31,6 +31,9 @@ declare global {
     };
   }
 }
+
+/** Scene numbers for the scripts: always in development, in a build only when asked for. */
+const STATS = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_SCENE_STATS === "1";
 
 /** Counts drawn frames so "nothing moving means no frames" can be checked. */
 function Stats() {
@@ -185,7 +188,7 @@ export default function Scene() {
             <Ready />
             <Pulse />
           </Suspense>
-          {process.env.NODE_ENV === "development" && <Stats />}
+          {STATS && <Stats />}
         </Canvas>
       </div>
       {onHome && (

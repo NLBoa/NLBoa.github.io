@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import Page from "@/components/Page";
@@ -5,6 +6,17 @@ import { getProject, projects } from "@/content/projects";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
+}
+
+export async function generateMetadata({ params }: PageProps<"/projects/[slug]">): Promise<Metadata> {
+  const { slug } = await params;
+  const project = getProject(slug);
+  if (!project) return { title: "Page not found" };
+  return {
+    title: project.title,
+    description: project.summary,
+    openGraph: { title: project.title, description: project.summary },
+  };
 }
 
 // Every project is prerendered through generateStaticParams, so the page

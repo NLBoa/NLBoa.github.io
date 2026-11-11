@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Schibsted_Grotesk } from "next/font/google";
 import { Suspense } from "react";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import RouteSync from "@/components/RouteSync";
-import { about } from "@/content/about";
+import { siteDescription, siteName, siteUrl } from "@/content/site";
 import SceneMount from "@/scene/SceneMount";
 import "./globals.css";
 
@@ -11,8 +12,11 @@ const sans = Schibsted_Grotesk({ variable: "--font-sans", subsets: ["latin"] });
 const mono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500"] });
 
 export const metadata: Metadata = {
-  title: about.name,
-  description: about.intro[0],
+  metadataBase: new URL(siteUrl),
+  title: { default: siteName, template: `%s | ${siteName}` },
+  description: siteDescription,
+  openGraph: { type: "website", siteName, title: siteName, description: siteDescription },
+  twitter: { card: "summary_large_image" },
 };
 
 // Runs before first paint: if the browser can do WebGL the home page keeps
@@ -32,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SceneMount />
         <div className="scrim" aria-hidden="true" />
         {children}
+        <Footer />
         <Suspense fallback={null}>
           <RouteSync />
         </Suspense>

@@ -4,7 +4,7 @@ import { chromium } from "playwright-core";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 
-const base = "http://localhost:3000";
+const base = process.env.BASE_URL ?? "http://localhost:3000";
 const out = path.resolve(import.meta.dirname, "../docs/checkpoints");
 mkdirSync(out, { recursive: true });
 
@@ -21,7 +21,9 @@ async function open(route, options = {}) {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  page.on("console", (m) => m.type() === "error" && !m.text().startsWith("Failed to load resource") && errors.push(m.text()));
+  // Failed requests are reported with their address, which the console message lacks.
+  page.on("response", (r) => r.status() >= 400 && errors.push(`${r.status()} ${r.url()}`));
   await page.goto(base + route, { waitUntil: "networkidle" });
   return { context, page, errors };
 }
@@ -228,6 +230,36 @@ async function pointAt(page, id) {
   await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(out, "phase-2-project-390x844.png") });
   check("phone: a project is two taps from home", true);
+  await context.close();
+}
+
+// 7. Shipping details: credits, titles, share image, 404 -------------------------
+{
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  await page.goto(base + "/", { waitUntil: "networkidle" });
+  check("home has a title and a share image", (await page.title()) === "Noah Leibovitz" && (await page.locator('meta[property="og:image"]').count()) === 1);
+  const image = await page.getAttribute('meta[property="og:image"]', "content");
+  const imageResponse = await page.request.get(image.replace(/^https?:\/\/[^/]+/, base));
+  check("the share image loads", imageResponse.ok() && imageResponse.headers()["content-type"] === "image/png");
+  await page.waitForSelector('.scene[data-ready="true"]');
+  await page.click('.site-footer a[href="/credits"]');
+  await page.waitForURL("**/credits");
+  await page.waitForFunction(() => document.title !== "", null, { timeout: 3000 });
+  check("the footer links to Credits", (await page.title()) === "Credits | Noah Leibovitz");
+  const text = await page.textContent("main.page");
+  check("Credits names the keyboard model, its creator and license", text.includes("Apple Magic Keyboard") && text.includes("infohack") && text.includes("CC BY 4.0"));
+  check("Credits links the exact license", (await page.locator('main.page a[href="http://creativecommons.org/licenses/by/4.0/"]').count()) === 1);
+  await page.goto(base + "/projects/argus");
+  check("project pages have their own title", (await page.title()) === "Argus | Noah Leibovitz");
+  const missing = await page.goto(base + "/nothing-here");
+  check("an unknown address is a 404 with a way back", missing.status() === 404 && (await page.isVisible('main.page a[href="/"]')));
+  await page.screenshot({ path: path.join(out, "phase-3-404-1440x900.png") });
+  await page.goto(base + "/credits", { waitUntil: "networkidle" });
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: path.join(out, "phase-3-credits-1440x900.png") });
+  const sitemap = await page.request.get(base + "/sitemap.xml");
+  check("sitemap lists the project pages", sitemap.ok() && (await sitemap.text()).includes("/projects/argus"));
   await context.close();
 }
 

@@ -12,7 +12,8 @@
     "checkpoint": "node scripts/checkpoint.mjs",
     "assets:models": "node scripts/optimize-models.mjs",
     "assets:textures": "node scripts/fetch-textures.mjs",
-    "flows": "node scripts/flows.mjs"
+    "flows": "node scripts/flows.mjs",
+    "share-image": "node scripts/share-image.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

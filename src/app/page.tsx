@@ -9,6 +9,10 @@ import { projects } from "@/content/projects";
 export default function Home() {
   return (
     <main className="home">
+      {/* Shown only if the desk takes a moment to arrive. */}
+      <p className="home-loading" role="status">
+        Setting up the desk
+      </p>
       <div className="home-index">
         <h1>{about.name}</h1>
         <p className="lede">{about.intro[0]}</p>

@@ -10,8 +10,9 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 
 - Phase 0 (blockout): done and approved. Branch `phase-0-blockout`.
 - Phase 1 (look): done and approved. Branch `phase-1-look` (stacked on phase 0).
-- **Phase 2 (function): done, waiting for Noah's review.** Branch `phase-2-function` (stacked on phase 1).
-- Phase 3 (ship): not started. It covers the `/credits` page and footer link, page titles and share images, 404 page, README, Vercel deploy.
+- Phase 2 (function): done and approved. Branch `phase-2-function` (stacked on phase 1).
+- **Phase 3 (ship): everything built and tested except the deploy itself.** Branch `phase-3-ship` (stacked on phase 2). `main` still holds only the scaffold commit; the four phase branches have not been merged.
+- **Not deployed.** There is no Git remote and the Vercel CLI is not installed. Creating a GitHub repo, pushing, and deploying each need Noah's explicit go-ahead (repo name, public or private, and whether to publish with the content placeholders still showing).
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -30,6 +31,8 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - `npm run checkpoint -- <label> [route]` — with the dev server running: screenshots at both review sizes into `docs/checkpoints/`, triangles, draw calls, frames drawn while idle, 3D asset bytes, open TODOs. Uses the installed Google Chrome through playwright-core.
 - `npm run flows` — with the dev server running: 27 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
 - `npm run todos` — list every `TODO(noah)` in the content files
+- `npm run share-image` — re-captures `src/app/opengraph-image.png` (1200×630) from the running site; run it again after the look or the content on the screens changes
+- `checkpoint`, `flows` and `share-image` read `BASE_URL`. To test a production build: `NEXT_PUBLIC_SCENE_STATS=1 npm run build`, `npx next start -p 3100`, then `BASE_URL=http://localhost:3100 npm run flows`. The stats flag only exposes `window.__scene` for the scripts; a normal build leaves it out.
 - `npm run assets:models` — `assets-src/keyboard.glb` → `public/models/keyboard-keys.glb` (crop, normalize, meshopt, WebP ≤ 1024 px)
 - `npm run assets:textures` — downloads the Poly Haven walnut maps into `assets-src/textures/` and writes WebP into `public/textures/`
 
@@ -108,6 +111,12 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-10 — Stream Deck icons are generic line drawings (eye, bulb, planet, orbit, person, envelope, document, branch, briefcase), not brand logos. A project picks its icon with `icon` in the content file; without one the key shows the title's first letter.
 - 2026-11-10 — Design tokens: wall `#121110`, paper `#ece6da`, dim `#a8a093`, faint `#756e63`, screen light `#cfe0ff` (focus rings and outlines). Left-aligned single column, no cards, no all-caps labels, no rules between rows.
 - 2026-11-10 — The idle camera drift (3° yaw, 1.5° pitch) is for mouse and trackpad only, only on the desk view.
+
+- 2026-11-10 — **Credits.** `src/content/credits.ts` is the typed manifest (title, creator, source, exact license link, changes) and `/credits` is generated from it; the footer links there (on phones the link sits in the dock). The keyboard's license link is the one the Sketchfab API reports for the model: `http://creativecommons.org/licenses/by/4.0/`. Fonts are listed too.
+- 2026-11-10 — **Share image** is a 1200×630 capture of the desk (`opengraph-image.png` at the app root, so every page uses it); titles follow `<page> | Noah Leibovitz`. `metadataBase`, the sitemap and robots use `siteUrl` from `src/content/site.ts`: `NEXT_PUBLIC_SITE_URL`, else Vercel's production URL, else localhost.
+- 2026-11-10 — **Loading.** Header and page shell render at once. On the home page a quiet "Setting up the desk" note appears after 0.9 s if the scene is not ready, and after 8 s the HTML Projects index stands in until it is.
+- 2026-11-10 — **404.** `src/app/not-found.tsx`. Known limit of Cache Components: in a production build the first request for an unknown `/projects/<slug>` can answer 200 with the not-found page and a `noindex` tag, then 404 once cached. Other unknown addresses are 404 from the first request.
+- 2026-11-10 — Production build measured locally: 3D assets 96.6 KB transferred (budget 3 MB), scripts about 520 KB transferred, 60 fps on the M3 Pro at both sizes. Still not measured on a real phone.
 
 ## Open questions for Noah
 

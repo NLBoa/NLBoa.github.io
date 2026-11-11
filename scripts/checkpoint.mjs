@@ -7,6 +7,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 
 const [label = "checkpoint", route = "/"] = process.argv.slice(2);
+const base = process.env.BASE_URL ?? "http://localhost:3000";
 const root = path.resolve(import.meta.dirname, "..");
 const out = path.join(root, "docs/checkpoints");
 mkdirSync(out, { recursive: true });
@@ -19,7 +20,7 @@ const sizes = [
 /** Forces a redraw every frame for a few seconds and reports the frame rate. */
 async function measureFps(context, width, height) {
   const page = await context.newPage();
-  await page.goto(`http://localhost:3000${route}`, { waitUntil: "networkidle" });
+  await page.goto(`${base}${route}`, { waitUntil: "networkidle" });
   await page.waitForFunction(() => (window.__scene?.frames ?? 0) > 0, null, { timeout: 15000 });
   await page.waitForTimeout(800);
   const result = await page.evaluate(
@@ -65,7 +66,15 @@ for (const { width, height, isMobile, dpr } of sizes) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-  await page.goto(`http://localhost:3000${route}`, { waitUntil: "networkidle" });
+  // Bytes over the wire, by kind, for the first load of this page.
+  const transferred = { models: 0, textures: 0, script: 0, other: 0 };
+  page.on("requestfinished", async (request) => {
+    const { responseBodySize } = await request.sizes().catch(() => ({ responseBodySize: 0 }));
+    const url = request.url();
+    const kind = url.includes("/models/") ? "models" : url.includes("/textures/") ? "textures" : request.resourceType() === "script" ? "script" : "other";
+    transferred[kind] += Math.max(0, responseBodySize);
+  });
+  await page.goto(`${base}${route}`, { waitUntil: "networkidle" });
   await page.waitForFunction(() => (window.__scene?.frames ?? 0) > 0, null, { timeout: 15000 });
   // Let the fade-in and the one-time pulse finish before measuring idle.
   await page.waitForTimeout(3500);
@@ -83,6 +92,10 @@ for (const { width, height, isMobile, dpr } of sizes) {
       `${stats.frames - before} frames drawn in 2 s idle, ${errors.length} console errors -> ${path.relative(root, file)}`,
   );
   for (const e of errors) console.log(`  error: ${e}`);
+  console.log(
+    `  transferred on first load: 3D assets ${transferred.models + transferred.textures} bytes ` +
+      `(models ${transferred.models}, textures ${transferred.textures}), scripts ${transferred.script}, everything else ${transferred.other}`,
+  );
   await context.close();
 
   // Frame rate at the real pixel ratio for that device class.
