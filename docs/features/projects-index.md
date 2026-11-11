@@ -4,7 +4,7 @@ Branch: `feature/projects-index` (on top of `fix/page-close`).
 
 ## What it is
 
-The Projects page was a plain list. It is now the left monitor's screen at full size: six large buttons, three to a row, each with a drawn cover in the project's own color, its name, one line and its stack. The left monitor in the 3D scene shows the same six tiles, so clicking it leads into what you were looking at.
+The Projects page was a plain list. It is now the left monitor's screen at full size: six large buttons, three to a row. Five are the projects, each with a drawn cover in the project's own color, its name, one line and its stack. The sixth, "More on GitHub", leads to the GitHub profile; it was added when MID came off the site, so the grid stays full. The left monitor in the 3D scene shows the same six tiles, so clicking it leads into what you were looking at.
 
 ## Decisions
 

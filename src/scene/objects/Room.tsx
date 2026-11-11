@@ -63,7 +63,7 @@ function WallPanel({ x0, x1, y0, y1 }: { x0: number; x1: number; y0: number; y1:
 function Curtain() {
   const geometry = useMemo(() => {
     const width = CURTAIN.right - CURTAIN.left;
-    const sheet = new PlaneGeometry(width, WINDOW.top - FLOOR_Y, CURTAIN.folds * 8, 1);
+    const sheet = new PlaneGeometry(width, CURTAIN.top - FLOOR_Y, CURTAIN.folds * 8, 1);
     const position = sheet.attributes.position;
     for (let i = 0; i < position.count; i++) {
       const along = (position.getX(i) / width + 0.5) * CURTAIN.folds * Math.PI * 2;
@@ -77,7 +77,7 @@ function Curtain() {
   const z = WALL_Z + WINDOW.depth + CURTAIN.depth + 0.004;
   return (
     <>
-      <mesh geometry={geometry} position={[x, (WINDOW.top + FLOOR_Y) / 2, z]} material={materials.curtain} />
+      <mesh geometry={geometry} position={[x, (CURTAIN.top + FLOOR_Y) / 2, z]} material={materials.curtain} />
       {/* A weighted hem, so the curtain ends in a straight edge at the floor. */}
       <mesh position={[x, FLOOR_Y + 0.04, z + CURTAIN.depth]} material={materials.curtain}>
         <boxGeometry args={[CURTAIN.right - CURTAIN.left, 0.08, 0.006]} />
@@ -87,48 +87,69 @@ function Curtain() {
 }
 
 /**
- * The room behind the desk: a back wall with a tall window on the left, the
- * window's frame, a curtain drawn back, and the floor.
+ * The room behind the desk: a back wall with a window in it, the window's
+ * trim, sill and frame, a curtain drawn back beside it, and the floor.
  *
  * Nothing is drawn where the glass is. The canvas is transparent there, and
  * the rain behind it (Rain.tsx) is an ordinary page layer. So the weather
  * moves without the 3D scene drawing a single frame.
  */
 export function Room() {
-  const { left, right, top, bar, depth } = WINDOW;
+  const { left, right, bottom, top, bar, depth, sill, trim } = WINDOW;
+  const width = right - left;
+  const height = top - bottom;
+  const middleX = (left + right) / 2;
+  const middleY = (top + bottom) / 2;
   const frameZ = WALL_Z + depth / 2;
-  const height = top - FLOOR_Y;
-  const middleY = (top + FLOOR_Y) / 2;
+  const trimZ = WALL_Z + 0.006;
 
   return (
     <>
+      {/* The wall, in four panels around the opening. */}
       <WallPanel x0={-FAR} x1={left} y0={FLOOR_Y} y1={FAR} />
       <WallPanel x0={right} x1={FAR} y0={FLOOR_Y} y1={FAR} />
       <WallPanel x0={left} x1={right} y0={top} y1={FAR} />
+      <WallPanel x0={left} x1={right} y0={FLOOR_Y} y1={bottom} />
 
-      {/* The frame: the two sides, then the bars between the panes. */}
-      {[left, right, ...WINDOW.uprights].map((x) => (
+      {/* Painted trim around the opening: the two sides and the head. */}
+      {[left - trim / 2, right + trim / 2].map((x) => (
+        <mesh key={x} position={[x, middleY + trim / 2, trimZ]} material={materials.trim}>
+          <boxGeometry args={[trim, height + trim, 0.012]} />
+        </mesh>
+      ))}
+      <mesh position={[middleX, top + trim / 2, trimZ]} material={materials.trim}>
+        <boxGeometry args={[width, trim, 0.012]} />
+      </mesh>
+
+      {/* The sill: a board that juts out under the window. It reaches past the
+          trim on the left and stops at the curtain on the right. */}
+      <mesh position={[middleX - (trim + sill.overhang) / 2, bottom - sill.thickness / 2, WALL_Z + sill.depth / 2]} material={materials.trim}>
+        <boxGeometry args={[width + trim + sill.overhang, sill.thickness, sill.depth]} />
+      </mesh>
+
+      {/* The frame: its four sides, then the bars between the panes. */}
+      {[left + bar / 2, right - bar / 2, ...WINDOW.uprights].map((x) => (
         <mesh key={x} position={[x, middleY, frameZ]} material={materials.windowFrame}>
           <boxGeometry args={[bar, height, depth]} />
         </mesh>
       ))}
-      {[top, ...WINDOW.rails].map((y) => (
-        <mesh key={y} position={[(left + right) / 2, y, frameZ]} material={materials.windowFrame}>
-          <boxGeometry args={[right - left, bar, depth]} />
+      {[top - bar / 2, bottom + bar / 2, ...WINDOW.rails].map((y) => (
+        <mesh key={y} position={[middleX, y, frameZ]} material={materials.windowFrame}>
+          <boxGeometry args={[width, bar, depth]} />
         </mesh>
       ))}
 
       {/* The glass: a faint cool sheen over the weather outside. */}
-      <mesh position={[(left + right) / 2, middleY, WALL_Z - 0.005]}>
-        <planeGeometry args={[right - left, height]} />
+      <mesh position={[middleX, middleY, WALL_Z - 0.005]}>
+        <planeGeometry args={[width, height]} />
         <meshBasicMaterial color="#9db4dc" transparent opacity={0.045} depthWrite={false} toneMapped={false} />
       </mesh>
 
       <Curtain />
 
-      {/* Skirting board along the plain part of the wall. */}
-      <mesh position={[(right + FAR) / 2, FLOOR_Y + 0.045, WALL_Z + 0.008]} material={materials.windowFrame}>
-        <boxGeometry args={[FAR - right, 0.09, 0.016]} />
+      {/* Skirting board along the foot of the wall. */}
+      <mesh position={[0, FLOOR_Y + 0.045, WALL_Z + 0.008]} material={materials.windowFrame}>
+        <boxGeometry args={[FAR * 2, 0.09, 0.016]} />
       </mesh>
 
       <mesh position={[0, FLOOR_Y, WALL_Z + FAR / 2]} rotation={[-Math.PI / 2, 0, 0]} material={materials.floor}>

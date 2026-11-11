@@ -55,7 +55,7 @@ function label(ctx: CanvasRenderingContext2D, fonts: ScreenFonts, text: string, 
  * Left monitor: the project grid. Each card is the same button the Projects
  * page shows: the project's cover in its own color, then its name.
  */
-export function projectGrid(projects: Project[]): ScreenDrawer {
+export function projectGrid(projects: Project[], more?: { slug: string; title: string; summary: string }): ScreenDrawer {
   return (ctx, fonts) => {
     const { width, height } = SCREEN_SIZE;
     ctx.fillStyle = ink.bg;
@@ -68,8 +68,10 @@ export function projectGrid(projects: Project[]): ScreenDrawer {
     label(ctx, fonts, `${projects.length} projects`, width - pad, 66);
     ctx.textAlign = "left";
 
+    // The cards: every project, then the tile that leads to the rest.
+    const cards: { slug: string; title: string; summary: string; accent?: string }[] = more ? [...projects, more] : projects;
     const cols = 3;
-    const rows = Math.ceil(projects.length / cols);
+    const rows = Math.ceil(cards.length / cols);
     const gap = 20;
     const top = 92;
     const cardW = (width - pad * 2 - gap * (cols - 1)) / cols;
@@ -77,10 +79,10 @@ export function projectGrid(projects: Project[]): ScreenDrawer {
     // The cover takes the top of the card; the words need about 100 px.
     const artH = Math.max(60, cardH - 104);
 
-    projects.forEach((project, i) => {
+    cards.forEach((project, i) => {
       const x = pad + (i % cols) * (cardW + gap);
       const y = top + Math.floor(i / cols) * (cardH + gap);
-      const accent = project.accent ?? ink.text;
+      const accent = project.accent ?? "#cfe0ff";
 
       ctx.fillStyle = ink.panel;
       ctx.beginPath();

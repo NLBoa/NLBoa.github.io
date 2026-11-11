@@ -5,7 +5,7 @@ import { Quaternion, Vector3 } from "three";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { about } from "@/content/about";
 import { portraitFront } from "@/content/portrait-front";
-import { featuredProjects, projects } from "@/content/projects";
+import { featuredProjects, moreProjects, projects } from "@/content/projects";
 import { slab } from "../geometry";
 import { OutlineFrame, pointerHandlers } from "../Highlight";
 import { ARM_BASE, LIGHT_BAR, MONITOR, MONITORS, type MonitorPlacement, type Vec3 } from "../layout";
@@ -18,7 +18,7 @@ import { useScreenTexture } from "../textures/useScreenTexture";
 RectAreaLightUniformsLib.init();
 
 const screens: Record<MonitorPlacement["id"], ScreenDrawer> = {
-  "monitor-left": projectGrid(projects),
+  "monitor-left": projectGrid(projects, moreProjects),
   "monitor-right": profile(about, portraitFront, featuredProjects),
 };
 

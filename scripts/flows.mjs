@@ -473,21 +473,22 @@ async function pointAt(page, id) {
   await still.context.close();
 
   // SKIBUS is off the site for now.
-  const parked = await (await browser.newPage()).goto(base + "/projects/skibus");
-  check("a parked project has no page", parked.status() === 404);
+  for (const slug of ["skibus", "mid"]) {
+    const parked = await (await browser.newPage()).goto(base + "/projects/" + slug);
+    // The exported site answers 404. The dev server sometimes answers an unknown
+    // project with its own error page instead; either way no page is served.
+    check(`${slug} is parked and has no page`, parked.status() >= 400, `status ${parked.status()}`);
+  }
 
-  // MID has nothing built to draw: a story page without a miniature.
-  const { context, page } = await open("/projects/mid");
-  check("mid: a story page without a miniature still reads", (await page.locator(".miniature").count()) === 0 && (await page.textContent("main.page")).includes("What it is"));
-  await page.screenshot({ path: path.join(out, "story-mid-1440x900.png") });
+  const { context, page } = await open("/projects/shell");
   // The pager walks the whole set, last to first.
-  let walked = ["mid"];
-  for (const previous of ["shell", "aegis-orbit", "jupiterp", "smart-display", "argus"]) {
+  let walked = ["shell"];
+  for (const previous of ["aegis-orbit", "jupiterp", "smart-display", "argus"]) {
     await page.click(`.pager ${a("/projects/" + previous)}`);
     await page.waitForURL(at("/projects/" + previous));
     walked.push(previous);
   }
-  check("the pager walks through all six projects", walked.length === 6 && (await page.locator(".pager a").count()) === 1);
+  check("the pager walks through all five projects", walked.length === 5 && (await page.locator(".pager a").count()) === 1);
   await context.close();
 }
 

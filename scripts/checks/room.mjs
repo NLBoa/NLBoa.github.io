@@ -15,10 +15,14 @@ export default async function room({ browser, base, out, open, check, at, sceneR
   await settle(page);
 
   check("room: the rain is a page layer behind the canvas", (await page.locator(".scene > .rain").count()) === 1 && (await page.evaluate(() => document.querySelector(".scene").firstElementChild.classList.contains("rain"))));
-  const glass = await patch(page, 70, 430);
+  const glass = await patch(page, 190, 150);
   const wall = await patch(page, 1340, 150);
-  check("room: the window on the left shows the night outside", glass[2] > glass[0] + 8, `rgb ${glass.join(" ")}`);
+  const below = await patch(page, 40, 600);
+  const beside = await patch(page, 6, 250, 20);
+  check("room: the window shows the night outside", glass[2] > glass[0] + 8, `rgb ${glass.join(" ")}`);
   check("room: the wall on the right stays warm", wall[0] > wall[2] + 4, `rgb ${wall.join(" ")}`);
+  check("room: under the sill it is wall, not window", below[2] <= below[0] + 6, `rgb ${below.join(" ")}`);
+  check("room: beside the window it is wall, not window", beside[2] <= beside[0] + 6, `rgb ${beside.join(" ")}`);
 
   const moving = await page.evaluate(() => ["rain-far", "rain-near", "rain-drop", "rain-car"].map((c) => getComputedStyle(document.querySelector("." + c)).animationName));
   check("room: the rain falls", moving.every((name) => name !== "none"), moving.join(", "));
@@ -65,8 +69,10 @@ export default async function room({ browser, base, out, open, check, at, sceneR
   const phone = await open("/", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await sceneReady(phone.page);
   await settle(phone.page);
-  const sky = await patch(phone.page, 40, 110);
+  const sky = await patch(phone.page, 100, 62, 28);
   check("room: phone: the window shows above the monitors", sky[2] > sky[0] + 8, `rgb ${sky.join(" ")}`);
+  const under = await patch(phone.page, 60, 470, 28);
+  check("room: phone: under the desk it is wall, not window", under[2] <= under[0] + 6, `rgb ${under.join(" ")}`);
   const overflow = await phone.page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check("room: phone: nothing overflows sideways", overflow <= 0, `${overflow}px`);
   await phone.page.screenshot({ path: path.join(out, "room-390x844.png") });

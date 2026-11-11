@@ -25,26 +25,32 @@ export const WALL_Z = -DESK.depth / 2 - 0.1;
 export const FLOOR_Y = -0.75;
 
 /**
- * The room. As in the reference photo, a tall window fills the left of the
- * back wall and runs down to the floor; the right of the wall is plain.
+ * The room's window: an ordinary window set into the back wall, behind the
+ * left monitor. Wall shows on every side of it: beside it at the left of the
+ * view, under its sill, and above its head.
  */
 export const WINDOW = {
-  left: -1.9,
-  right: 0.06,
-  bottom: FLOOR_Y,
-  top: 1.9,
+  left: -0.88,
+  right: 0.02,
+  /** The sill, a little above the desk so it shows under the monitors. */
+  bottom: 0.09,
+  top: 1.12,
   /** Width of the frame's bars. */
-  bar: 0.032,
+  bar: 0.03,
   /** How far the frame stands out from the wall. */
   depth: 0.04,
   /** Upright bars between the panes. */
-  uprights: [-0.9],
-  /** Cross bars: one just above the desk, where it shows under the monitors. */
-  rails: [0.11],
+  uprights: [-0.43],
+  /** Cross bars between the panes. High enough to clear the header on a wide screen. */
+  rails: [0.8],
+  /** The sill board: how far it reaches past the frame at each end, its thickness, and how far it juts out. */
+  sill: { overhang: 0.05, thickness: 0.028, depth: 0.075 },
+  /** The trim around the opening, wider than the frame it holds. */
+  trim: 0.055,
 } as const;
 
 /** The curtain, drawn back against the window's right edge. */
-export const CURTAIN = { left: 0.02, right: 0.4, folds: 7, depth: 0.012 } as const;
+export const CURTAIN = { left: 0.02, right: 0.4, top: 1.5, folds: 7, depth: 0.012 } as const;
 
 // Monitors: 27-inch 16:9 -------------------------------------------------
 

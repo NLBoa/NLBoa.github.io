@@ -39,7 +39,7 @@ export default async function aboutPage({ browser, base, out, open, check, at, a
   const built = await page.locator(".toolbox-result a").allTextContents();
   check("about: picking Python lists the projects built with it", built.join() === "Argus,Smart Display", built.join(", "));
   await page.click('.toolbox button:has-text("TypeScript")');
-  check("about: picking another tool replaces the list", (await page.locator(".toolbox-result a").allTextContents()).join() === "Jupiterp,Aegis Orbit,MID");
+  check("about: picking another tool replaces the list", (await page.locator(".toolbox-result a").allTextContents()).join() === "Jupiterp,Aegis Orbit");
   check("about: a tool no project names is not a button", (await page.locator('.toolbox-plain:has-text("Docker")').count()) === 1);
   await page.click(`.toolbox-result ${a("/projects/jupiterp")}`);
   await page.waitForURL(at("/projects/jupiterp"), { timeout: 3000 });

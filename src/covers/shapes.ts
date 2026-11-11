@@ -151,6 +151,14 @@ const mid: Shape[] = [0, 1, 2, 3, 4, 5].map((i): Shape => {
   return { d, stroke: "dim", width: 1.5, dash: [4, 4] };
 });
 
+// More on GitHub: a line of commits with a branch that joins it again.
+const more: Shape[] = [
+  { d: "M56 112H264", stroke: "dim", width: 2.5 },
+  { d: "M108 112C132 112 132 62 160 62H186C214 62 214 112 238 112", stroke: "accent", width: 2.5 },
+  ...[56, 108, 238, 264].map((x) => ({ d: circle(x, 112, 8), fill: "panel" as Ink, stroke: "ink" as Ink, width: 2.5 })),
+  ...[160, 186].map((x) => ({ d: circle(x, 62, 8), fill: "accent" as Ink })),
+];
+
 export const covers: Record<string, Shape[]> = {
   argus,
   "smart-display": smartDisplay,
@@ -158,4 +166,5 @@ export const covers: Record<string, Shape[]> = {
   "aegis-orbit": aegisOrbit,
   shell,
   mid,
+  more,
 };

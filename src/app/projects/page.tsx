@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Page from "@/components/Page";
 import ProjectTiles from "@/components/ProjectTiles";
-import { projects } from "@/content/projects";
+import { contact } from "@/content/contact";
+import { moreProjects, projects } from "@/content/projects";
 import "./projects.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,10 @@ export default function Projects() {
         <h1>Projects</h1>
         <p>{projects.length} projects</p>
       </header>
-      <ProjectTiles projects={projects} />
+      <ProjectTiles
+        projects={projects}
+        more={contact.github ? { ...moreProjects, href: contact.github, where: contact.github.replace(/^https?:\/\//, "") } : undefined}
+      />
     </Page>
   );
 }

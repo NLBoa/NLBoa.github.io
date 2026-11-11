@@ -331,6 +331,15 @@ export const projects: Project[] = [
       team: null,
     },
   },
+];
+
+/**
+ * Off the site for now, at Noah's request (2026-11-11). Nothing links to these
+ * and no page is built for them. To bring one back, move its entry into
+ * `projects` above. MID came off because not much of it is built yet.
+ * SKIBUS's miniature is still in src/miniatures/skibus, and MID's cover in src/covers.
+ */
+export const parkedProjects: Project[] = [
   {
     slug: "mid",
     title: "MID",
@@ -355,14 +364,6 @@ export const projects: Project[] = [
       team: null,
     },
   },
-];
-
-/**
- * Off the site for now, at Noah's request (2026-11-11). Nothing links to these
- * and no page is built for them. To bring one back, move its entry into
- * `projects` above. SKIBUS's miniature is still in src/miniatures/skibus.
- */
-export const parkedProjects: Project[] = [
   {
     slug: "skibus",
     title: "SKIBUS",
@@ -402,6 +403,16 @@ export const parkedProjects: Project[] = [
     },
   },
 ];
+
+/**
+ * The last tile on the Projects page: where the rest of the work is.
+ * It keeps the grid full now that five projects are written up.
+ */
+export const moreProjects = {
+  slug: "more",
+  title: "More on GitHub",
+  summary: "Smaller projects and experiments that are not written up here.",
+};
 
 export const featuredProjects = projects.filter((p) => p.featured);
 
