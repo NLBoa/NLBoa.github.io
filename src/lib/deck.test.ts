@@ -16,7 +16,7 @@ const project = (slug: string, featured: boolean, extra: Partial<Project> = {}):
   ...extra,
 });
 
-const contact: Contact = { email: "a@b.c", github: "https://github.com/x", linkedin: "https://linkedin.com/in/x", resume: null };
+const contact: Contact = { email: "a@b.c", github: "https://github.com/x", linkedin: "https://linkedin.com/in/x", resume: null, status: null, timeZone: null };
 
 describe("deckKeys", () => {
   it("always returns 15 keys", () => {

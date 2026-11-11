@@ -5,5 +5,6 @@ Each file here records one feature: what it is, the decisions made, and how to k
 | Branch | Notes |
 |---|---|
 | `fix/page-close` | The base for the others: Close pinned to the top-right corner, Esc on key-up as well as key-down. Recorded in `CLAUDE.md`. |
+| `feature/contact-page` | [contact-page.md](contact-page.md) |
 
 To keep a feature, merge its branch into `main`. To drop it, delete the branch. Each feature also adds one file to `scripts/checks/`, which `npm run flows` runs.

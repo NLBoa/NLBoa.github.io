@@ -1,0 +1,312 @@
+/*
+ * The Contact page: the pen cup opens it, so it is a sheet of note paper on
+ * the dark desk, with the other ways to reach me beside it.
+ */
+.page.contact {
+  --ink: #1d1a16;
+  --ink-soft: #5c554a;
+  --line: rgba(29, 26, 22, 0.16);
+  --good: #5dd68a;
+  padding-top: calc(var(--header-height) + 1.5rem);
+}
+
+.page.contact .page-bar {
+  margin: 0;
+}
+
+.contact-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  column-gap: 3.5rem;
+}
+
+.contact-head h1 {
+  margin: 0;
+  font-size: clamp(2.75rem, 8vw, 5rem);
+  letter-spacing: -0.04em;
+}
+
+.contact-head .lede {
+  margin-bottom: 0.6rem;
+}
+
+/* A green lamp before the line that says what I am open to. */
+.contact-status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.9rem;
+  color: var(--paper);
+  font-size: 0.9375rem;
+}
+
+.contact-status::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--good);
+}
+
+.contact-desk {
+  display: grid;
+  grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+  align-items: start;
+  gap: 4rem;
+  margin-top: 2.75rem;
+}
+
+/* The pen cup is pale and sits right behind this page, so the scrim is a little heavier here. */
+body:has(main.contact) .scrim {
+  opacity: 0.975;
+}
+
+/* The note: a sheet of ruled paper. */
+.note {
+  --rule-height: 2.25rem;
+  position: relative;
+  padding: 1.6rem 2rem 1.5rem 3.75rem;
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* The margin line. */
+.note::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2.75rem;
+  width: 1px;
+  background: rgba(198, 78, 62, 0.45);
+}
+
+.note-line {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  height: var(--rule-height);
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.note-line > span,
+.note-line > label {
+  flex: none;
+  width: 3rem;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.note-line strong {
+  font-weight: 600;
+}
+
+.note input,
+.note textarea {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 1rem;
+}
+
+.note input {
+  height: calc(var(--rule-height) - 2px);
+  padding: 0;
+}
+
+/* The lines of the paper run under the text as it is typed. */
+.note textarea {
+  display: block;
+  min-height: calc(var(--rule-height) * 7);
+  padding: 0;
+  line-height: var(--rule-height);
+  resize: vertical;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 calc(var(--rule-height) - 1px), var(--line) 0 var(--rule-height));
+  background-attachment: local;
+}
+
+.note ::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.75;
+}
+
+.note input:focus-visible,
+.note textarea:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.note-foot {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 1.1rem;
+}
+
+.note-send {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.note-send:hover {
+  background: #000;
+}
+
+.note-send:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.note-foot p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* The other ways to reach me: each one a whole row to press. */
+.reach h2 {
+  margin: 0 0 0.5rem;
+}
+
+.reach ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reach li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.reach li > a {
+  display: grid;
+  flex: 1;
+  gap: 0.1rem;
+  min-width: 0;
+  padding: 0.85rem 0;
+  text-decoration: none;
+}
+
+.reach li span {
+  color: var(--faint);
+  font-size: 0.875rem;
+}
+
+.reach li strong {
+  overflow: hidden;
+  font-size: 1.1875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reach li > a:hover strong {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+.copy {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dim);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.copy:hover {
+  border-color: var(--faint);
+  color: var(--paper);
+}
+
+.copy[data-state="done"] {
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.copy span {
+  color: inherit;
+  font-size: inherit;
+}
+
+.local-time {
+  margin: 1.25rem 0 0;
+  color: var(--dim);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
+}
+
+@media (hover: none) {
+  .copy {
+    min-height: 2.75rem;
+  }
+}
+
+@media (max-width: 62rem) {
+  .contact-desk {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  /* Room for Close above the heading. */
+  .page.contact {
+    padding-top: calc(var(--header-height) + 3.75rem);
+  }
+
+  .contact-head {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1rem;
+  }
+
+  .contact-desk {
+    margin-top: 2rem;
+  }
+
+  .note {
+    padding: 1.25rem 1.1rem 1.25rem 2.5rem;
+  }
+
+  .note::before {
+    left: 1.75rem;
+  }
+
+  .note-foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .note-send {
+    justify-content: center;
+  }
+}
