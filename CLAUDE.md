@@ -18,7 +18,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - **Project pages as stories: published 2026-11-11** (Noah: "Publish it"). Six projects are on the site, each with a story page; five have a miniature (MID has none). SKIBUS is parked. The branch `project-pages` is merged into `main`. The story texts are still drafts that Noah has not confirmed line by line; see the open questions.
 - **All four features are kept and merged into `main` (2026-11-11), not yet published**: the Projects page as tiles, the room with a rainy window, the About profile card with the ASCII portrait, and the Contact note paper (Noah: "Keep everything"). Their notes are in `docs/features/`. The feature branches and `preview/all-features` still exist locally but are fully contained in `main`. `main` is ahead of the published site: push only when Noah says to publish.
 - **Five projects are on the site**: Argus, Smart Display, Jupiterp, Aegis Orbit, Shell. SKIBUS and MID are parked in `parkedProjects` (MID because not much of it is built yet). The Projects page and the left monitor end with a "More on GitHub" tile so the grid of six stays full.
-- **The room beside a project page: built on `feature/room-beside-page` (2026-11-11), waiting for Noah's verdict**, not merged. On a wide window the scrim opens to the right of a project page's column and the window, rain and desk show there. Notes: `docs/features/room-beside-page.md`.
+- **Three features wait for Noah's verdict (2026-11-11), none merged into `main`**, each on its own branch from `main` with notes in `docs/features/`: `feature/room-beside-page` (the room shows beside a project page), `feature/cyber-city` (a city and flying cars outside the window), `feature/desk-orb` (an orb at the back of the desk, left of the Stream Deck, that watches the pointer). **`preview/room-life` has all three merged**, with this file's notes and the re-captured link-preview image; to keep everything, fast-forward `main` to it. **Dropped by Noah, branches still exist unmerged:** `feature/wall-display` (the Smart Display on the wall: "Remove the home display on the right side") and `feature/desk-plant` (a snake plant built in code: he asked for a large floor plant from a found model instead, then said "Actually no plants for now"). Two Poly Haven models were found for a floor plant and not downloaded: `potted_plant_01` (1.35 m, 6.33 MB) and `potted_plant_02` (0.84 m, 2.63 MB), both CC0.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -67,7 +67,10 @@ src/scene/       layout.ts      every size and position in meters (single source
                  SceneUI.tsx    DOM beside the canvas: label, hotspot links, phone dock
                  SceneMount.tsx WebGL check, error boundary, dynamic import with ssr: false
                  Lights.tsx, materials.ts, geometry.ts
-                 objects/       Room, Monitors, StreamDeck, PenCup, Keyboard
+                 objects/       Room, Monitors, StreamDeck, PenCup, Keyboard, Orb
+                 Rain.tsx, City.tsx (+ skyline.ts)  the weather and the city behind it: page layers, CSS only
+                 band.ts        the strip beside a project page where the room shows
+                 orb.ts         where the orb looks (pure, tested)
                  textures/      screens.ts, useScreenTexture.ts, keyIcons.ts
 scripts/         checkpoint.mjs, flows.mjs, optimize-models.mjs, fetch-textures.mjs
 public/models/   keyboard-keys.glb      public/textures/  walnut-diff.webp, walnut-normal.webp
@@ -161,6 +164,11 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-11 — **Close and Esc.** Close is a pill fixed in the window's top-right corner under the header (it used to sit at the end of the text column, which is mid-window on a wide screen). Esc closes on key-down or key-up, because an embedded browser pane can keep the key-down for itself, and its listener is attached once and reads the address when the key arrives, so it works the instant a page opens.
 
 - 2026-11-11 — **The sides of a project page** (Noah: "currently empty", "something maybe moving", "also on the right side"). Right: the room shows through beside the column (chosen over a drawn scene per project and a pinned side panel). Left heading column: kept quiet, by his choice. The band's size is defined once in `src/scene/band.ts` and mirrored in `src/app/projects/[slug]/room.css`; change both together. `CameraPose.shiftX` is a sideways lens shift like `shiftY`.
+
+- 2026-11-11 — **More life in the room** (Noah: the right side "is very boring", "a cyber city" outside the window with "a cyber car", "a little AI ball thing that watches the mouse"). Chosen by Noah: the city drawn in code, not downloaded models. For the right side he first chose the Smart Display on the wall, then a plant, then nothing: the right side stays empty for now. He liked the orb and moved it to the back, next to the Stream Deck. The orb is decoration only; the four things that open something are unchanged.
+- 2026-11-11 — **Nothing may draw 3D frames on a timer.** The city, cars and signs are CSS in the rain layer. The orb draws only while the pointer moves or its eye is turning. Keep it that way: the idle-frame checks in `npm run flows` depend on it.
+- 2026-11-11 — The view is fitted to the desk: on a 16:10 laptop only about 25 cm of wall is in view right of the monitors, and none of the floor beside the desk. Anything meant to fill the right side on a laptop has to stand on the desk's right end; a floor plant beside the desk would only show fully on a wide window. The pointer no longer redraws the scene while a page is open (`CameraRig`).
+- 2026-11-11 — Measured on the preview branch (static export, M3 Pro): 22,346 triangles, 78 draw calls, 0 idle frames, 60 fps at both review sizes; 227 browser checks and 124 unit tests pass. One export run timed out part-way while the laptop was busy and on battery, and read 30 fps; the rerun was clean.
 
 ## Open questions for Noah
 
