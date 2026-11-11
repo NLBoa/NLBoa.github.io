@@ -17,7 +17,9 @@ const a = (sitePath) => {
   const href = norm(prefix + sitePath);
   return `:is(a[href="${href || "/"}"], a[href="${href}/"])`;
 };
-const out = path.resolve(import.meta.dirname, "../docs/checkpoints");
+// Screenshots from a run go to an ignored folder, so branches never disagree over them.
+// Checkpoint screenshots worth keeping are made with `npm run checkpoint`.
+const out = path.resolve(import.meta.dirname, "../test-results");
 mkdirSync(out, { recursive: true });
 
 let failures = 0;
@@ -512,6 +514,19 @@ async function pointAt(page, id) {
   await page.waitForURL(at("/"), { timeout: 3000 });
   check("Esc closes the page even when only its key-up arrives", true);
   await context.close();
+
+  // Esc pressed the instant a page opens, before the page has settled.
+  const quick = await open("/");
+  await sceneReady(quick.page);
+  await quick.page.click(`.site-nav ${a("/contact")}`);
+  await quick.page.waitForURL(at("/contact"), { timeout: 3000 });
+  await quick.page.keyboard.press("Escape");
+  await quick.page.waitForURL(at("/"), { timeout: 3000 });
+  check("Esc works the instant a page opens", true);
+  await quick.page.keyboard.press("Escape");
+  await quick.page.waitForTimeout(300);
+  check("Esc on the desk does nothing", at("/")(quick.page.url()));
+  await quick.context.close();
 
   const phone = await open("/projects/argus", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   const size = await phone.page.locator(".page-close").boundingBox();
