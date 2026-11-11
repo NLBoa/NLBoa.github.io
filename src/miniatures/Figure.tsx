@@ -3,6 +3,8 @@ import { useId, type ReactNode, type Ref } from "react";
 type Props = {
   /** The drawing itself. */
   children: ReactNode;
+  /** True when the drawing holds its own controls, so it is a group and not one image. */
+  interactive?: boolean;
   /** Short name of the drawing, for screen readers. */
   label: string;
   /** What the drawing shows, in full, for screen readers. */
@@ -18,11 +20,11 @@ type Props = {
 };
 
 /** The frame every miniature sits in: stage, status and buttons, caption. */
-export default function Figure({ children, label, description, status, actions, caption, legend, ref }: Props) {
+export default function Figure({ children, interactive = false, label, description, status, actions, caption, legend, ref }: Props) {
   const descriptionId = useId();
   return (
     <figure className="miniature" ref={ref}>
-      <div className="miniature-stage" role="img" aria-label={label} aria-describedby={descriptionId}>
+      <div className="miniature-stage" role={interactive ? "group" : "img"} aria-label={label} aria-describedby={descriptionId}>
         {children}
       </div>
       <p id={descriptionId} className="visually-hidden">

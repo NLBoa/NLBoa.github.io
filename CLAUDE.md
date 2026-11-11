@@ -15,7 +15,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - **Live at https://nlboa.github.io/** since 2026-11-10. Repository: https://github.com/NLBoa/NLBoa.github.io (public). It is a user site, so there is no base path. Everything is merged into `main`; every push to `main` rebuilds and republishes through `.github/workflows/pages.yml`.
 - The phase branches (`phase-0-blockout` … `github-pages`) exist only locally and are fully contained in `main`.
 - Work from here on: small changes can go straight to `main` if Noah asks for them to be published; otherwise use a branch and ask before pushing, because a push to `main` goes live.
-- **Project pages as stories (in progress, branch `project-pages`, not published).** Aegis Orbit is built as the pattern and is waiting for Noah's review. Next, only after his OK: Argus, Smart Display, Jupiterp, then SKIBUS, Shell, MID, one at a time, each starting from its README and each miniature confirmed with Noah first.
+- **Project pages as stories (branch `project-pages`, committed locally, not published).** All seven projects have a story page; six have a miniature (MID has none). Noah approved Aegis Orbit ("This is perfect") and asked for the rest in one go, to review at the end. Waiting for that review; do not push to `main` until he says to publish.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -32,7 +32,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - `npm run dev` — dev server on :3000
 - `npm run build` (writes the static site to `out/`), `npm run preview` (serves `out/` like GitHub Pages, port 3200), `npm run lint`, `npm test` (vitest, pure logic only)
 - `npm run checkpoint -- <label> [route]` — with the dev server running: screenshots at both review sizes into `docs/checkpoints/`, triangles, draw calls, frames drawn while idle, 3D asset bytes, open TODOs. Uses the installed Google Chrome through playwright-core.
-- `npm run flows` — with the dev server running: 59 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
+- `npm run flows` — with the dev server running: 116 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
 - `npm run todos` — list every `TODO(noah)` in the content files
 - `npm run share-image` — re-captures `src/app/opengraph-image.png` (1200×630) from the running site; run it again after the look or the content on the screens changes
 - `checkpoint`, `flows` and `share-image` read `BASE_URL`, which may include a base path. To test the exported site as GitHub Pages serves it: `NEXT_PUBLIC_BASE_PATH=/portfolio NEXT_PUBLIC_SCENE_STATS=1 npm run build`, `NEXT_PUBLIC_BASE_PATH=/portfolio npm run preview`, then `BASE_URL=http://localhost:3200/portfolio npm run flows`. The stats flag only exposes `window.__scene` for the scripts; a normal build leaves it out.
@@ -44,13 +44,15 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 
 ```
 src/app/         layout.tsx: header, <SceneMount/> (once, so the canvas persists), scrim, page
+                 globals.css (site and the miniature frame), miniatures.css (each miniature's drawing)
                  page.tsx (home: the Projects index, hidden while the desk is up),
                  projects/, projects/[slug]/, about/, contact/   — all static HTML
 src/components/  Header, NavLinks, Page (frame with Close), ProjectList, RouteSync
                  project/ProjectStory (the story layout), project/ProjectPager
 src/content/     all site copy, typed (types, projects, about, contact, site, miniatures)
 src/miniatures/  MiniatureSlot.tsx (slug -> miniature, each its own chunk), Figure.tsx (shared frame),
-                 hooks.ts, <slug>/model.ts (pure, tested) + <slug>/Miniature.tsx (SVG)
+                 hooks.ts, <slug>/model.ts (pure, tested) + <slug>/Miniature.tsx (SVG or plain HTML)
+                 argus, smart-display, jupiterp, aegis-orbit, skibus, shell
 src/lib/         deck.ts: the Stream Deck's 15 keys generated from content (tested)
 src/scene/       layout.ts      every size and position in meters (single source of truth)
                  interactive.ts the objects that react, in Tab order; URL -> camera view
@@ -140,8 +142,16 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-10 — Aegis Orbit's two screenshots come from the team repository's README (MIT-licensed, Noah is a contributor). Noah still has to confirm they may be shown.
 - 2026-11-10 — With a page open the monitor screens are now `#0c0c0c` (was `#262626`, whose text still ghosted behind wide pages), and the fixed header is solid, because long pages scroll under it.
 
+- 2026-11-11 — **All seven projects are stories.** Noah: "Do the same for all the other projects displayed. Don't ask for me to verify each project." Sources, all read 2026-11-10: Argus README and CLAUDE.md; OMEGA-WB and zigbee_ceiling READMEs; Jupiterp pull request 975; Java-Shell README; the profile README for SKIBUS. **Private repositories were not read** (the SKIBUS ones are private), so SKIBUS has only the profile's facts. MID's repository is a scaffold with a template README, so its page says so and has no miniature: there is nothing built to draw.
+- 2026-11-11 — **The miniatures.** Argus: a ranked queue and tonight's work window; one button steps through "a post moves a deadline", "finish the first task", "start over". Smart Display: a 6×4 board; "Arrange widgets" turns on dragging and corner resizing (off by default so the page still scrolls on a phone), arrow keys move and Shift+arrows resize, lights toggle, the clock shows the real time. Jupiterp: toggle sample courses in the planner and the generator follows. SKIBUS: riders go still to come → checked in → aboard, by list or by buttons, and seats fill. Shell: a session replayed one feature at a time with typing, taken from the README (the `jobs` lines are the README's own).
+- 2026-11-11 — **Miniature rules, revised.** SVG or plain HTML, never canvas or WebGL. Made-up sample data is allowed when the caption says so ("made-up coursework", "sample courses", "made-up riders"); no invented claims about the real project. The drawing must be in the static HTML and make sense as a still; controls inside the stage are rendered disabled until JavaScript runs. Argus's sample courses and tasks are the ones in Argus's own demo data.
+- 2026-11-11 — Story options: `howTitle` (Smart Display: "How a tap reaches a ceiling light"; Jupiterp: "How the sync works") and `partsTitle` ("What I built" for solo work, "My contribution" for Jupiterp; default "My part"). A project with no `how` steps or no `parts` simply has no such section.
+- 2026-11-11 — Accents: Argus `#e8759a` (raspberry), Smart Display `#7cc4f5` (the board's daytime sky), Jupiterp `#f2a154`, Aegis Orbit `#45d0bf`, SKIBUS `#f0cf4f` (bus yellow), Shell `#8fdc8a` (prompt green), MID `#b9a2f7`.
+- 2026-11-11 — Argus's two screenshots come from its repository's visual-test baselines, which run on demo data (`today`, `workload`, dark, desktop). Jupiterp's date is now "Merged October 2026" (the pull request was merged 2026-10-31).
+- 2026-11-11 — Each miniature is a separate chunk of about 10 to 12 KB and loads only on its own page. Project images total 308 KB. The desk is untouched (17,926 triangles, 56 draw calls).
+
 ## Open questions for Noah
 
-Aegis Orbit story: read the draft; role wording; teammates and who built what; any result at Technica; whether the README's figures belong; which parts of the sandbox HUD were his; OK to use the two screenshots.
+Every story is a draft for Noah to read. Aegis Orbit: role wording; teammates and who built what; any result at Technica; whether the README's figures belong; which parts of the sandbox HUD were his; OK to use the two screenshots. Argus: OK to use the two demo-data screenshots; order of the steps. Smart Display: whether the tap-to-light chain is right for the board; whether to name the roommates. Shell: whether each replayed output matches what the shell prints. SKIBUS: what it replaced, how check-in worked, screenshots. MID: what it does; whether to link its public repository.
 
 See `npm run todos` for content gaps (dates, some roles, images, 7SM title, "Outside of code", résumé PDF, MID details). Beyond those: whether to keep the cropped full-size keyboard model or supply a compact one, an optional `assets-src/pencup.jpg` pattern for the pen cup, and a frame-rate check on a real phone.

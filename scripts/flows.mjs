@@ -317,7 +317,6 @@ async function pointAt(page, id) {
   await page.click(`.pager ${a("/projects/skibus")}`);
   await page.waitForURL(at("/projects/skibus"));
   check("story page: the pager leads to the next project", true);
-  check("a project without a story keeps the short page", (await page.locator("main.page.project").count()) === 0 && (await page.textContent("main.page")).includes("What I built"));
   check("no console errors on the story page", errors.length === 0, errors.slice(0, 2).join(" | "));
   await desktop.close();
 
@@ -341,6 +340,154 @@ async function pointAt(page, id) {
   await phone.page.tap(".miniature button.primary");
   check("phone: tapping Approve burn works", (await phase(phone.page)) === "burned");
   await phone.context.close();
+}
+
+// 9. Every project's story page and miniature -----------------------------------
+{
+  const phase = (page, selector, name) => page.getAttribute(selector, name);
+  const status = (page) => page.textContent(".miniature-status");
+  const act = (page, n = 0) => page.click(`.miniature-bar button >> nth=${n}`);
+
+  // What each miniature must do when it is used.
+  const uses = {
+    argus: async (page) => {
+      const first = () => page.evaluate(() => [...document.querySelectorAll(".mini-argus-queue li")].find((li) => li.style.getPropertyValue("--place") === "0" && li.dataset.done === "false").querySelector(".mini-argus-title").firstChild.textContent);
+      check("argus: the queue starts with the work due soonest", (await first()) === "Homework 3");
+      await act(page);
+      check("argus: a post moves the exam up the queue", (await phase(page, ".mini-argus", "data-step")) === "moved" && (await page.locator('.mini-argus-queue li[data-source="piazza"]').count()) === 1);
+      await act(page);
+      check("argus: finishing the first task refills the window", (await first()) === "Problem Set 6" && (await page.locator(".mini-argus-bar span").allTextContents()).join() === "Problem Set 6,Midterm 2");
+      await act(page);
+      check("argus: then it starts over", (await phase(page, ".mini-argus", "data-step")) === "synced");
+    },
+    "smart-display": async (page) => {
+      const style = (id) => page.evaluate((id) => document.querySelector(`[data-widget="${id}"]`).getAttribute("style").replace(/\s/g, "").replace(/;$/, ""), id);
+      await page.click(".mini-lights button >> nth=1");
+      check("smart display: tapping a light switches it", (await page.getAttribute(".mini-lights button >> nth=1", "aria-pressed")) === "true");
+      const still = await style("spotify");
+      const box = await page.locator(".mini-board").boundingBox();
+      const cell = (x, y) => [box.x + ((x + 0.5) / 6) * box.width, box.y + ((y + 0.5) / 4) * box.height];
+      const dragTo = async (from, to) => {
+        await page.mouse.move(...from);
+        await page.mouse.down();
+        await page.mouse.move((from[0] + to[0]) / 2, (from[1] + to[1]) / 2, { steps: 4 });
+        await page.mouse.move(...to, { steps: 4 });
+        await page.mouse.up();
+        await page.waitForTimeout(300);
+      };
+      await dragTo(cell(3, 0), cell(2, 2));
+      check("smart display: widgets stay put until Arrange is on", (await style("spotify")) === still);
+      await act(page);
+      await dragTo(cell(3, 0), cell(2, 2));
+      check("smart display: a widget can be dragged to free space", (await style("spotify")) === "--x:2;--y:2;--w:1;--h:2");
+      const handle = await page.locator('[data-widget="spotify"] .mini-handle').boundingBox();
+      await dragTo([handle.x + handle.width / 2, handle.y + handle.height / 2], cell(4, 3));
+      check("smart display: a widget can be resized from its corner", (await style("spotify")) === "--x:2;--y:2;--w:3;--h:2");
+      await dragTo(cell(0, 2), cell(0, 0));
+      check("smart display: a widget cannot land on another", (await style("grocery")) === "--x:0;--y:2;--w:2;--h:2");
+      await page.locator('[data-widget="grocery"]').focus();
+      await page.keyboard.press("ArrowDown");
+      check("smart display: a move that does not fit says so", (await status(page)) === "It does not fit there.");
+      await page.locator('[data-widget="lights"]').focus();
+      await page.keyboard.press("ArrowLeft");
+      check("smart display: arrow keys move the focused widget", (await style("lights")) === "--x:3;--y:0;--w:2;--h:2");
+      await act(page, 1);
+      check("smart display: Reset restores the layout", (await style("spotify")) === "--x:3;--y:0;--w:1;--h:2");
+    },
+    jupiterp: async (page) => {
+      const listed = () => page.locator(".mini-jup-listed li").allTextContents();
+      check("jupiterp: the generator starts with the planned courses", (await listed()).join() === "CMSC131,MATH140");
+      await page.click('.mini-jup-catalog button[data-course="c4"]');
+      check("jupiterp: planning a course adds it to the generator", (await listed()).join() === "CMSC131,MATH140,BMGT110" && (await page.locator('.mini-jup-week i[data-course="c4"]').count()) === 2);
+      await page.click('.mini-jup-catalog button[data-course="c1"]');
+      check("jupiterp: dropping a course removes it from the generator", (await listed()).join() === "MATH140,BMGT110" && (await page.locator('.mini-jup-week i[data-course="c1"]').count()) === 0);
+    },
+    skibus: async (page) => {
+      const seats = (state) => page.locator(`.mini-bus-seat[data-state="${state}"]`).count();
+      check("skibus: boarding waits for a check-in", await page.isDisabled(".miniature-bar button >> nth=1"));
+      await act(page);
+      await act(page);
+      await act(page, 1);
+      check("skibus: check-in marks a seat and boarding fills it", (await seats("checked")) === 1 && (await seats("aboard")) === 1);
+      await page.click(".mini-bus-roster li:nth-child(7) button");
+      check("skibus: a rider can be checked in from the list", (await seats("checked")) === 2);
+      for (let i = 0; i < 7; i++) await act(page);
+      for (let i = 0; i < 9; i++) await act(page, 1);
+      check("skibus: the bus fills and says so", (await seats("aboard")) === 10 && (await status(page)) === "Everyone is aboard. The bus can leave.");
+      await act(page);
+      check("skibus: Start over empties the bus", (await seats("waiting")) === 10);
+    },
+    shell: async (page) => {
+      const typing = () => phase(page, ".mini-term", "data-typing");
+      const text = () => page.evaluate(() => [...document.querySelectorAll(".mini-term p")].map((p) => p.textContent).join("\n"));
+      check("shell: the session starts with the first commands run", (await text()).includes("echo is a shell builtin") && (await typing()) === "false");
+      await act(page);
+      check("shell: the next command is typed out", (await typing()) === "true");
+      await act(page);
+      check("shell: the button skips the typing", (await typing()) === "false" && (await text()).includes('two  spaces and "quotes"'));
+      for (let i = 0; i < 3; i++) {
+        await act(page);
+        await act(page);
+      }
+      check("shell: the session ends with the background job", (await text()).includes("[1]+  Running                 sleep 30 &") && (await page.textContent(".miniature-bar button")) === "Start over");
+      await act(page);
+      await act(page);
+      check("shell: Start over begins again", (await phase(page, ".mini-term", "data-group")) === "builtins");
+    },
+  };
+
+  for (const slug of ["argus", "smart-display", "jupiterp", "skibus", "shell"]) {
+    const route = `/projects/${slug}`;
+
+    const plainContext = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
+    const plain = await plainContext.newPage();
+    await plain.goto(base + route, { waitUntil: "load" });
+    const plainText = await plain.textContent("main.page");
+    check(`${slug}: the miniature and the story are in the HTML without JavaScript`, (await plain.locator(".miniature .miniature-stage > *").count()) === 1 && plainText.includes("What it is") && plainText.includes("Built with"));
+    check(`${slug}: without JavaScript no button can be pressed`, (await plain.locator(".miniature button:not([disabled])").count()) === 0);
+    await plainContext.close();
+
+    const { context, page, errors } = await open(route);
+    await page.waitForSelector(".miniature-bar");
+    await page.waitForTimeout(400);
+    const fold = await page.evaluate(() => document.querySelector(".miniature-bar").getBoundingClientRect().bottom);
+    check(`${slug}: the miniature and its buttons fit a 1440x900 screen`, fold <= 900, `bottom ${fold.toFixed(0)}px`);
+    await page.screenshot({ path: path.join(out, `story-${slug}-1440x900.png`) });
+    await uses[slug](page);
+    check(`${slug}: no console errors`, errors.length === 0, errors.slice(0, 2).join(" | "));
+    await context.close();
+
+    const phone = await open(route, { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+    await phone.page.waitForSelector(".miniature-bar");
+    await phone.page.waitForTimeout(400);
+    const overflow = await phone.page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    check(`${slug}: phone: nothing overflows sideways`, overflow <= 0, `${overflow}px`);
+    const smallest = await phone.page.evaluate(() => Math.min(...[...document.querySelectorAll(".miniature-bar button, .mini-jup-catalog button, .mini-bus-roster button")].map((b) => b.getBoundingClientRect().height)));
+    check(`${slug}: phone: buttons are at least 44px tall`, smallest >= 44, `${smallest}px`);
+    await phone.page.screenshot({ path: path.join(out, `story-${slug}-390x844.png`) });
+    await phone.context.close();
+  }
+
+  // Reduced motion: the terminal does not type.
+  const still = await open("/projects/shell", { reducedMotion: "reduce" });
+  await still.page.waitForSelector(".miniature-bar button");
+  await still.page.click(".miniature-bar button");
+  check("reduced motion: the shell's next command appears at once", (await still.page.getAttribute(".mini-term", "data-typing")) === "false" && (await still.page.getAttribute(".mini-term", "data-group")) === "quoting");
+  await still.context.close();
+
+  // MID has nothing built to draw: a story page without a miniature.
+  const { context, page } = await open("/projects/mid");
+  check("mid: a story page without a miniature still reads", (await page.locator(".miniature").count()) === 0 && (await page.textContent("main.page")).includes("What it is"));
+  await page.screenshot({ path: path.join(out, "story-mid-1440x900.png") });
+  // The pager walks the whole set, last to first.
+  let walked = ["mid"];
+  for (const previous of ["shell", "skibus", "aegis-orbit", "jupiterp", "smart-display", "argus"]) {
+    await page.click(`.pager ${a("/projects/" + previous)}`);
+    await page.waitForURL(at("/projects/" + previous));
+    walked.push(previous);
+  }
+  check("the pager walks through all seven projects", walked.length === 7 && (await page.locator(".pager a").count()) === 1);
+  await context.close();
 }
 
 await browser.close();

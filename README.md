@@ -64,7 +64,13 @@ A miniature is the small working drawing at the top of a project's page. It is a
 2. Draw it in `src/miniatures/<slug>/Miniature.tsx` as SVG inside `Figure`, with its words in `src/content/miniatures.ts`.
 3. List it in `src/miniatures/MiniatureSlot.tsx`.
 
-Rules: SVG only (no second WebGL canvas), no invented numbers, nothing plays under reduced motion, and the drawing must make sense as a still, because that is what shows without JavaScript.
+Rules:
+
+- SVG or plain HTML, never a canvas or WebGL.
+- Made-up sample data is fine when the caption says so. No invented claims about the real project.
+- Nothing plays by itself under reduced motion.
+- The drawing must make sense as a still, because that is what shows without JavaScript. Controls inside the drawing stay disabled until JavaScript runs.
+- Its styles go in `src/app/miniatures.css`.
 
 ## How it is built
 

@@ -11,7 +11,12 @@ import type { ComponentType } from "react";
  * To add one: write `src/miniatures/<slug>/Miniature.tsx` and list it here.
  */
 const miniatures: Record<string, ComponentType> = {
+  argus: dynamic(() => import("./argus/Miniature")),
+  "smart-display": dynamic(() => import("./smart-display/Miniature")),
+  jupiterp: dynamic(() => import("./jupiterp/Miniature")),
   "aegis-orbit": dynamic(() => import("./aegis-orbit/Miniature")),
+  skibus: dynamic(() => import("./skibus/Miniature")),
+  shell: dynamic(() => import("./shell/Miniature")),
 };
 
 export default function MiniatureSlot({ slug }: { slug: string }) {

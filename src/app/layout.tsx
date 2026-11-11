@@ -7,6 +7,7 @@ import RouteSync from "@/components/RouteSync";
 import { siteDescription, siteName, siteUrl } from "@/content/site";
 import SceneMount from "@/scene/SceneMount";
 import "./globals.css";
+import "./miniatures.css";
 
 const sans = Schibsted_Grotesk({ variable: "--font-sans", subsets: ["latin"] });
 const mono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500"] });

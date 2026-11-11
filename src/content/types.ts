@@ -23,7 +23,11 @@ export type ProjectStory = {
   about: string[];
   /** A caveat that belongs with the description. */
   note?: string;
+  /** Heading over the steps, when "How it works" is too general. */
+  howTitle?: string;
   how: StoryStep[];
+  /** Heading over the parts. "My part" suits team work; a solo project names its own. */
+  partsTitle?: string;
   parts: StoryPart[];
   /** Who else worked on it and who did what. */
   team: string | null;
