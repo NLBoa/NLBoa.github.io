@@ -1,0 +1,53 @@
+/*
+ * The room beside a project page. On a wide window the column leaves a strip
+ * free on the right; there the scrim opens, so the window, the rain and the
+ * edge of the desk show beside the text. The strip is "the band": its size is
+ * defined in src/scene/band.ts, and the numbers here must match it.
+ *
+ * 83.875rem is the narrowest window with a band: the gutter (7vw), the 60rem
+ * column, a 2rem gap and 16rem of band.
+ */
+@property --scrim-open {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@media (min-width: 83.875rem) and (min-aspect-ratio: 1001/1000) {
+  html[data-webgl] .scrim {
+    --edge: calc(var(--gutter) + 60rem);
+    mask-image: linear-gradient(
+      to right,
+      #000 var(--edge),
+      rgb(0 0 0 / calc(1 - var(--scrim-open) * 0.86)) calc(var(--edge) + 5rem)
+    );
+    transition:
+      opacity 0.45s ease,
+      --scrim-open 0.7s ease;
+  }
+
+  html[data-webgl] body:has(main.page.project) .scrim {
+    --scrim-open: 1;
+  }
+
+  /* The header is solid over the column, where the page scrolls under it, and
+     clear over the band, so the room runs to the top of the window. */
+  html[data-webgl] body:has(main.page.project) .site-header {
+    background: linear-gradient(to right, var(--wall) calc(var(--gutter) + 60rem), transparent calc(var(--gutter) + 65rem));
+  }
+
+  /* The weather keeps going beside the page; no text sits over it there. */
+  html[data-webgl] body:has(main.page.project) .rain {
+    opacity: 1;
+  }
+
+  html[data-webgl] body:has(main.page.project) .rain * {
+    animation-play-state: running;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-webgl] .scrim {
+    transition: none;
+  }
+}

@@ -28,7 +28,9 @@ const MOUNT_DEPTH = 0.045;
 function Monitor({ placement, screenLight }: { placement: MonitorPlacement; screenLight: number }) {
   const texture = useScreenTexture(screens[placement.id]);
   // With a page open the screens go dark, so their text never shows through behind the page's own.
-  const pageOpen = useScene((s) => s.path !== "/");
+  // Beside a project page the room is in view with no text over it, so there they light up
+  // again, once the camera has arrived.
+  const pageOpen = useScene((s) => s.path !== "/" && !s.beside);
   const shell = useMemo(
     () =>
       slab({

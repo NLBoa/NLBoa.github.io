@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { sideBand } from "./band";
 import { fitCamera, homePose, poseFor } from "./camera";
 import { INTERACTIVES, viewForPath } from "./interactive";
-import { FRAME_POINTS, KEYBOARD, MONITOR, MONITORS, PEN_CUP, onDesk, type Vec3 } from "./layout";
+import { FRAME_POINTS, KEYBOARD, MONITOR, MONITORS, PEN_CUP, WALL_Z, WINDOW, onDesk, type Vec3 } from "./layout";
 
 /** Projects a point into normalized device coordinates for a pose. */
 function project(pose: ReturnType<typeof homePose>, aspect: number, point: Vec3) {
@@ -94,6 +95,52 @@ describe("poseFor", () => {
     for (const view of ["projects", "about", "contact", "deck"] as const) {
       expect(distance(poseFor(view, 1.6))).toBeLessThan(distance(home));
     }
+  });
+});
+
+describe("the room beside a project page", () => {
+  const viewport = (width: number, height: number) => ({ width, height, band: sideBand(width, height) });
+
+  it("stays on the left monitor when the window has no band", () => {
+    expect(poseFor("story", 1100 / 800, viewport(1100, 800))).toEqual(poseFor("projects", 1100 / 800));
+    expect(poseFor("story", 390 / 844, viewport(390, 844))).toEqual(poseFor("projects", 390 / 844));
+    expect(poseFor("story", 1.6)).toEqual(poseFor("projects", 1.6));
+  });
+
+  it.each([
+    [1344, 800],
+    [1440, 900],
+    [1728, 1117],
+    [1920, 1080],
+  ])("frames the window in the band at %i x %i", (width, height) => {
+    const view = viewport(width, height);
+    const band = view.band!;
+    const pose = poseFor("story", width / height, view);
+    const aspect = band.width / height;
+    // The picture is centered on the band.
+    expect(pose.shiftX).toBeCloseTo((band.left + band.width / 2) / width - 0.5, 9);
+    // The band starts on the wall just left of the window's trim...
+    const edge = project(pose, aspect, [WINDOW.left - WINDOW.trim, pose.target[1], WALL_Z]);
+    expect(edge.x).toBeGreaterThan(-1);
+    expect(edge.x).toBeLessThan(-0.5);
+    // ...and holds the window's head and the desk top.
+    for (const point of [
+      [pose.target[0], WINDOW.top + WINDOW.trim, WALL_Z],
+      [pose.target[0], 0, 0],
+    ] as Vec3[]) {
+      expect(Math.abs(project(pose, aspect, point).y)).toBeLessThan(1);
+    }
+    // Some of the glass is always in view.
+    expect(project(pose, aspect, [WINDOW.left + 0.2, 0.9, WALL_Z]).x).toBeLessThan(1);
+  });
+
+  it("shows more of the room to the right as the band widens", () => {
+    const narrow = poseFor("story", 1440 / 900, viewport(1440, 900));
+    const wide = poseFor("story", 1920 / 1080, viewport(1920, 1080));
+    expect(wide.position[0]).toBeGreaterThan(narrow.position[0]);
+    // At 1920 the whole window is in the band.
+    const band = sideBand(1920, 1080)!;
+    expect(project(wide, band.width / 1080, [WINDOW.right, 0.9, WALL_Z]).x).toBeLessThan(1);
   });
 });
 

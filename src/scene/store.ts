@@ -21,6 +21,8 @@ type SceneState = {
   /** 0..1 strength of the first-load pulse on every interactive object. */
   pulse: number;
   reducedMotion: boolean;
+  /** The camera has come to rest on the room beside an open project page (set by <CameraRig>). */
+  beside: boolean;
   /** Provided by <RouteSync>, so the 3D layer can change routes. */
   navigate: (href: string) => void;
 
@@ -40,6 +42,7 @@ export const useScene = create<SceneState>((set, get) => ({
   ready: false,
   pulse: 0,
   reducedMotion: false,
+  beside: false,
   navigate: () => {},
 
   setPath: (path) =>

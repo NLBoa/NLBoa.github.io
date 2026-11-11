@@ -15,6 +15,7 @@ import { Desk, Room } from "./objects/Room";
 import Rain from "./Rain";
 import { StreamDeck } from "./objects/StreamDeck";
 import { Dock, Hotspots, SceneLabel } from "./SceneUI";
+import { rootRem, sideBand } from "./band";
 import { selectActive, selectView, useScene } from "./store";
 
 declare global {
@@ -27,6 +28,8 @@ declare global {
       readonly renderer: string;
       tick: () => void;
       invalidate: () => void;
+      /** The strip beside a project page's column at this window size, if there is one (see band.ts). */
+      readonly band: { left: number; width: number } | null;
       /** Where an interactive object's label anchor is on screen (for the flow tests). */
       locate: (id: string) => { x: number; y: number } | null;
     };
@@ -59,6 +62,10 @@ function Stats() {
         const context = gl.getContext();
         const info = context.getExtension("WEBGL_debug_renderer_info");
         return info ? String(context.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "unknown";
+      },
+      get band() {
+        const { size } = get();
+        return sideBand(size.width, size.height, rootRem());
       },
       tick: () => void frames++,
       invalidate: () => invalidate(),

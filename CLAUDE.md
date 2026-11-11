@@ -18,6 +18,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - **Project pages as stories: published 2026-11-11** (Noah: "Publish it"). Six projects are on the site, each with a story page; five have a miniature (MID has none). SKIBUS is parked. The branch `project-pages` is merged into `main`. The story texts are still drafts that Noah has not confirmed line by line; see the open questions.
 - **All four features are kept and merged into `main` (2026-11-11), not yet published**: the Projects page as tiles, the room with a rainy window, the About profile card with the ASCII portrait, and the Contact note paper (Noah: "Keep everything"). Their notes are in `docs/features/`. The feature branches and `preview/all-features` still exist locally but are fully contained in `main`. `main` is ahead of the published site: push only when Noah says to publish.
 - **Five projects are on the site**: Argus, Smart Display, Jupiterp, Aegis Orbit, Shell. SKIBUS and MID are parked in `parkedProjects` (MID because not much of it is built yet). The Projects page and the left monitor end with a "More on GitHub" tile so the grid of six stays full.
+- **The room beside a project page: built on `feature/room-beside-page` (2026-11-11), waiting for Noah's verdict**, not merged. On a wide window the scrim opens to the right of a project page's column and the window, rain and desk show there. Notes: `docs/features/room-beside-page.md`.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -158,6 +159,8 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 
 - 2026-11-11 — **Features on their own branches** (Noah: "put each feature on a separate branch so I can keep and remove things"). Each feature branches from `fix/page-close`, keeps its notes in `docs/features/<name>.md`, its browser checks in `scripts/checks/<name>.mjs` (run by `npm run flows`), and its styles in its own CSS file, so the branches merge without touching the same lines. `npm run flows` writes its screenshots to the ignored `test-results/` folder, and feature branches do not re-capture the link-preview image, for the same reason: run `npm run share-image` after merging. Read `docs/features/` for what each one decided.
 - 2026-11-11 — **Close and Esc.** Close is a pill fixed in the window's top-right corner under the header (it used to sit at the end of the text column, which is mid-window on a wide screen). Esc closes on key-down or key-up, because an embedded browser pane can keep the key-down for itself, and its listener is attached once and reads the address when the key arrives, so it works the instant a page opens.
+
+- 2026-11-11 — **The sides of a project page** (Noah: "currently empty", "something maybe moving", "also on the right side"). Right: the room shows through beside the column (chosen over a drawn scene per project and a pinned side panel). Left heading column: kept quiet, by his choice. The band's size is defined once in `src/scene/band.ts` and mirrored in `src/app/projects/[slug]/room.css`; change both together. `CameraPose.shiftX` is a sideways lens shift like `shiftY`.
 
 ## Open questions for Noah
 
