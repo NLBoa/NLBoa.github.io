@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, type MouseEvent } from "react";
 import { featuredProjects } from "@/content/projects";
+import { asset } from "@/lib/paths";
 import { INTERACTIVES, byId } from "./interactive";
 import { selectActive, useScene } from "./store";
 
@@ -49,7 +50,7 @@ export function Hotspots() {
         item.external || item.href.endsWith(".pdf") ? (
           <a
             key={item.id}
-            href={item.href}
+            href={asset(item.href)}
             target="_blank"
             rel="noopener noreferrer"
             onFocus={() => setFocused(item.id)}

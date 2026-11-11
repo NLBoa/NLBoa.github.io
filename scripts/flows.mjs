@@ -4,7 +4,18 @@ import { chromium } from "playwright-core";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 
-const base = process.env.BASE_URL ?? "http://localhost:3000";
+// BASE_URL may include a base path, e.g. http://localhost:3200/portfolio
+const baseUrl = new URL(process.env.BASE_URL ?? "http://localhost:3000");
+const prefix = baseUrl.pathname.replace(/\/+$/, "");
+const base = baseUrl.origin + prefix;
+const norm = (p) => p.replace(/\/+$/, "");
+/** True when a URL is the given site path, with or without a trailing slash. */
+const at = (sitePath) => (url) => norm(new URL(url).pathname) === norm(prefix + sitePath);
+/** Selector for a link to a site path, whichever way its href is written. */
+const a = (sitePath) => {
+  const href = norm(prefix + sitePath);
+  return `:is(a[href="${href || "/"}"], a[href="${href}/"])`;
+};
 const out = path.resolve(import.meta.dirname, "../docs/checkpoints");
 mkdirSync(out, { recursive: true });
 
@@ -32,7 +43,6 @@ const sceneReady = (page) => page.waitForSelector('.scene[data-ready="true"]', {
 const settle = (page) => page.waitForTimeout(3600); // fade-in + the one-time pulse
 const locate = (page, id) => page.evaluate((id) => window.__scene.locate(id), id);
 const frames = (page) => page.evaluate(() => window.__scene.frames);
-const urlPath = (page) => new URL(page.url()).pathname;
 
 // Offsets from an object's label anchor down onto the object itself.
 const onto = { "monitor-left": 120, "monitor-right": 130, "pen-cup": 75 };
@@ -71,7 +81,7 @@ async function pointAt(page, id) {
   const monitor = await pointAt(page, "monitor-left");
   const t0 = Date.now();
   await page.mouse.click(monitor.x, monitor.y);
-  await page.waitForURL("**/projects", { timeout: 3000 });
+  await page.waitForURL(at("/projects"), { timeout: 3000 });
   const took = Date.now() - t0;
   check("clicking the left monitor opens /projects in about a second", took < 1500, `${took} ms`);
   await page.waitForSelector("main.page h1");
@@ -80,39 +90,39 @@ async function pointAt(page, id) {
   await page.screenshot({ path: path.join(out, "phase-2-projects-1440x900.png") });
 
   await page.keyboard.press("Escape");
-  await page.waitForURL(base + "/", { timeout: 3000 });
-  check("Esc returns to the desk", urlPath(page) === "/");
+  await page.waitForURL(at("/"), { timeout: 3000 });
+  check("Esc returns to the desk", at("/")(page.url()));
   await page.waitForTimeout(1200);
 
   const right = await pointAt(page, "monitor-right");
   await page.mouse.click(right.x, right.y);
-  await page.waitForURL("**/about", { timeout: 3000 });
+  await page.waitForURL(at("/about"), { timeout: 3000 });
   check("clicking the right monitor opens /about", true);
   await page.goBack();
-  await page.waitForURL(base + "/", { timeout: 3000 });
-  check("Back returns to the desk", urlPath(page) === "/");
+  await page.waitForURL(at("/"), { timeout: 3000 });
+  check("Back returns to the desk", at("/")(page.url()));
   await page.waitForTimeout(1200);
 
   await pointAt(page, "pen-cup");
   await page.mouse.click(cup.x, cup.y);
-  await page.waitForURL("**/contact", { timeout: 3000 });
+  await page.waitForURL(at("/contact"), { timeout: 3000 });
   check("clicking the pen cup opens /contact", true);
   await page.keyboard.press("Escape");
-  await page.waitForURL(base + "/", { timeout: 3000 });
+  await page.waitForURL(at("/"), { timeout: 3000 });
   await page.waitForTimeout(1200);
 
   const key = await pointAt(page, "key-0");
   await page.waitForTimeout(300);
   check("hovering the first Stream Deck key names its project", (await page.textContent("#scene-label")) === "Argus");
   await page.mouse.click(key.x, key.y);
-  await page.waitForURL("**/projects/argus", { timeout: 3000 });
+  await page.waitForURL(at("/projects/argus"), { timeout: 3000 });
   check("pressing that key opens /projects/argus", true);
   await page.waitForTimeout(600);
   await page.screenshot({ path: path.join(out, "phase-2-project-1440x900.png") });
 
   // Header links work from a page.
-  await page.click('.site-nav a[href="/about"]');
-  await page.waitForURL("**/about", { timeout: 3000 });
+  await page.click(`.site-nav ${a("/about")}`);
+  await page.waitForURL(at("/about"), { timeout: 3000 });
   check("header links work from any page", true);
 
   check("no console errors on the desk flow", errors.length === 0, errors.slice(0, 2).join(" | "));
@@ -143,7 +153,7 @@ async function pointAt(page, id) {
   check("focus shows the label", (await page.textContent("#scene-label")) === "Argus");
   await page.screenshot({ path: path.join(out, "phase-2-focus-1440x900.png") });
   await page.keyboard.press("Enter");
-  await page.waitForURL("**/projects/argus", { timeout: 3000 });
+  await page.waitForURL(at("/projects/argus"), { timeout: 3000 });
   check("Enter activates the focused object", true);
   await context.close();
 }
@@ -181,11 +191,11 @@ async function pointAt(page, id) {
   await page.waitForTimeout(500);
   check("without WebGL the home page shows the Projects index", await page.isVisible(".home-index .project-list"));
   check("without WebGL there is no canvas", (await page.locator("canvas").count()) === 0);
-  await page.click('.home-index a[href="/projects/argus"]');
-  await page.waitForURL("**/projects/argus");
+  await page.click(`.home-index ${a("/projects/argus")}`);
+  await page.waitForURL(at("/projects/argus"));
   check("without WebGL a project is one click from home", true);
-  await page.click('.site-nav a[href="/contact"]');
-  await page.waitForURL("**/contact");
+  await page.click(`.site-nav ${a("/contact")}`);
+  await page.waitForURL(at("/contact"));
   check("without WebGL the header still works", true);
   await page.goto(base + "/", { waitUntil: "networkidle" });
   await page.screenshot({ path: path.join(out, "phase-2-no-webgl-1440x900.png") });
@@ -203,7 +213,7 @@ async function pointAt(page, id) {
   const monitor = await pointAt(page, "monitor-left");
   const t0 = Date.now();
   await page.mouse.click(monitor.x, monitor.y);
-  await page.waitForURL("**/projects", { timeout: 3000 });
+  await page.waitForURL(at("/projects"), { timeout: 3000 });
   check("reduced motion: the page opens without a flight", Date.now() - t0 < 450, `${Date.now() - t0} ms`);
   await context.close();
 }
@@ -214,19 +224,19 @@ async function pointAt(page, id) {
   const { context, page } = await open("/", phone);
   await sceneReady(page);
   await settle(page);
-  check("phone: the featured projects are listed under the desk", await page.isVisible('.dock a[href="/projects/argus"]'));
+  check("phone: the featured projects are listed under the desk", await page.isVisible(`.dock ${a("/projects/argus")}`));
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check("phone: nothing overflows sideways", overflow <= 0, `${overflow}px`);
   const nav = await page.evaluate(() => document.querySelector(".site-nav").getBoundingClientRect().right);
   check("phone: the header fits", nav <= 390, `right edge ${nav.toFixed(0)}px`);
   const p = await locate(page, "monitor-left");
   await page.touchscreen.tap(p.x, p.y + 50);
-  await page.waitForURL("**/projects", { timeout: 3000 });
+  await page.waitForURL(at("/projects"), { timeout: 3000 });
   check("phone: tapping the left monitor opens /projects", true);
   await page.waitForTimeout(700);
   await page.screenshot({ path: path.join(out, "phase-2-projects-390x844.png") });
-  await page.tap('.project-list a[href="/projects/aegis-orbit"]');
-  await page.waitForURL("**/projects/aegis-orbit");
+  await page.tap(`.project-list ${a("/projects/aegis-orbit")}`);
+  await page.waitForURL(at("/projects/aegis-orbit"));
   await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(out, "phase-2-project-390x844.png") });
   check("phone: a project is two taps from home", true);
@@ -240,11 +250,13 @@ async function pointAt(page, id) {
   await page.goto(base + "/", { waitUntil: "networkidle" });
   check("home has a title and a share image", (await page.title()) === "Noah Leibovitz" && (await page.locator('meta[property="og:image"]').count()) === 1);
   const image = await page.getAttribute('meta[property="og:image"]', "content");
-  const imageResponse = await page.request.get(image.replace(/^https?:\/\/[^/]+/, base));
+  // The tag carries the public address; fetch the same file from this server.
+  const imageUrl = new URL(image);
+  const imageResponse = await page.request.get(baseUrl.origin + imageUrl.pathname + imageUrl.search);
   check("the share image loads", imageResponse.ok() && imageResponse.headers()["content-type"] === "image/png");
   await page.waitForSelector('.scene[data-ready="true"]');
-  await page.click('.site-footer a[href="/credits"]');
-  await page.waitForURL("**/credits");
+  await page.click(`.site-footer ${a("/credits")}`);
+  await page.waitForURL(at("/credits"));
   await page.waitForFunction(() => document.title !== "", null, { timeout: 3000 });
   check("the footer links to Credits", (await page.title()) === "Credits | Noah Leibovitz");
   const text = await page.textContent("main.page");
@@ -253,7 +265,7 @@ async function pointAt(page, id) {
   await page.goto(base + "/projects/argus");
   check("project pages have their own title", (await page.title()) === "Argus | Noah Leibovitz");
   const missing = await page.goto(base + "/nothing-here");
-  check("an unknown address is a 404 with a way back", missing.status() === 404 && (await page.isVisible('main.page a[href="/"]')));
+  check("an unknown address is a 404 with a way back", missing.status() === 404 && (await page.isVisible(`main.page ${a("/")}`)));
   await page.screenshot({ path: path.join(out, "phase-3-404-1440x900.png") });
   await page.goto(base + "/credits", { waitUntil: "networkidle" });
   await page.waitForTimeout(600);

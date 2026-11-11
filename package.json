@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
     "todos": "grep -rn 'TODO(noah)' src/content",
@@ -13,7 +12,8 @@
     "assets:models": "node scripts/optimize-models.mjs",
     "assets:textures": "node scripts/fetch-textures.mjs",
     "flows": "node scripts/flows.mjs",
-    "share-image": "node scripts/share-image.mjs"
+    "share-image": "node scripts/share-image.mjs",
+    "preview": "node scripts/serve-export.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

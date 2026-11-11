@@ -11,13 +11,14 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - Phase 0 (blockout): done and approved. Branch `phase-0-blockout`.
 - Phase 1 (look): done and approved. Branch `phase-1-look` (stacked on phase 0).
 - Phase 2 (function): done and approved. Branch `phase-2-function` (stacked on phase 1).
-- **Phase 3 (ship): everything built and tested except the deploy itself.** Branch `phase-3-ship` (stacked on phase 2). `main` still holds only the scaffold commit; the four phase branches have not been merged.
-- **Not deployed.** There is no Git remote and the Vercel CLI is not installed. Creating a GitHub repo, pushing, and deploying each need Noah's explicit go-ahead (repo name, public or private, and whether to publish with the content placeholders still showing).
+- Phase 3 (ship): built and tested. Branch `phase-3-ship` (stacked on phase 2).
+- **Hosting changed to GitHub Pages** (Noah, 2026-11-10). Branch `github-pages` (stacked on phase 3) converts the build to a static export and adds the deploy workflow. `main` still holds only the scaffold commit; none of the branches are merged.
+- **Not published yet.** There is no Git remote. Creating the GitHub repo (it must be public for Pages on a free account), merging to `main` and pushing need Noah's explicit go-ahead, including the repo name, which decides the address.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
 
-- Next.js 16.4 (App Router, `cacheComponents`), React 19.3, TypeScript 5.9 (what `create-next-app` pins; move to 7 only if Next supports it cleanly).
+- Next.js 16.4 (App Router, `output: "export"`, `trailingSlash: true`, optional `basePath`), React 19.3, TypeScript 5.9 (what `create-next-app` pins; move to 7 only if Next supports it cleanly).
 - three 0.187, @react-three/fiber 9.8, @react-three/drei 10.7 (fiber 9 needs react `>=19 <19.4`). zustand 5 is installed for scene state (unused until Phase 2).
 - Plain CSS with variables in `src/app/globals.css`. No component kit, no Tailwind.
 - Fonts: Schibsted Grotesk (everything) and IBM Plex Mono (stack, dates, small data) via `next/font`. The monitor screens and Stream Deck keys draw with the same fonts.
@@ -27,12 +28,12 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 ## Commands
 
 - `npm run dev` — dev server on :3000
-- `npm run build`, `npm run lint`, `npm test` (vitest, pure logic only)
+- `npm run build` (writes the static site to `out/`), `npm run preview` (serves `out/` like GitHub Pages, port 3200), `npm run lint`, `npm test` (vitest, pure logic only)
 - `npm run checkpoint -- <label> [route]` — with the dev server running: screenshots at both review sizes into `docs/checkpoints/`, triangles, draw calls, frames drawn while idle, 3D asset bytes, open TODOs. Uses the installed Google Chrome through playwright-core.
 - `npm run flows` — with the dev server running: 27 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
 - `npm run todos` — list every `TODO(noah)` in the content files
 - `npm run share-image` — re-captures `src/app/opengraph-image.png` (1200×630) from the running site; run it again after the look or the content on the screens changes
-- `checkpoint`, `flows` and `share-image` read `BASE_URL`. To test a production build: `NEXT_PUBLIC_SCENE_STATS=1 npm run build`, `npx next start -p 3100`, then `BASE_URL=http://localhost:3100 npm run flows`. The stats flag only exposes `window.__scene` for the scripts; a normal build leaves it out.
+- `checkpoint`, `flows` and `share-image` read `BASE_URL`, which may include a base path. To test the exported site as GitHub Pages serves it: `NEXT_PUBLIC_BASE_PATH=/portfolio NEXT_PUBLIC_SCENE_STATS=1 npm run build`, `NEXT_PUBLIC_BASE_PATH=/portfolio npm run preview`, then `BASE_URL=http://localhost:3200/portfolio npm run flows`. The stats flag only exposes `window.__scene` for the scripts; a normal build leaves it out.
 - `npm run assets:models` — `assets-src/keyboard.glb` → `public/models/keyboard-keys.glb` (crop, normalize, meshopt, WebP ≤ 1024 px)
 - `npm run assets:textures` — downloads the Poly Haven walnut maps into `assets-src/textures/` and writes WebP into `public/textures/`
 
@@ -76,7 +77,7 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 
 ## Decisions
 
-- 2026-11-10 — Project lives in `~/portfolio`. Local commits per phase; nothing is pushed or deployed without Noah's say-so.
+- 2026-11-10 — Project lives in `~/portfolio`. Local commits per phase; nothing is pushed or published without Noah's say-so.
 - 2026-11-10 — **No shrine.** Overrides sections 4–6 of the brief. Four interactive objects: left monitor (`/projects`), right monitor (`/about`), Stream Deck (per key), pen cup (`/contact`). "Outside of code" stays a section of `/about` (`#outside-code`). The only downloaded model is the keyboard, so the credits manifest has one CC BY entry.
 - 2026-11-10 — **Featured projects come from the "Featured work" section of the GitHub profile README** (github.com/NLBoa): Argus, Smart Display, Jupiterp, Aegis Orbit. Stream Deck: those 4 + About, Contact, Résumé, GitHub, LinkedIn = 9 lit keys, 6 dark.
 - 2026-11-10 — Content sources are the brief's starter facts and that README. Never invent facts. Where the two disagree, keep a `TODO(noah): confirm` and ask; do not pick silently. Nothing else from GitHub (private repos, "More projects") is added unless Noah says so.
@@ -107,16 +108,22 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-10 — **Phones.** Stream Deck keys are too small to tap, so on portrait screens the four featured projects are listed as links under the desk (`SceneUI.Dock`). Pixel ratio 1.5, shadows baked once.
 - 2026-11-10 — Outlines are explicit geometry (`OutlineFrame` rings, `OutlineHull` for the cup). drei's `<Outlines>` rendered nothing visible here; do not go back to it without checking a screenshot.
 - 2026-11-10 — With a page open the scrim is 94% and the monitor screens go dark, otherwise the screen text ghosts behind the page text.
-- 2026-11-10 — `/projects/[slug]` sets `export const instant = false` and awaits `params` at the top, so an unknown slug is a real 404. Under `<Suspense>` it streamed a 200. `dynamicParams` is unavailable with Cache Components.
+- 2026-11-10 — (Superseded by the static export, below.) `/projects/[slug]` used `export const instant = false` under Cache Components so an unknown slug was a real 404.
 - 2026-11-10 — Stream Deck icons are generic line drawings (eye, bulb, planet, orbit, person, envelope, document, branch, briefcase), not brand logos. A project picks its icon with `icon` in the content file; without one the key shows the title's first letter.
 - 2026-11-10 — Design tokens: wall `#121110`, paper `#ece6da`, dim `#a8a093`, faint `#756e63`, screen light `#cfe0ff` (focus rings and outlines). Left-aligned single column, no cards, no all-caps labels, no rules between rows.
 - 2026-11-10 — The idle camera drift (3° yaw, 1.5° pitch) is for mouse and trackpad only, only on the desk view.
 
 - 2026-11-10 — **Credits.** `src/content/credits.ts` is the typed manifest (title, creator, source, exact license link, changes) and `/credits` is generated from it; the footer links there (on phones the link sits in the dock). The keyboard's license link is the one the Sketchfab API reports for the model: `http://creativecommons.org/licenses/by/4.0/`. Fonts are listed too.
-- 2026-11-10 — **Share image** is a 1200×630 capture of the desk (`opengraph-image.png` at the app root, so every page uses it); titles follow `<page> | Noah Leibovitz`. `metadataBase`, the sitemap and robots use `siteUrl` from `src/content/site.ts`: `NEXT_PUBLIC_SITE_URL`, else Vercel's production URL, else localhost.
+- 2026-11-10 — **Share image** is a 1200×630 capture of the desk (`opengraph-image.png` at the app root, so every page uses it); titles follow `<page> | Noah Leibovitz`. `metadataBase`, the sitemap and robots use `siteUrl` from `src/content/site.ts`: `NEXT_PUBLIC_SITE_URL`, else localhost.
 - 2026-11-10 — **Loading.** Header and page shell render at once. On the home page a quiet "Setting up the desk" note appears after 0.9 s if the scene is not ready, and after 8 s the HTML Projects index stands in until it is.
-- 2026-11-10 — **404.** `src/app/not-found.tsx`. Known limit of Cache Components: in a production build the first request for an unknown `/projects/<slug>` can answer 200 with the not-found page and a `noindex` tag, then 404 once cached. Other unknown addresses are 404 from the first request.
+- 2026-11-10 — **404.** `src/app/not-found.tsx`, exported as `out/404.html`, which GitHub Pages serves with status 404 for any unknown address.
 - 2026-11-10 — Production build measured locally: 3D assets 96.6 KB transferred (budget 3 MB), scripts about 520 KB transferred, 60 fps on the M3 Pro at both sizes. Still not measured on a real phone.
+
+- 2026-11-10 — **GitHub Pages instead of Vercel** (Noah's call). The build is a static export: `cacheComponents` and `partialPrefetching` are off (they need a server), images are unoptimized, `sitemap.ts` and `robots.ts` are `force-static`, and the `instant` opt-out on the project page is gone. An unknown address, including an unknown project, is now always the host's real 404 (`out/404.html`), which removes the earlier soft-404 limit.
+- 2026-11-10 — **Base path.** A project site lives under `/<repo>`. `next.config.ts` reads `NEXT_PUBLIC_BASE_PATH`; the workflow fills it from `actions/configure-pages`. Next prefixes its own links; every address written by hand to a file in `public/` (models, textures, project images, a résumé PDF) must go through `asset()` in `src/lib/paths.ts`. `usePathname()` now ends with a slash, so compare paths through `normalizePath()`.
+- 2026-11-10 — A résumé PDF, once added, is treated as an outside link: the header link and Stream Deck key open the file in a new tab instead of routing to it.
+- 2026-11-10 — `.github/workflows/pages.yml` publishes on every push to `main` (checkout v7, setup-node v7, configure-pages v6, upload-pages-artifact v5, deploy-pages v5: the current majors on 2026-11-10). The repository needs Settings > Pages > Source set to "GitHub Actions" once.
+- 2026-11-10 — Verified locally: all 36 browser checks pass against the export served under `/portfolio` by `scripts/serve-export.mjs`, and against the dev server. The live GitHub Pages site itself has not been tested because it does not exist yet.
 
 ## Open questions for Noah
 

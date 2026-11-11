@@ -21,7 +21,7 @@ export function deckKeys(projects: Project[], contact: Contact): (DeckKey | null
     { label: "About", href: "/about", external: false, icon: "person" },
     { label: "Contact", href: "/contact", external: false, icon: "envelope" },
     // Until a PDF exists the Résumé key opens the contact page.
-    { label: "Résumé", href: contact.resume ?? "/contact", external: false, icon: "document" },
+    { label: "Résumé", href: contact.resume ?? "/contact", external: Boolean(contact.resume), icon: "document" },
   ];
   if (contact.github) fixed.push({ label: "GitHub", href: contact.github, external: true, icon: "branch" });
   if (contact.linkedin) fixed.push({ label: "LinkedIn", href: contact.linkedin, external: true, icon: "briefcase" });

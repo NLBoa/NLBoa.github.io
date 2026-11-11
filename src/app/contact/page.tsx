@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Page from "@/components/Page";
 import { contact } from "@/content/contact";
+import { asset } from "@/lib/paths";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -45,7 +46,7 @@ export default function Contact() {
           <>
             <dt>Résumé</dt>
             <dd>
-              <a href={contact.resume}>Download the PDF</a>
+              <a href={asset(contact.resume)}>Download the PDF</a>
             </dd>
           </>
         )}

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { asset } from "@/lib/paths";
 import { byId, viewForPath, type View } from "./interactive";
 
 /** How long the camera takes to reach an object before its page opens. */
@@ -61,7 +62,7 @@ export const useScene = create<SceneState>((set, get) => ({
     const release = () => set({ pressed: null });
 
     if (item.external) {
-      window.open(item.href, "_blank", "noopener,noreferrer");
+      window.open(asset(item.href), "_blank", "noopener,noreferrer");
       if (isKey) {
         set({ pressed: id });
         setTimeout(release, 180);

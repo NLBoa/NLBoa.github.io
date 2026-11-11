@@ -38,7 +38,7 @@ describe("deckKeys", () => {
 
   it("points Résumé at the contact page until a PDF exists", () => {
     expect(deckKeys([], contact)[2]).toMatchObject({ label: "Résumé", href: "/contact" });
-    expect(deckKeys([], { ...contact, resume: "/resume.pdf" })[2]).toMatchObject({ href: "/resume.pdf" });
+    expect(deckKeys([], { ...contact, resume: "/resume.pdf" })[2]).toMatchObject({ href: "/resume.pdf", external: true });
   });
 
   it("leaves out GitHub and LinkedIn keys when there is no link", () => {

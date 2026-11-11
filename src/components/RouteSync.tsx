@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { normalizePath } from "@/lib/paths";
 import { useScene } from "@/scene/store";
 
 /**
@@ -9,7 +10,7 @@ import { useScene } from "@/scene/store";
  * it change routes, tracks reduced motion, and makes Esc return to the desk.
  */
 export default function RouteSync() {
-  const pathname = usePathname();
+  const pathname = normalizePath(usePathname());
   const router = useRouter();
 
   useEffect(() => {

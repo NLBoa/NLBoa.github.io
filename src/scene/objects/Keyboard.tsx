@@ -3,11 +3,12 @@
 import { useGLTF } from "@react-three/drei";
 import { Component, useMemo, type ReactNode } from "react";
 import type { Mesh, MeshStandardMaterial } from "three";
+import { asset } from "@/lib/paths";
 import { slab } from "../geometry";
 import { KEYBOARD, TRACKPAD } from "../layout";
 import { materials } from "../materials";
 
-const KEYS_URL = "/models/keyboard-keys.glb";
+const KEYS_URL = asset("/models/keyboard-keys.glb");
 
 /**
  * Keycaps with their legends: "Apple Magic Keyboard" by infohack (CC BY),

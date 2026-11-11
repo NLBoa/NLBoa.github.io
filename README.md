@@ -2,7 +2,7 @@
 
 A portfolio whose home page is a 3D desk at night. The two monitors, the Stream Deck and the pen cup open parts of the site; the header does the same job without the 3D scene.
 
-Every page is static HTML. The desk is a layer on top: without WebGL the home page is simply the list of projects.
+The whole site is exported as static files and hosted on GitHub Pages. The desk is a layer on top of ordinary HTML pages: without WebGL the home page is simply the list of projects.
 
 ## Run it
 
@@ -21,8 +21,8 @@ Then open http://localhost:3000.
 | Command | What it does |
 |---|---|
 | `npm run dev` | Development server on port 3000 |
-| `npm run build` | Production build |
-| `npm run start` | Serve the production build |
+| `npm run build` | Builds the static site into `out/` |
+| `npm run preview` | Serves `out/` locally the way GitHub Pages does (port 3200) |
 | `npm test` | Unit tests (camera framing, Stream Deck keys, routes) |
 | `npm run lint` | ESLint |
 | `npm run flows` | Browser checks of every behavior, against a running server |
@@ -94,8 +94,29 @@ Raw downloads live in `assets-src/` and the reference photo in `reference/`. Bot
 
 Attribution for all of it is on the `/credits` page.
 
-## Deploy
+## Deploy (GitHub Pages)
 
-The site is a standard Next.js app and deploys to Vercel without configuration: import the Git repository in Vercel and accept the defaults. Vercel supplies the production address for share links and the sitemap; for a custom domain set `NEXT_PUBLIC_SITE_URL` to it (for example `https://example.com`).
+`.github/workflows/pages.yml` builds the site and publishes it on every push to `main`. One-time setup in the GitHub repository: **Settings > Pages > Source: GitHub Actions**.
 
-Before a deploy, `npm run build` and `npm run flows` should both pass.
+The address depends on the repository's name:
+
+- a repository named `<username>.github.io` is served at `https://<username>.github.io/`
+- any other name is served at `https://<username>.github.io/<repository>/`
+
+The workflow passes the right base path and origin to the build (`NEXT_PUBLIC_BASE_PATH`, `NEXT_PUBLIC_SITE_URL`), so nothing in the code names the repository. For a custom domain, set `NEXT_PUBLIC_SITE_URL` to it and leave the base path empty.
+
+GitHub Pages on a free account needs the repository to be public.
+
+To try the published form locally:
+
+```bash
+NEXT_PUBLIC_BASE_PATH=/portfolio npm run build
+```
+
+```bash
+NEXT_PUBLIC_BASE_PATH=/portfolio npm run preview
+```
+
+Because the site may live under a sub-path, any address you write yourself to a file in `public/` must go through `asset()` from `src/lib/paths.ts`. Links made with `next/link` handle it on their own.
+
+Before pushing to `main`, `npm run build` and `npm run flows` should both pass.

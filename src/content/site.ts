@@ -13,15 +13,11 @@ export const navLinks = [
 ];
 
 /**
- * The site's public address, for share links and the sitemap. Set
- * NEXT_PUBLIC_SITE_URL for a custom domain; on Vercel the production URL is
- * picked up by itself.
+ * The site's public origin (no path), for share links and the sitemap. The
+ * GitHub Pages workflow sets NEXT_PUBLIC_SITE_URL; set it yourself for a
+ * custom domain.
  */
-export const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000");
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const siteName = about.name;
 export const siteDescription = about.intro[0];

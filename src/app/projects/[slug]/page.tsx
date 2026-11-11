@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import Page from "@/components/Page";
 import { getProject, projects } from "@/content/projects";
+import { asset } from "@/lib/paths";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -19,12 +20,7 @@ export async function generateMetadata({ params }: PageProps<"/projects/[slug]">
   };
 }
 
-// Every project is prerendered through generateStaticParams, so the page
-// reads its slug before rendering anything. That keeps an unknown slug a real
-// 404 (under Suspense it would stream a 200), at the cost of opting this
-// segment out of Next's instant-navigation validation.
-export const instant = false;
-
+// Only the projects in the content file exist; any other slug is the host's 404 page.
 export default async function ProjectPage({ params }: PageProps<"/projects/[slug]">) {
   const { slug } = await params;
   const project = getProject(slug);
@@ -83,7 +79,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
       )}
 
       {project.images.slice(0, 3).map((image) => (
-        <Image key={image.src} className="project-image" src={image.src} alt={image.alt} width={image.width} height={image.height} />
+        <Image key={image.src} className="project-image" src={asset(image.src)} alt={image.alt} width={image.width} height={image.height} />
       ))}
     </Page>
   );

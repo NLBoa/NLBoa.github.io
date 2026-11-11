@@ -3,6 +3,7 @@
 import { useTexture } from "@react-three/drei";
 import { useMemo } from "react";
 import { RepeatWrapping, SRGBColorSpace, type Texture } from "three";
+import { asset } from "@/lib/paths";
 import { woodBox } from "../geometry";
 import { DESK, WALL_Z } from "../layout";
 import { materials } from "../materials";
@@ -20,7 +21,7 @@ function tiling(textures: Texture[]) {
 
 /** Dark walnut top (Poly Haven "Walnut Veneer", CC0), toned down to the photo. */
 export function Desk() {
-  const [map, normalMap] = useTexture(["/textures/walnut-diff.webp", "/textures/walnut-normal.webp"], tiling);
+  const [map, normalMap] = useTexture([asset("/textures/walnut-diff.webp"), asset("/textures/walnut-normal.webp")], tiling);
   const top = useMemo(() => woodBox(DESK.width, DESK.thickness, DESK.depth, TILE), []);
 
   return (

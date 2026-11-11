@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { asset, normalizePath } from "@/lib/paths";
 
 type Props = {
   links: { label: string; href: string }[];
@@ -22,7 +23,7 @@ function Links({ links, current }: { links: Props["links"]; current: string | nu
               {link.label}
             </Link>
           ) : (
-            <a href={link.href}>{link.label}</a>
+            <a href={asset(link.href)}>{link.label}</a>
           )}
         </li>
       ))}
@@ -31,7 +32,7 @@ function Links({ links, current }: { links: Props["links"]; current: string | nu
 }
 
 function WithPath({ links }: { links: Props["links"] }) {
-  return <Links links={links} current={usePathname()} />;
+  return <Links links={links} current={normalizePath(usePathname())} />;
 }
 
 export default function NavLinks({ links, current }: Props) {
