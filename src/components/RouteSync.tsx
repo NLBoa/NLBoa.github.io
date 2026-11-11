@@ -30,13 +30,23 @@ export default function RouteSync() {
     return () => query.removeEventListener("change", update);
   }, []);
 
+  // Esc closes the open page. Some hosts (an embedded browser pane, for one)
+  // keep the key-down for themselves and pass on only the key-up, so either
+  // one closes the page; `closing` stops the pair from counting twice.
   useEffect(() => {
     if (pathname === "/") return;
+    let closing = false;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !event.defaultPrevented) router.push("/");
+      if (event.key !== "Escape" || event.defaultPrevented || closing) return;
+      closing = true;
+      router.push("/");
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("keyup", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keyup", onKey);
+    };
   }, [pathname, router]);
 
   return null;

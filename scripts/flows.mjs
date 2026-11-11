@@ -1,8 +1,9 @@
 // End-to-end checks of the Phase 2 behavior, against the dev server on :3000.
 // Usage: npm run flows
 import { chromium } from "playwright-core";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 // BASE_URL may include a base path, e.g. http://localhost:3200/portfolio
 const baseUrl = new URL(process.env.BASE_URL ?? "http://localhost:3000");
@@ -486,6 +487,46 @@ async function pointAt(page, id) {
   }
   check("the pager walks through all six projects", walked.length === 6 && (await page.locator(".pager a").count()) === 1);
   await context.close();
+}
+
+// 10. Close and Esc on every kind of page -----------------------------------------
+{
+  for (const route of ["/projects", "/projects/argus", "/about", "/contact", "/credits"]) {
+    const { context, page } = await open(route);
+    await page.waitForSelector(".page-close");
+    const box = await page.locator(".page-close").boundingBox();
+    const navRight = await page.evaluate(() => document.querySelector(".site-nav").getBoundingClientRect().right);
+    check(`${route}: Close is in the top-right corner, in line with the header`, Math.abs(box.x + box.width - navRight) <= 1 && box.y < 140, `right ${(box.x + box.width).toFixed(0)}px, top ${box.y.toFixed(0)}px`);
+    await page.evaluate(() => window.scrollTo(0, 600));
+    const after = await page.locator(".page-close").boundingBox();
+    check(`${route}: Close stays put while the page scrolls`, Math.abs(after.y - box.y) <= 1);
+    await page.click(".page-close");
+    await page.waitForURL(at("/"), { timeout: 3000 });
+    check(`${route}: Close returns to the desk`, true);
+    await context.close();
+  }
+  // A host that keeps the key-down and passes on only the key-up.
+  const { context, page } = await open("/projects");
+  await page.waitForSelector(".page-close");
+  await page.keyboard.up("Escape");
+  await page.waitForURL(at("/"), { timeout: 3000 });
+  check("Esc closes the page even when only its key-up arrives", true);
+  await context.close();
+
+  const phone = await open("/projects/argus", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+  const size = await phone.page.locator(".page-close").boundingBox();
+  check("phone: Close is a 44px target inside the screen", size.height >= 44 && size.x + size.width <= 390, `${size.height}px tall`);
+  await phone.context.close();
+}
+
+// Checks that belong to one feature live in scripts/checks/, one file each.
+{
+  const dir = path.resolve(import.meta.dirname, "checks");
+  const files = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".mjs")).sort() : [];
+  for (const file of files) {
+    const { default: run } = await import(pathToFileURL(path.join(dir, file)).href);
+    await run({ browser, base, out, open, check, at, a, sceneReady, settle, locate, pointAt, frames });
+  }
 }
 
 await browser.close();

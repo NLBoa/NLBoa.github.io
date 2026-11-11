@@ -327,12 +327,33 @@ html[data-webgl] body:has(main.home) .site-footer {
   font-size: 0.9375rem;
 }
 
+/* Close sits in the window's top-right corner, under the header, and stays
+   there while the page scrolls. */
 .page-close {
+  position: fixed;
+  top: calc(var(--header-height) + 0.6rem);
+  right: var(--gutter);
+  z-index: 9;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--wall);
+  color: var(--dim);
   text-decoration: none;
 }
 
 .page-close:hover {
+  border-color: var(--faint);
   color: var(--paper);
+}
+
+@media (hover: none) {
+  .page-close {
+    min-height: 2.75rem;
+  }
 }
 
 kbd {
