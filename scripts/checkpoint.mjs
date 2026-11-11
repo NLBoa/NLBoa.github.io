@@ -12,12 +12,49 @@ const out = path.join(root, "docs/checkpoints");
 mkdirSync(out, { recursive: true });
 
 const sizes = [
-  { width: 1440, height: 900, isMobile: false },
-  { width: 390, height: 844, isMobile: true },
+  { width: 1440, height: 900, isMobile: false, dpr: 2 },
+  { width: 390, height: 844, isMobile: true, dpr: 1.5 },
 ];
 
+/** Forces a redraw every frame for a few seconds and reports the frame rate. */
+async function measureFps(context, width, height) {
+  const page = await context.newPage();
+  await page.goto(`http://localhost:3000${route}`, { waitUntil: "networkidle" });
+  await page.waitForFunction(() => (window.__scene?.frames ?? 0) > 0, null, { timeout: 15000 });
+  await page.waitForTimeout(800);
+  const result = await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const start = performance.now();
+        const startFrames = window.__scene.frames;
+        const times = [];
+        let last = start;
+        function loop(now) {
+          times.push(now - last);
+          last = now;
+          window.__scene.invalidate();
+          if (now - start < 3000) requestAnimationFrame(loop);
+          else {
+            times.sort((a, b) => a - b);
+            resolve({
+              fps: ((window.__scene.frames - startFrames) / (now - start)) * 1000,
+              p95: times[Math.floor(times.length * 0.95)],
+              renderer: window.__scene.renderer,
+            });
+          }
+        }
+        requestAnimationFrame(loop);
+      }),
+  );
+  console.log(
+    `  redrawing every frame at ${width}x${height}: ${result.fps.toFixed(0)} fps, ` +
+      `95th percentile frame ${result.p95.toFixed(1)} ms (${result.renderer})`,
+  );
+  await page.close();
+}
+
 const browser = await chromium.launch({ channel: "chrome" });
-for (const { width, height, isMobile } of sizes) {
+for (const { width, height, isMobile, dpr } of sizes) {
   const context = await browser.newContext({
     viewport: { width, height },
     deviceScaleFactor: 1,
@@ -46,6 +83,11 @@ for (const { width, height, isMobile } of sizes) {
   );
   for (const e of errors) console.log(`  error: ${e}`);
   await context.close();
+
+  // Frame rate at the real pixel ratio for that device class.
+  const perf = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: dpr, isMobile, hasTouch: isMobile });
+  await measureFps(perf, width, height);
+  await perf.close();
 }
 await browser.close();
 

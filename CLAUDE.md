@@ -8,8 +8,9 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 
 ## Status
 
-- **Phase 0 (blockout): done, waiting for Noah's review.** Branch `phase-0-blockout`.
-- Phase 1 (look), Phase 2 (function), Phase 3 (ship): not started.
+- Phase 0 (blockout): done and approved. Branch `phase-0-blockout`.
+- **Phase 1 (look): done, waiting for Noah's review.** Branch `phase-1-look` (stacked on phase 0).
+- Phase 2 (function), Phase 3 (ship): not started.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -27,6 +28,8 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - `npm run build`, `npm run lint`, `npm test` (vitest, pure logic only)
 - `npm run checkpoint -- <label> [route]` — with the dev server running: screenshots at both review sizes into `docs/checkpoints/`, triangles, draw calls, frames drawn while idle, 3D asset bytes, open TODOs. Uses the installed Google Chrome through playwright-core.
 - `npm run todos` — list every `TODO(noah)` in the content files
+- `npm run assets:models` — `assets-src/keyboard.glb` → `public/models/keyboard-keys.glb` (crop, normalize, meshopt, WebP ≤ 1024 px)
+- `npm run assets:textures` — downloads the Poly Haven walnut maps into `assets-src/textures/` and writes WebP into `public/textures/`
 
 ## Layout
 
@@ -38,8 +41,15 @@ src/scene/       layout.ts    every size and position in meters (single source o
                  camera.ts    fitCamera / homePose: framing per aspect ratio (tested)
                  Scene.tsx    the <Canvas>, lights, camera rig, dev stats (window.__scene)
                  SceneMount.tsx  WebGL check + dynamic import with ssr: false
-                 Blockout.tsx Phase 0 gray boxes (replaced object by object in Phase 1)
-scripts/         checkpoint.mjs
+                 Lights.tsx   hemisphere, light-bar spot, room bounce, warm fill
+                 materials.ts the shared palette (matte/satin) and the light colors
+                 geometry.ts  rounded slabs, real-unit UVs for the wood
+                 objects/     Room (desk, legs, wall), Monitors (+ arms, base, light bar),
+                              StreamDeck, PenCup, Keyboard (+ Trackpad)
+                 textures/    screens.ts draws the monitor content from src/content;
+                              useScreenTexture.ts turns a drawer into a texture
+scripts/         checkpoint.mjs, optimize-models.mjs, fetch-textures.mjs
+public/models/   keyboard-keys.glb      public/textures/  walnut-diff.webp, walnut-normal.webp
 docs/checkpoints/ screenshots from each phase
 reference/       desk-reference.jpg (+ original HEIC)   — git-ignored
 assets-src/      keyboard.glb (raw Sketchfab download)  — git-ignored
@@ -71,6 +81,17 @@ assets-src/      keyboard.glb (raw Sketchfab download)  — git-ignored
 - 2026-11-10 — Missing dates show the `DATES_PLACEHOLDER` text ("Dates to be added") from `src/content/types.ts`, each with a `TODO(noah): dates` beside it, until Noah supplies them.
 - 2026-11-10 — Project list is now seven: Argus, Smart Display, Jupiterp, Aegis Orbit (featured), SKIBUS, Shell, MID.
 
+- 2026-11-10 — **The downloaded keyboard model is the full-size Magic Keyboard with a numeric keypad**, not the compact one on the desk. `optimize-models.mjs` keeps only the keycaps of the main block (legends intact) and the aluminum body is built in code at 27.9 × 11.5 cm. So the shipped keyboard has no fn key or arrow cluster; at desk scale it reads as the compact board. The credits entry must say "cropped to the compact layout; body rebuilt". If Noah supplies a true compact model, swap it in.
+- 2026-11-10 — Credits data so far (the manifest and `/credits` page are Phase 3): "Apple Magic Keyboard" by infohack, https://sketchfab.com/3d-models/apple-magic-keyboard-faa71198d6884781bf8a9cf89a26b930, CC BY (copy the exact license link from the model page in Phase 3). Walnut Veneer by Poly Haven is CC0 (no attribution required; credit it anyway).
+- 2026-11-10 — Lighting recipe (night): two cool `RectAreaLight`s on the screens, a spot from the light bar with `decay={1}` so the wash is even, a faint warm directional "room bounce", a warm point fill from the right, low hemisphere ambient, ACES tone mapping at exposure 1.25. Screens and the light-bar strip are `toneMapped={false}` basic materials. No post-processing.
+- 2026-11-10 — Shadows are drei `ContactShadows` with `frames={1}`: baked once after everything under the Suspense boundary has loaded, never per frame (so phones have no real-time shadows). Anything that moves an object on the desk in Phase 2 must not rely on that shadow updating.
+- 2026-11-10 — The walnut roughness map is not used (it read as glare under the single low light); diffuse + normal only, tinted `#948b80`, grain along the desk's width.
+- 2026-11-10 — No environment map, so no metallic materials: "aluminum" is a satin gray.
+- 2026-11-10 — The desk has two dark slab legs (part of the desk, kept in shadow) so it does not float on phones, where the area under it is visible.
+- 2026-11-10 — Monitor screens already show site content (project grid, intro) drawn with the site's fonts. Stream Deck keys are dark until Phase 2 gives each its icon texture.
+- 2026-11-10 — `useGLTF(url, false, true)`: Draco off (it would fetch a decoder from a CDN), meshopt on. Meshopt quantizes positions, so use the mesh's world matrix, not the bare geometry.
+- 2026-11-10 — Measured on Noah's M3 Pro MacBook (dev build, Chrome, Metal): 60 fps while redrawing every frame at 1440×900 @2x and at 390×844 @1.5x. **Not measured on a real phone yet.**
+
 ## Open questions for Noah
 
-See `npm run todos` for content gaps (dates, some roles, images, 7SM title, "Outside of code", résumé PDF, MID details). Beyond those: the font choice, the Stream Deck / trackpad / pen cup dimensions, whether the right monitor should sit higher than the left, and the phone framing.
+See `npm run todos` for content gaps (dates, some roles, images, 7SM title, "Outside of code", résumé PDF, MID details). Beyond those: the font choice, whether to keep the cropped full-size keyboard model or supply a compact one, an optional `assets-src/pencup.jpg` pattern for the pen cup, and a frame-rate check on a real phone.

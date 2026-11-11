@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "todos": "grep -rn 'TODO(noah)' src/content",
-    "checkpoint": "node scripts/checkpoint.mjs"
+    "checkpoint": "node scripts/checkpoint.mjs",
+    "assets:models": "node scripts/optimize-models.mjs",
+    "assets:textures": "node scripts/fetch-textures.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
@@ -22,6 +24,8 @@
   },
   "devDependencies": {
     "@gltf-transform/cli": "^4.5.1",
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -29,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "playwright-core": "^1.65.0",
+    "sharp": "^0.35.5",
     "typescript": "^5",
     "vitest": "^5.1.0"
   }

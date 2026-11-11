@@ -50,8 +50,8 @@ export const MONITOR = {
 export const ARM_BASE = {
   position: onDesk(0.52, 0.04),
   size: [0.12, 0.012, 0.09] as Vec3,
-  pole: { size: [0.045, 0.3, 0.045] as Vec3 },
-  armThickness: 0.035,
+  pole: { radius: 0.02, height: 0.3 },
+  armRadius: 0.017,
 };
 
 const monitorCenterY = MONITOR.bottomY + MONITOR.body.height / 2;
@@ -170,12 +170,15 @@ export const PEN_CUP = {
 
 export const KEYBOARD = {
   position: onDesk(0.45, 0.72),
-  size: [0.279, 0.008, 0.115] as Vec3, // Magic Keyboard, compact
+  /** Magic Keyboard, compact. Height is to the key tops. */
+  size: [0.279, 0.0056, 0.115] as Vec3,
+  /** The aluminum body under the keycaps (from scripts/optimize-models.mjs). */
+  bodyHeight: 0.0043,
 };
 
 export const TRACKPAD = {
   position: onDesk(0.7, 0.74),
-  size: [0.16, 0.008, 0.115] as Vec3, // Magic Trackpad
+  size: [0.16, 0.006, 0.115] as Vec3, // Magic Trackpad
 };
 
 // What the camera has to keep in frame --------------------------------------
