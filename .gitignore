@@ -44,3 +44,6 @@ next-env.d.ts
 /reference/
 /assets-src/
 .DS_Store
+
+# screenshots written by `npm run flows`
+/test-results/

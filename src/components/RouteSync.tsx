@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { normalizePath } from "@/lib/paths";
+import { normalizePath, sitePath } from "@/lib/paths";
 import { useScene } from "@/scene/store";
 
 /**
@@ -30,15 +30,21 @@ export default function RouteSync() {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  // Esc closes the open page. Some hosts (an embedded browser pane, for one)
-  // keep the key-down for themselves and pass on only the key-up, so either
-  // one closes the page; `closing` stops the pair from counting twice.
+  // Esc closes the open page. The listener is there from the start and reads
+  // the address when the key arrives, so Esc works the instant a page opens.
+  // Some hosts (an embedded browser pane, for one) keep the key-down for
+  // themselves and pass on only the key-up, so either one closes the page;
+  // `handled` stops a normal down-and-up pair from counting twice.
   useEffect(() => {
-    if (pathname === "/") return;
-    let closing = false;
+    let handled = false;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || event.defaultPrevented || closing) return;
-      closing = true;
+      if (event.key !== "Escape") return;
+      if (event.type === "keyup" && handled) {
+        handled = false;
+        return;
+      }
+      if (event.defaultPrevented || sitePath(window.location.pathname) === "/") return;
+      handled = event.type === "keydown";
       router.push("/");
     };
     document.addEventListener("keydown", onKey);
@@ -47,7 +53,7 @@ export default function RouteSync() {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("keyup", onKey);
     };
-  }, [pathname, router]);
+  }, [router]);
 
   return null;
 }
