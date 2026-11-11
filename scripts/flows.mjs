@@ -275,6 +275,74 @@ async function pointAt(page, id) {
   await context.close();
 }
 
+// 8. A project told as a story, and its miniature --------------------------------
+{
+  const route = "/projects/aegis-orbit";
+  const phase = (page) => page.getAttribute(".miniature svg", "data-phase");
+  const buttons = (page) => page.locator(".miniature button").allTextContents();
+
+  // In the HTML itself, so it shows without JavaScript.
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
+  const plain = await context.newPage();
+  await plain.goto(base + route, { waitUntil: "load" });
+  check("story page: the miniature's drawing is in the HTML without JavaScript", (await plain.locator(".miniature svg path").count()) > 3);
+  check("story page: without JavaScript there are no dead buttons", (await plain.locator(".miniature button").count()) === 0);
+  const plainText = await plain.textContent("main.page");
+  check("story page: the story is readable without JavaScript", ["What it is", "How it works", "My part", "Catalog explorer"].every((t) => plainText.includes(t)));
+  await context.close();
+
+  const { context: desktop, page, errors } = await open(route);
+  await page.waitForFunction(() => document.querySelector(".miniature svg")?.dataset.phase === "decision", null, { timeout: 8000 });
+  check("miniature: plays to the decision and stops", JSON.stringify(await buttons(page)) === JSON.stringify(["Approve burn", "Stay on course"]));
+  const fold = await page.evaluate(() => document.querySelector(".miniature-bar").getBoundingClientRect().bottom);
+  check("miniature: the drawing and its buttons fit a 1440x900 screen", fold <= 900, `bottom ${fold.toFixed(0)}px`);
+  await page.screenshot({ path: path.join(out, "story-aegis-orbit-1440x900.png") });
+
+  await page.click(".miniature button.primary");
+  check("miniature: Approve burn starts the burn", (await phase(page)) === "burned");
+  await page.waitForSelector(".mini-ghost", { timeout: 3000 });
+  check("miniature: the ghost flies the course not taken", true);
+  await page.waitForTimeout(1800);
+  await page.screenshot({ path: path.join(out, "story-aegis-orbit-ghost-1440x900.png") });
+  await page.waitForFunction(() => document.querySelector(".miniature svg")?.dataset.phase === "done", null, { timeout: 15000 });
+  check("miniature: with the burn the spacecraft survives the pass", (await page.locator(".mini-craft").count()) === 1 && (await page.locator(".mini-clearance").count()) === 1);
+
+  await page.click(".miniature button");
+  check("miniature: Replay starts again", (await phase(page)) === "approach");
+  await page.click(".miniature button:not(.primary)");
+  check("miniature: the choice can be made before the clock stops", (await phase(page)) === "rejected");
+  await page.waitForFunction(() => document.querySelector(".miniature svg")?.dataset.phase === "done", null, { timeout: 20000 });
+  check("miniature: without the burn the spacecraft is lost at the pass", (await page.locator(".mini-craft").count()) === 0 && (await page.locator(".mini-hit").count()) === 1);
+
+  await page.click(`.pager ${a("/projects/skibus")}`);
+  await page.waitForURL(at("/projects/skibus"));
+  check("story page: the pager leads to the next project", true);
+  check("a project without a story keeps the short page", (await page.locator("main.page.project").count()) === 0 && (await page.textContent("main.page")).includes("What I built"));
+  check("no console errors on the story page", errors.length === 0, errors.slice(0, 2).join(" | "));
+  await desktop.close();
+
+  // Reduced motion: nothing plays; the buttons step between stills.
+  const still = await open(route, { reducedMotion: "reduce" });
+  await still.page.waitForSelector(".miniature button.primary");
+  check("reduced motion: the miniature starts at the decision", (await phase(still.page)) === "decision");
+  await still.page.click(".miniature button.primary");
+  check("reduced motion: the outcome is shown at once", (await phase(still.page)) === "done" && (await still.page.locator(".mini-clearance").count()) === 1);
+  await still.context.close();
+
+  // Phone.
+  const phone = await open(route, { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+  await phone.page.waitForSelector(".miniature button.primary");
+  const overflow = await phone.page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  check("phone: the story page does not overflow sideways", overflow <= 0, `${overflow}px`);
+  const smallest = await phone.page.evaluate(() => Math.min(...[...document.querySelectorAll(".miniature button")].map((b) => b.getBoundingClientRect().height)));
+  check("phone: the miniature's buttons are at least 44px tall", smallest >= 44, `${smallest}px`);
+  await phone.page.waitForFunction(() => document.querySelector(".miniature svg")?.dataset.phase === "decision", null, { timeout: 8000 });
+  await phone.page.screenshot({ path: path.join(out, "story-aegis-orbit-390x844.png") });
+  await phone.page.tap(".miniature button.primary");
+  check("phone: tapping Approve burn works", (await phase(phone.page)) === "burned");
+  await phone.context.close();
+}
+
 await browser.close();
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed");
 process.exit(failures ? 1 : 0);

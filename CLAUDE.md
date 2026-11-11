@@ -15,6 +15,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - **Live at https://nlboa.github.io/** since 2026-11-10. Repository: https://github.com/NLBoa/NLBoa.github.io (public). It is a user site, so there is no base path. Everything is merged into `main`; every push to `main` rebuilds and republishes through `.github/workflows/pages.yml`.
 - The phase branches (`phase-0-blockout` … `github-pages`) exist only locally and are fully contained in `main`.
 - Work from here on: small changes can go straight to `main` if Noah asks for them to be published; otherwise use a branch and ask before pushing, because a push to `main` goes live.
+- **Project pages as stories (in progress, branch `project-pages`, not published).** Aegis Orbit is built as the pattern and is waiting for Noah's review. Next, only after his OK: Argus, Smart Display, Jupiterp, then SKIBUS, Shell, MID, one at a time, each starting from its README and each miniature confirmed with Noah first.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -31,11 +32,12 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - `npm run dev` — dev server on :3000
 - `npm run build` (writes the static site to `out/`), `npm run preview` (serves `out/` like GitHub Pages, port 3200), `npm run lint`, `npm test` (vitest, pure logic only)
 - `npm run checkpoint -- <label> [route]` — with the dev server running: screenshots at both review sizes into `docs/checkpoints/`, triangles, draw calls, frames drawn while idle, 3D asset bytes, open TODOs. Uses the installed Google Chrome through playwright-core.
-- `npm run flows` — with the dev server running: 27 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
+- `npm run flows` — with the dev server running: 59 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
 - `npm run todos` — list every `TODO(noah)` in the content files
 - `npm run share-image` — re-captures `src/app/opengraph-image.png` (1200×630) from the running site; run it again after the look or the content on the screens changes
 - `checkpoint`, `flows` and `share-image` read `BASE_URL`, which may include a base path. To test the exported site as GitHub Pages serves it: `NEXT_PUBLIC_BASE_PATH=/portfolio NEXT_PUBLIC_SCENE_STATS=1 npm run build`, `NEXT_PUBLIC_BASE_PATH=/portfolio npm run preview`, then `BASE_URL=http://localhost:3200/portfolio npm run flows`. The stats flag only exposes `window.__scene` for the scripts; a normal build leaves it out.
 - `npm run assets:models` — `assets-src/keyboard.glb` → `public/models/keyboard-keys.glb` (crop, normalize, meshopt, WebP ≤ 1024 px)
+- `npm run assets:images` — `assets-src/projects/<slug>/*.png|jpg` → `public/projects/<slug>/*.webp` (max 1600 px wide); prints each file's pixel size for the content file
 - `npm run assets:textures` — downloads the Poly Haven walnut maps into `assets-src/textures/` and writes WebP into `public/textures/`
 
 ## Layout
@@ -45,7 +47,10 @@ src/app/         layout.tsx: header, <SceneMount/> (once, so the canvas persists
                  page.tsx (home: the Projects index, hidden while the desk is up),
                  projects/, projects/[slug]/, about/, contact/   — all static HTML
 src/components/  Header, NavLinks, Page (frame with Close), ProjectList, RouteSync
-src/content/     all site copy, typed (types, projects, about, contact, site)
+                 project/ProjectStory (the story layout), project/ProjectPager
+src/content/     all site copy, typed (types, projects, about, contact, site, miniatures)
+src/miniatures/  MiniatureSlot.tsx (slug -> miniature, each its own chunk), Figure.tsx (shared frame),
+                 hooks.ts, <slug>/model.ts (pure, tested) + <slug>/Miniature.tsx (SVG)
 src/lib/         deck.ts: the Stream Deck's 15 keys generated from content (tested)
 src/scene/       layout.ts      every size and position in meters (single source of truth)
                  interactive.ts the objects that react, in Tab order; URL -> camera view
@@ -127,6 +132,16 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-10 — Verified: all 36 browser checks pass against the export served under `/portfolio` by `scripts/serve-export.mjs` and against the dev server. On the live site: every route answers 200, unknown addresses 404, the desk loads, hover, click, Esc, header links, a direct project URL and the phone dock all work, with no console errors (first load about 700 KB transferred).
 - 2026-11-10 — Pages setup note: for a `<user>.github.io` repository GitHub switches Pages on by itself in branch mode; it was changed to the Actions source with `gh api -X PUT repos/NLBoa/NLBoa.github.io/pages -f build_type=workflow`.
 
+- 2026-11-10 — **Project pages become stories** (Noah: the pages were "boring", "no detail", "feel like bullet points"; each project should be its own thing). Chosen from five ideas: a working miniature at the top of each project page plus the page told as a story. Not chosen, so do not build without asking: covers on the Projects index, a screen takeover, the desk reacting to the open project. This relaxes "the 3D scene is the only decoration" on project pages only.
+- 2026-11-10 — **Story content is drafted from each project's GitHub README** (Noah's OK). Anything unsure is a `TODO(noah)`; nothing is invented. Roll out one project at a time, Aegis Orbit first.
+- 2026-11-10 — **Story layout.** A project with `story` in the content file renders `ProjectStory`; one without keeps the short facts page. Page width 60rem with the text at reading width; title beside its summary; links at the top; sections "What it is", "How it works" (an `<ol>` drawn as a line of stations, because it is a real sequence), "My part" (titled paragraphs with screenshots, not a list), "The team" (only when known), "Built with"; previous/next project at the foot. Each project has one `accent` color, used only on its page.
+- 2026-11-10 — **Miniature rules.** SVG rendered by React, so the drawing is in the static HTML; buttons appear only once JavaScript runs. No second WebGL context. Animates only while on screen. Under reduced motion nothing plays and the buttons step between stills. Every miniature is a `<figure>` whose caption says it is a schematic, with a text description. **No invented numbers**: geometry only. Words live in `src/content/miniatures.ts`. Each is its own chunk through `MiniatureSlot` (a client component, because Next does not code-split a client component dynamically imported from a server component).
+- 2026-11-10 — **Aegis Orbit miniature**: the ghost replay Noah built. The clock stops at a predicted close approach; "Approve burn" bends the path and a ghost flies the course not taken into the pass; "Stay on course" flies into it. Colors follow the real app (teal course, red dashed debris path). Accent `#45d0bf`. Its chunk is 6.5 KB and loads only on that page.
+- 2026-11-10 — Aegis Orbit's two screenshots come from the team repository's README (MIT-licensed, Noah is a contributor). Noah still has to confirm they may be shown.
+- 2026-11-10 — With a page open the monitor screens are now `#0c0c0c` (was `#262626`, whose text still ghosted behind wide pages), and the fixed header is solid, because long pages scroll under it.
+
 ## Open questions for Noah
+
+Aegis Orbit story: read the draft; role wording; teammates and who built what; any result at Technica; whether the README's figures belong; which parts of the sandbox HUD were his; OK to use the two screenshots.
 
 See `npm run todos` for content gaps (dates, some roles, images, 7SM title, "Outside of code", résumé PDF, MID details). Beyond those: whether to keep the cropped full-size keyboard model or supply a compact one, an optional `assets-src/pencup.jpg` pattern for the pen cup, and a frame-rate check on a real phone.

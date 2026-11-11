@@ -11,6 +11,7 @@
     "checkpoint": "node scripts/checkpoint.mjs",
     "assets:models": "node scripts/optimize-models.mjs",
     "assets:textures": "node scripts/fetch-textures.mjs",
+    "assets:images": "node scripts/optimize-images.mjs",
     "flows": "node scripts/flows.mjs",
     "share-image": "node scripts/share-image.mjs",
     "preview": "node scripts/serve-export.mjs"

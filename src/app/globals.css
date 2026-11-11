@@ -126,6 +126,11 @@ body:has(main.page) .scene {
   pointer-events: none;
 }
 
+/* Pages scroll under the header, so there it is solid. */
+body:has(main.page) .site-header {
+  background: var(--wall);
+}
+
 /* The small label beside a hovered or focused object. */
 .scene-label {
   position: fixed;
@@ -478,6 +483,508 @@ p {
   height: auto;
   margin-top: 2rem;
   border-radius: 4px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A project told as a story ------------------------------------------------- */
+
+/* Wider than a text page: the miniature and screenshots use the full width,
+   the reading text keeps its measure. Each project sets its own --accent. */
+.page.project {
+  --accent: var(--screen-light);
+  --label: 11rem;
+  max-width: calc(60rem + var(--gutter) * 2);
+}
+
+/* The title with its summary beside it. */
+.project-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  column-gap: 3.5rem;
+}
+
+.project-head h1 {
+  margin: 0;
+  font-size: clamp(2.75rem, 8vw, 5rem);
+  letter-spacing: -0.04em;
+}
+
+.project-head .lede {
+  margin-bottom: 0.9rem;
+}
+
+.project-facts,
+.project-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.75rem;
+  margin: 0 2.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  vertical-align: baseline;
+}
+
+.project-facts {
+  color: var(--dim);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
+}
+
+.project-links a {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+}
+
+/* The miniature: a small working drawing of the project. */
+.miniature {
+  margin: 2.5rem 0 0;
+}
+
+.miniature-stage {
+  border: 1px solid var(--rule);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+  background: #0a0e13;
+}
+
+.miniature-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.miniature-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  min-height: 4.25rem;
+  padding: 0.75rem 1rem 0.75rem 1.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 0 0 6px 6px;
+  background: color-mix(in srgb, var(--wall) 70%, #0a0e13);
+}
+
+.miniature-status {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.miniature-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.miniature button {
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  border: 1px solid var(--faint);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--paper);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.miniature button:hover {
+  border-color: var(--paper);
+}
+
+.miniature button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #06110f;
+  font-weight: 600;
+}
+
+.miniature button.primary:hover {
+  filter: brightness(1.1);
+}
+
+.miniature figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.4rem 2rem;
+  margin-top: 0.75rem;
+  color: var(--faint);
+  font-size: 0.875rem;
+}
+
+.miniature-legend {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.miniature-legend li::before {
+  content: "";
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.2rem;
+  margin-right: 0.45rem;
+  border-radius: 1px;
+  vertical-align: middle;
+  background: var(--key, currentColor);
+}
+
+/* Aegis Orbit: the colors follow the simulator's own (teal course, red debris). */
+.mini-aegis {
+  --threat: #ef6a5b;
+  --ghost: #8fdcf0;
+}
+
+.miniature-legend .key-craft {
+  --key: var(--accent);
+}
+
+.miniature-legend .key-threat {
+  --key: #ef6a5b;
+}
+
+.miniature-legend .key-ghost {
+  --key: #8fdcf0;
+}
+
+.mini-aegis path,
+.mini-aegis line,
+.mini-aegis circle {
+  fill: none;
+}
+
+.mini-aegis .mini-air {
+  fill: #0e151e;
+}
+
+.mini-aegis .mini-earth {
+  fill: #131c27;
+  stroke: #2f4a63;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.mini-band {
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.5;
+}
+
+.mini-threat-path,
+.mini-not-taken,
+.mini-clearance,
+.mini-pass circle,
+.mini-pass path {
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.mini-threat-path {
+  stroke: var(--threat);
+  stroke-dasharray: 5 5;
+  opacity: 0.75;
+}
+
+.mini-not-taken {
+  stroke: var(--ghost);
+  stroke-dasharray: 5 5;
+}
+
+.mini-pass circle {
+  stroke: var(--threat);
+  stroke-dasharray: 3 4;
+}
+
+.mini-pass path {
+  stroke: var(--threat);
+}
+
+.mini-clearance {
+  stroke: var(--paper);
+}
+
+.mini-aegis .mini-flash {
+  fill: var(--threat);
+}
+
+.mini-aegis .mini-plume {
+  fill: #ffe2a8;
+}
+
+.mini-aegis .mini-debris {
+  fill: var(--threat);
+}
+
+.mini-hit path {
+  stroke: var(--threat);
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.mini-craft rect {
+  fill: var(--paper);
+  stroke: #0a0e13;
+  stroke-width: 1.5;
+}
+
+.mini-ghost rect {
+  fill: color-mix(in srgb, var(--ghost) 18%, transparent);
+  stroke: var(--ghost);
+  stroke-width: 1.5;
+}
+
+/* Story sections: the heading in a left column, the content beside it. */
+.story {
+  display: grid;
+  grid-template-columns: var(--label) minmax(0, 1fr);
+  column-gap: 2rem;
+  margin-top: 5rem;
+}
+
+.story > h2 {
+  margin: 0.15rem 0 0;
+}
+
+.story-body > p {
+  max-width: var(--measure);
+  font-size: 1.125rem;
+  text-wrap: pretty;
+}
+
+.story-body > p:last-child {
+  margin-bottom: 0;
+}
+
+.story .story-note {
+  margin-top: 1.5rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent);
+  color: var(--dim);
+  font-size: 0.9375rem;
+}
+
+/* How it works uses the full width under its heading. */
+.story-wide {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 1.75rem;
+}
+
+/* The steps as a line of stations. Below a laptop's width it runs downward. */
+.flow {
+  display: grid;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flow li {
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+.flow li::before,
+.flow li::after {
+  content: "";
+  position: absolute;
+}
+
+/* The line to the next station. */
+.flow li::before {
+  top: 0.9rem;
+  bottom: -1.9rem;
+  left: 0.3rem;
+  width: 1px;
+  background: var(--rule);
+}
+
+.flow li:last-child::before {
+  display: none;
+}
+
+/* The station. */
+.flow li::after {
+  top: 0.45rem;
+  left: 0;
+  width: 0.65rem;
+  height: 0.65rem;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  background: var(--wall);
+}
+
+.flow-title {
+  display: block;
+  font-weight: 600;
+}
+
+.flow-text {
+  display: block;
+  max-width: 34rem;
+  color: var(--dim);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+@media (min-width: 64rem) {
+  .flow {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  .flow li {
+    padding: 1.6rem 0 0;
+  }
+
+  .flow li::before {
+    top: 0.3rem;
+    right: -1.25rem;
+    bottom: auto;
+    left: 0.65rem;
+    width: auto;
+    height: 1px;
+  }
+
+  .flow li::after {
+    top: 0;
+  }
+
+  .flow-text {
+    margin-top: 0.3rem;
+    font-size: 0.8125rem;
+  }
+}
+
+.shot {
+  margin: 1.5rem 0 0;
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+
+.shot figcaption {
+  margin-top: 0.6rem;
+  color: var(--faint);
+  font-size: 0.875rem;
+}
+
+.part + .part {
+  margin-top: 3.5rem;
+}
+
+.part h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.part p {
+  max-width: var(--measure);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.story .project-stack {
+  margin: 0.3rem 0 0;
+  color: var(--dim);
+}
+
+/* The projects on either side. */
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-top: 6rem;
+}
+
+.pager a {
+  display: grid;
+  gap: 0.15rem;
+  text-decoration: none;
+}
+
+.pager-next {
+  text-align: right;
+}
+
+.pager-label {
+  color: var(--faint);
+  font-size: 0.875rem;
+}
+
+.pager-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.pager a:hover .pager-title {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+@media (max-width: 48rem) {
+  .project-head {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1rem;
+  }
+
+  .story {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1rem;
+    margin-top: 3.5rem;
+  }
+
+  .miniature-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .miniature-actions button {
+    flex: 1;
+    padding: 0 0.5rem;
+  }
+
+  .miniature figcaption {
+    flex-direction: column;
+  }
+
+  /* The drawing is small here, so what moves in it is drawn larger. */
+  .mini-glyph {
+    transform: scale(1.7);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .mini-band {
+    stroke-width: 10;
+  }
 }
 
 @media (max-width: 30rem) {

@@ -61,7 +61,7 @@ function Monitor({ placement, screenLight }: { placement: MonitorPlacement; scre
       {/* The screen: a plane of exactly 27 inches, 16:9. */}
       <mesh position={[0, MONITOR.screenOffsetY, front + 0.0004]}>
         <planeGeometry args={[MONITOR.screen.width, MONITOR.screen.height]} />
-        <meshBasicMaterial map={texture} color={pageOpen ? "#262626" : "#ffffff"} toneMapped={false} />
+        <meshBasicMaterial map={texture} color={pageOpen ? "#0c0c0c" : "#ffffff"} toneMapped={false} />
       </mesh>
       {/* Cool light the screen throws on the desk. */}
       <rectAreaLight

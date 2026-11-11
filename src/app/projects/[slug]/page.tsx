@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import Page from "@/components/Page";
+import ProjectStory from "@/components/project/ProjectStory";
 import { getProject, projects } from "@/content/projects";
 import { asset } from "@/lib/paths";
 
@@ -25,6 +26,9 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
+
+  // A project with a story gets the larger layout; the rest keep the short facts page.
+  if (project.story) return <ProjectStory project={project} story={project.story} />;
 
   return (
     <Page back={{ label: "All projects", href: "/projects" }}>

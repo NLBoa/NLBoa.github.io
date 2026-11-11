@@ -29,6 +29,7 @@ Then open http://localhost:3000.
 | `npm run checkpoint -- <label>` | Screenshots at 1440×900 and 390×844, triangle and draw-call counts, frame rate, asset sizes, open TODOs |
 | `npm run todos` | Lists every `TODO(noah)` left in the content |
 | `npm run assets:models` | Rebuilds `public/models/` from `assets-src/` |
+| `npm run assets:images` | Converts project screenshots in `assets-src/projects/<slug>/` to WebP in `public/projects/<slug>/` |
 | `npm run assets:textures` | Downloads the desk texture and rebuilds `public/textures/` |
 | `npm run share-image` | Re-captures the link-preview image from the running site |
 
@@ -43,6 +44,7 @@ All copy lives in `src/content/`. Components never contain text of their own.
 | `projects.ts` | Every project: title, one-line summary, role, dates, stack, what I built, links, up to three images, `featured`, and the Stream Deck `icon` |
 | `about.ts` | Intro, education, experience, and the "Outside of code" section |
 | `contact.ts` | Email, GitHub, LinkedIn, résumé PDF path |
+| `miniatures.ts` | The words in each project's miniature: caption, status lines, button labels |
 | `credits.ts` | Third-party assets; the `/credits` page is generated from it |
 | `site.ts` | Header links and the site's public address |
 
@@ -52,6 +54,17 @@ Things to know:
 - A value of `null` (or an empty list) means "not known yet". The page leaves that part out. Each gap has a `TODO(noah)` comment beside it.
 - To add the résumé, put the PDF in `public/` and set `resume` in `contact.ts` (for example `"/resume.pdf"`). The header link and the Stream Deck key then point to it.
 - Project images go in `public/` and are listed with their pixel `width` and `height`.
+- A project with a `story` (what it is, how it works, the parts I built) gets the larger page with a miniature at the top. A project without one keeps the short facts page. `accent` is the project's own color on that page.
+
+### Add a miniature
+
+A miniature is the small working drawing at the top of a project's page. It is a schematic, never the real app.
+
+1. Write the logic as pure functions in `src/miniatures/<slug>/model.ts`, with tests beside it.
+2. Draw it in `src/miniatures/<slug>/Miniature.tsx` as SVG inside `Figure`, with its words in `src/content/miniatures.ts`.
+3. List it in `src/miniatures/MiniatureSlot.tsx`.
+
+Rules: SVG only (no second WebGL canvas), no invented numbers, nothing plays under reduced motion, and the drawing must make sense as a still, because that is what shows without JavaScript.
 
 ## How it is built
 
@@ -62,9 +75,10 @@ Things to know:
 
 ```
 src/app/         routes, root layout, global styles, share image, icon, sitemap
-src/components/  header, footer, page frame, project list, route sync
+src/components/  header, footer, page frame, project list, route sync, project story layout
 src/content/     all copy (see above)
 src/lib/         Stream Deck key generation
+src/miniatures/  one small working drawing per project
 src/scene/       the 3D desk
   layout.ts        every size and position, in meters
   interactive.ts   the objects that react, in Tab order

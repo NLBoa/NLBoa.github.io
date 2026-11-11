@@ -94,10 +94,63 @@ export const projects: Project[] = [
       { label: "GitHub", href: "https://github.com/KingXaney/Aegis-Orbit-" },
       { label: "Live demo", href: "https://aegis-orbit-liart.vercel.app" },
     ],
-    // TODO(noah): up to three images
-    images: [],
+    // From the project's README. TODO(noah): confirm these two screenshots may be used here.
+    images: [
+      {
+        src: "/projects/aegis-orbit/mission-agent.webp",
+        alt: "The mission simulator: a globe with the spacecraft's path, a panel with the agent's recommendation, and a close-up of the spacecraft.",
+        caption: "The mission simulator during a critical close approach, with the agent's recommendation.",
+        width: 1600,
+        height: 900,
+      },
+    ],
     featured: true,
     icon: "orbit",
+    // The teal the simulator uses for the spacecraft's planned path.
+    accent: "#45d0bf",
+    // Drafted from the README (github.com/KingXaney/Aegis-Orbit-), read 2026-11-10.
+    // TODO(noah): read this draft and correct anything that is off.
+    story: {
+      about: [
+        "Aegis Orbit is an interactive simulator for keeping a satellite clear of debris. It predicts close approaches, plans avoidance burns and explains its recommendation, and a person approves or rejects each simulated maneuver on a 3D globe.",
+        "Underneath, a Python physics engine propagates real and synthetic orbits, screens them for close approaches, and re-checks every candidate burn for new risks before it is offered.",
+      ],
+      note: "A research and simulation prototype. Positions are estimates from public orbital data or synthetic states, and no spacecraft is commanded.",
+      // TODO(noah): confirm the order and wording of these steps.
+      how: [
+        { title: "Track", text: "Public orbital data is loaded and every orbit is computed forward." },
+        { title: "Rank", text: "An XGBoost model scores every catalog object in milliseconds." },
+        { title: "Screen", text: "Physics checks the flagged objects for close approaches." },
+        { title: "Plan", text: "Candidate burns are searched, then each is re-checked for new risks." },
+        { title: "Explain", text: "An agent explains the threat and the options from logged tool results." },
+        { title: "Approve", text: "A person approves the simulated burn, and a ghost flies the course not taken." },
+      ],
+      parts: [
+        {
+          title: "Catalog explorer",
+          text: "The home page. Every tracked object is drawn on a live globe and propagated in the browser, with search, filters by type, orbit class and operator, a details card on click, and loading states.",
+          image: {
+            src: "/projects/aegis-orbit/home.webp",
+            alt: "The catalog explorer: a globe surrounded by thousands of tracked objects, one satellite's orbit drawn across it, and a list of that satellite's upcoming close approaches.",
+            width: 1600,
+            height: 900,
+          },
+        },
+        {
+          title: "Sandbox flight-deck HUD",
+          // TODO(noah): say which parts of the sandbox screen were yours.
+          text: "The heads-up display for the live sandbox, where the clock never stops, you drop space junk onto the orbit, and an autopilot plans and flies the dodge burns.",
+        },
+        {
+          title: "Ghost replays",
+          text: "Every approved burn leaves a translucent ghost of the spacecraft flying the course it did not take. The clock slows before the pass the burn avoided, and a warning shows what would have happened.",
+        },
+      ],
+      // TODO(noah): teammates, team size and who built what (GitHub lists three contributors).
+      // TODO(noah): any result or prize at Technica.
+      // TODO(noah): should the README's figures (18,598-object catalog, ROC-AUC 0.966) appear? They describe the team's model.
+      team: null,
+    },
   },
   {
     slug: "skibus",
