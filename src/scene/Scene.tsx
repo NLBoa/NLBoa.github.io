@@ -11,7 +11,8 @@ import Lights from "./Lights";
 import { Keyboard, Trackpad } from "./objects/Keyboard";
 import { Monitors } from "./objects/Monitors";
 import { PenCup } from "./objects/PenCup";
-import { Desk, Wall } from "./objects/Room";
+import { Desk, Room } from "./objects/Room";
+import Rain from "./Rain";
 import { StreamDeck } from "./objects/StreamDeck";
 import { Dock, Hotspots, SceneLabel } from "./SceneUI";
 import { selectActive, selectView, useScene } from "./store";
@@ -157,17 +158,18 @@ export default function Scene() {
   return (
     <>
       <div className="scene" data-ready={ready} aria-hidden="true">
+        {/* The weather, seen through the window: the canvas is transparent where the glass is. */}
+        <Rain />
         <Canvas
           frameloop="demand"
           dpr={[1, phone ? 1.5 : 2]}
           camera={{ fov: 35, near: 0.05, far: 30 }}
           gl={{ toneMappingExposure: 1.25 }}
         >
-          <color attach="background" args={["#0d0c0c"]} />
           <CameraRig />
           <LabelAnchor />
           <Lights />
-          <Wall />
+          <Room />
           {/* Everything on the desk appears together, so the shadows are baked once with all of it. */}
           <Suspense fallback={null}>
             <Desk />

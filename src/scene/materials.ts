@@ -20,6 +20,9 @@ export const materials = {
   /** Pen cup. */
   cream: m("#e6dcc6", 0.9),
   wall: m("#4a4541", 1),
+  floor: m("#2a2522", 0.95),
+  windowFrame: m("#0b0c0e", 0.85),
+  curtain: m("#2c2f38", 1),
   deskLegs: m("#0e0e0f", 0.9),
   pens: [m("#1b1c1f", 0.5), m("#2f3a4f", 0.5), m("#d9d6cf", 0.5), m("#6e6a64", 0.5)],
 };
@@ -32,6 +35,8 @@ export const light = {
   fill: "#ffb680",
   /** Hover and focus outlines: the color of the screens' light. */
   outline: "#cfe0ff",
+  /** Night light coming in through the window. */
+  window: "#7f9bd1",
   skyTint: "#56607a",
   groundTint: "#3a302a",
 };

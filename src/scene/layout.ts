@@ -18,8 +18,33 @@ export function onDesk(u: number, v: number, y = 0): Vec3 {
   return [(u - 0.5) * DESK.width, y, (v - 0.5) * DESK.depth];
 }
 
-/** The wall sits a little behind the back edge so the arm clamp has room. */
-export const WALL_Z = -DESK.depth / 2 - 0.05;
+/** The wall sits behind the back edge, with room for the arm clamp and the curtain. */
+export const WALL_Z = -DESK.depth / 2 - 0.1;
+
+/** The desk top is at y = 0, so the floor is a desk's height below it. */
+export const FLOOR_Y = -0.75;
+
+/**
+ * The room. As in the reference photo, a tall window fills the left of the
+ * back wall and runs down to the floor; the right of the wall is plain.
+ */
+export const WINDOW = {
+  left: -1.9,
+  right: 0.06,
+  bottom: FLOOR_Y,
+  top: 1.9,
+  /** Width of the frame's bars. */
+  bar: 0.032,
+  /** How far the frame stands out from the wall. */
+  depth: 0.04,
+  /** Upright bars between the panes. */
+  uprights: [-0.9],
+  /** Cross bars: one just above the desk, where it shows under the monitors. */
+  rails: [0.11],
+} as const;
+
+/** The curtain, drawn back against the window's right edge. */
+export const CURTAIN = { left: 0.02, right: 0.4, folds: 7, depth: 0.012 } as const;
 
 // Monitors: 27-inch 16:9 -------------------------------------------------
 
