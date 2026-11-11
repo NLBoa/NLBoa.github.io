@@ -54,3 +54,6 @@ export type Contact = {
   /** Path under public/, for example "/resume.pdf". */
   resume: string | null;
 };
+
+/** Shown wherever a date is still missing; each use has a TODO(noah) beside it. */
+export const DATES_PLACEHOLDER = "Dates to be added";

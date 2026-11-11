@@ -67,6 +67,10 @@ assets-src/      keyboard.glb (raw Sketchfab download)  — git-ignored
 - 2026-11-10 — Both monitors are at the same height in the blockout; in the photo the right one sits a little higher. Open question for Noah.
 - 2026-11-10 — Reference photo reviewed. Take from it only: monitor arrangement, wood tone, night lighting (cool screen light, light bar wash, warm fill from the right). None of the clutter.
 
+- 2026-11-10 — Noah's content rulings: Smart Display **is** the brief's "Pi home hub" (one project, README description). Jupiterp is its own project and stays featured. **TerpScheduler is not used. The Bitcamp project (CampusEats / UMD event feed) is not part of the site.** Aegis Orbit uses the README's description. The honor is "Presidential Scholar". SKIBUS uses the README's numbers (roughly 10x faster check-in, 180+ person-trips, 5-person team, 4 seasons). The email, GitHub and LinkedIn from the README are right to publish.
+- 2026-11-10 — Missing dates show the `DATES_PLACEHOLDER` text ("Dates to be added") from `src/content/types.ts`, each with a `TODO(noah): dates` beside it, until Noah supplies them.
+- 2026-11-10 — Project list is now seven: Argus, Smart Display, Jupiterp, Aegis Orbit (featured), SKIBUS, Shell, MID.
+
 ## Open questions for Noah
 
-See `npm run todos` for content gaps. Beyond those: the reference-vs-brief conflicts listed in `src/content/projects.ts` and `about.ts`, the font choice, and the Stream Deck / trackpad / pen cup dimensions.
+See `npm run todos` for content gaps (dates, some roles, images, 7SM title, "Outside of code", résumé PDF, MID details). Beyond those: the font choice, the Stream Deck / trackpad / pen cup dimensions, whether the right monitor should sit higher than the left, and the phone framing.
