@@ -17,7 +17,9 @@ const a = (sitePath) => {
   const href = norm(prefix + sitePath);
   return `:is(a[href="${href || "/"}"], a[href="${href}/"])`;
 };
-const out = path.resolve(import.meta.dirname, "../docs/checkpoints");
+// Screenshots from a run go to an ignored folder, so branches never disagree over them.
+// Checkpoint screenshots worth keeping are made with `npm run checkpoint`.
+const out = path.resolve(import.meta.dirname, "../test-results");
 mkdirSync(out, { recursive: true });
 
 let failures = 0;
