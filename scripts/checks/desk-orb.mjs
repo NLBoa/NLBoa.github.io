@@ -3,7 +3,7 @@ import path from "node:path";
 import sharp from "sharp";
 
 /** The orb's place in a 1440 x 900 window. */
-const ORB = { x: 206, y: 556, size: 88 };
+const ORB = { x: 443, y: 428, size: 88 };
 
 const look = async (page) => sharp(await page.screenshot({ clip: { x: ORB.x, y: ORB.y, width: ORB.size, height: ORB.size } })).raw().toBuffer();
 
