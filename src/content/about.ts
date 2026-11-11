@@ -18,7 +18,7 @@ export const about: About = {
     school: "University of Maryland",
     classOf: 2029,
     studies: ["Computer science (AI specialization)", "Business"],
-    honors: ["Presidential Scholar", "Kappa Theta Pi"],
+    honors: ["Presidential Scholar", "Dean's List", "Kappa Theta Pi"],
   },
   experience: [
     {
