@@ -105,13 +105,8 @@ export type Contact = {
   email: string | null;
   github: string | null;
   linkedin: string | null;
-  /** Path under public/, for example "/resume.pdf". */
-  resume: string | null;
   /** One line on what I am looking for, or null. */
   status: string | null;
   /** Where I am, for "my time" on the Contact page: an IANA zone and its everyday name. */
   timeZone: { id: string; name: string } | null;
 };
-
-/** Shown wherever a date is still missing; each use has a TODO(noah) beside it. */
-export const DATES_PLACEHOLDER = "Dates to be added";

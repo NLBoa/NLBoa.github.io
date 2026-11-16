@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-import { Quaternion, Vector3 } from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef } from "react";
+import { Color, Quaternion, Vector3, type MeshBasicMaterial } from "three";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { about } from "@/content/about";
 import { portraitFront } from "@/content/portrait-front";
@@ -25,12 +26,43 @@ const screens: Record<MonitorPlacement["id"], ScreenDrawer> = {
 /** How far the mount sits behind the panel's center. */
 const MOUNT_DEPTH = 0.045;
 
+/** A screen's tint while lit, and while a page is open over it. */
+const LIT = new Color("#ffffff");
+const DARK = new Color("#0c0c0c");
+/**
+ * Seconds a screen takes to dim or light up. Long enough that it is a fade and not a cut to
+ * black, and well inside the page's own 0.4 s fade-in, so the screen's text is gone before the
+ * page's text is readable over it.
+ */
+const DIM = 0.2;
+
 function Monitor({ placement, screenLight }: { placement: MonitorPlacement; screenLight: number }) {
   const texture = useScreenTexture(screens[placement.id]);
   // With a page open the screens go dark, so their text never shows through behind the page's own.
   // Beside a project page the room is in view with no text over it, so there they light up
   // again, once the camera has arrived.
   const pageOpen = useScene((s) => s.path !== "/" && !s.beside);
+  const invalidate = useThree((s) => s.invalidate);
+  const screen = useRef<MeshBasicMaterial>(null);
+  // 0 lit, 1 dark. A direct load of a page starts dark; after that the screens fade quickly,
+  // so the picture never snaps to black in a single frame as a page opens.
+  const dim = useRef(pageOpen ? 1 : 0);
+
+  useEffect(() => {
+    invalidate();
+  }, [pageOpen, invalidate]);
+
+  useFrame((state, delta) => {
+    const target = pageOpen ? 1 : 0;
+    if (dim.current !== target) {
+      const step = useScene.getState().reducedMotion ? 1 : Math.min(delta, 1 / 30) / DIM;
+      dim.current = target > dim.current ? Math.min(target, dim.current + step) : Math.max(target, dim.current - step);
+      if (dim.current !== target) state.invalidate();
+    }
+    // Ease out: most of the change comes first.
+    const k = 1 - (1 - dim.current) * (1 - dim.current);
+    screen.current?.color.lerpColors(LIT, DARK, k);
+  });
   const shell = useMemo(
     () =>
       slab({
@@ -47,8 +79,9 @@ function Monitor({ placement, screenLight }: { placement: MonitorPlacement; scre
   const front = MONITOR.body.depth / 2;
 
   return (
-    <group position={placement.position} rotation={[0, placement.yaw, 0]} {...pointerHandlers(placement.id)}>
-      <mesh geometry={shell} material={materials.blackSatin} />
+    <group position={placement.position} rotation={[0, placement.yaw, 0]}>
+      {/* The shell alone takes the pointer: it covers the whole monitor (see pointerHandlers). */}
+      <mesh geometry={shell} material={materials.blackSatin} {...pointerHandlers(placement.id)} />
       <OutlineFrame
         id={placement.id}
         width={MONITOR.body.width}
@@ -64,7 +97,7 @@ function Monitor({ placement, screenLight }: { placement: MonitorPlacement; scre
       {/* The screen: a plane of exactly 27 inches, 16:9. */}
       <mesh position={[0, MONITOR.screenOffsetY, front + 0.0004]}>
         <planeGeometry args={[MONITOR.screen.width, MONITOR.screen.height]} />
-        <meshBasicMaterial map={texture} color={pageOpen ? "#0c0c0c" : "#ffffff"} toneMapped={false} />
+        <meshBasicMaterial ref={screen} map={texture} toneMapped={false} />
       </mesh>
       {/* Cool light the screen throws on the desk. */}
       <rectAreaLight

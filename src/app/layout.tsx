@@ -8,6 +8,15 @@ import { siteDescription, siteName, siteUrl } from "@/content/site";
 import SceneMount from "@/scene/SceneMount";
 import "./globals.css";
 import "./miniatures.css";
+// Every page's own stylesheet is loaded here, in the one stylesheet the site ships. Imported from
+// its page instead, each became a separate file that the browser preloaded whenever a link to
+// that page was on screen, and then warned in the console that it was "preloaded but not used".
+// Their rules are all scoped to their own page.
+import "./about/about.css";
+import "./contact/contact.css";
+import "./projects/projects.css";
+import "./projects/[slug]/room.css";
+import "./resume/resume.css";
 
 const sans = Schibsted_Grotesk({ variable: "--font-sans", subsets: ["latin"] });
 const mono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500"] });
@@ -16,6 +25,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: siteName, template: `%s | ${siteName}` },
   description: siteDescription,
+  // Each page's canonical address is its own path on the site.
+  alternates: { canonical: "./" },
   openGraph: { type: "website", siteName, title: siteName, description: siteDescription },
   twitter: { card: "summary_large_image" },
 };

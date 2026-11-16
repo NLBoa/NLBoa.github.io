@@ -1,0 +1,89 @@
+{
+  "file": "/resume/Noah-Leibovitz-Resume.pdf",
+  "fileName": "Noah-Leibovitz-Resume.pdf",
+  "bytes": 161880,
+  "updated": "2026-11-16",
+  "pages": [
+    {
+      "image": "/resume/page-1.webp",
+      "width": 1836,
+      "height": 2376,
+      "links": [
+        {
+          "href": "mailto:noah.leibovitz@outlook.com",
+          "left": 0.2514,
+          "top": 0.077,
+          "width": 0.1976,
+          "height": 0.0221
+        },
+        {
+          "href": "http://www.linkedin.com/in/noah-leibovitz/",
+          "left": 0.4572,
+          "top": 0.077,
+          "width": 0.2533,
+          "height": 0.0221
+        },
+        {
+          "href": "https://github.com/NLBoa",
+          "left": 0.7268,
+          "top": 0.077,
+          "width": 0.134,
+          "height": 0.0221
+        }
+      ],
+      "lines": [
+        "Noah Leibovitz",
+        "425-270-9037 | noah.leibovitz@outlook.com | www.linkedin.com/in/noah-leibovitz/ | github.com/NLBoa",
+        "EDUCATION",
+        "University of Maryland, College Park Expected May 2029",
+        "Dual Degree: B.S. Computer Science (direct admit) and B.S. Finance | GPA: 3.83",
+        "Honors & Awards: University of Maryland President’s Scholarship, Dean's List (all semesters)",
+        "Relevant Coursework: Data Structures, Algorithms, Object-Oriented Programming, Computer Systems, Data Science,",
+        "Statistics, Calculus I, Calculus II, Discrete Mathematics",
+        "EXPERIENCE",
+        "Gulf Coast Estate Care June 2026 – Present",
+        "Software Engineering Intern Naples, FL",
+        "• Build a server-side visit-routing API for the company’s iOS app that combines a route-optimization algorithm with Google Maps",
+        "to order each day’s service visits by travel time",
+        "• Built the core scheduling engine in C# that tracks per-employee daily capacity across three service tiers and books recurring",
+        "contracts as atomic transactions, preventing partial or conflicting reservations",
+        "• Implement the contract-cancellation path, which unwinds a booking across its full recurrence and returns capacity to the",
+        "pool, keeping availability consistent after any change",
+        "• Write unit tests covering 14 edge cases, including over-booking attempts, partial-fit contracts, and capacity release on",
+        "cancellation",
+        "Seven Simple Machines Aug. 2024 – Sept. 2024",
+        "Product Design Intern Seattle, WA",
+        "• Designed and prototyped a health- and issue-detection dashboard in Figma for the Dynamis platform as one of two interns,",
+        "translating direct customer requirements into a functional UI spec across consecutive Agile sprints.",
+        "• Pitched the final prototype directly to the CEO, communicating design decisions and product vision for an early-stage",
+        "system-health monitoring capability.",
+        "PROJECTS",
+        "Smart Display Board | Python, JavaScript, HTML/CSS, MQTT, Raspberry Pi, Claude Code Oct. 2026",
+        "• Built a full-screen Raspberry Pi smart display for a shared apartment with 8 widgets and real-time sync across devices, using",
+        "Claude Code guided by a CLAUDE.md spec that sets Pi performance limits, layout, and accessibility rules",
+        "• Integrated Zigbee lighting through Zigbee2MQTT and a custom MQTT client, adding recurring schedules, sunset and light-sensor",
+        "automation, and low-battery alerts for wireless switches",
+        "• Connected Spotify via OAuth 2.0, ESPN and FotMob for live match tracking with 30-second score polling, and Open Food Facts",
+        "for barcode-scanned grocery lists with per-person cost splitting",
+        "Java Shell | Java, Maven, POSIX, ProcessBuilder July 2026",
+        "• Built a POSIX-style shell in Java with a REPL that runs built-ins (echo, type, jobs, exit) and external programs through PATH",
+        "resolution and ProcessBuilder",
+        "• Implemented a tokenizer handling bash-style single quotes, double quotes, and backslash escapes",
+        "• Engineered pipelines across built-in and external commands, stdout/stderr redirection (>, >>, 2>, 2>>), and background job control",
+        "(&) with bash-style status reporting",
+        "SKIBUS Program | C#, .NET, Razor, SQL, JavaScript, Azure Sept. 2021 – June 2025",
+        "• Pitched and helped launch a ski and snowboard trip program at The Bush School in Seattle, WA that became the school’s largest",
+        "extracurricular within 1 year",
+        "• Co-built an iOS app and web check-in system for SKIBUS using C#, .NET, Razor, and SQL, enabling RFID and QR code check-",
+        "ins that cut wait times by 80%+ across 180+ person-trips",
+        "• Recruited and led a 5-student engineering team supporting the backend, UI, and platform operations",
+        "TECHNICAL SKILLS",
+        "Languages: C#, C, Java, Python, SQL (Postgres), JavaScript, HTML/CSS",
+        "Frameworks: .NET, ASP.NET Core, Razor Pages, JUnit, xUnit",
+        "Cloud & Developer Tools: Azure, Git, Maven, Visual Studio, VS Code, IntelliJ, Claude Code",
+        "IoT & Hardware: Raspberry Pi, Zigbee, MQTT",
+        "Libraries: pandas, NumPy, Matplotlib"
+      ]
+    }
+  ]
+}

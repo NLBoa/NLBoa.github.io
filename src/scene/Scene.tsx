@@ -2,8 +2,8 @@
 
 import { ContactShadows } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useLayoutEffect, useRef } from "react";
-import { Vector3 } from "three";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { Vector3, setConsoleFunction, type Camera } from "three";
 import CameraRig from "./CameraRig";
 import { byId } from "./interactive";
 import { DESK } from "./layout";
@@ -15,9 +15,9 @@ import { PenCup } from "./objects/PenCup";
 import { Desk, Room } from "./objects/Room";
 import Rain from "./Rain";
 import { StreamDeck } from "./objects/StreamDeck";
-import { Dock, Hotspots, SceneLabel } from "./SceneUI";
+import { Dock, Hotspots, SceneLabel, labelFor } from "./SceneUI";
 import { rootRem, sideBand } from "./band";
-import { selectActive, selectView, useScene } from "./store";
+import { selectActive, useScene } from "./store";
 
 declare global {
   interface Window {
@@ -36,6 +36,14 @@ declare global {
     };
   }
 }
+
+// React Three Fiber 9 times its frame loop with THREE.Clock, which three now marks as deprecated
+// with a console warning on every page load. There is nothing here to change until R3F moves to
+// THREE.Timer, so that one notice is left out; everything else three reports goes through as usual.
+setConsoleFunction((type, message, ...rest) => {
+  if (type === "warn" && typeof message === "string" && message.startsWith("THREE.Clock:")) return;
+  console[type](message, ...rest);
+});
 
 /** Scene numbers for the scripts: always in development, in a build only when asked for. */
 const STATS = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_SCENE_STATS === "1";
@@ -89,25 +97,33 @@ function Stats() {
   return null;
 }
 
-/** Keeps the DOM label pinned beside the active object. Mount after CameraRig. */
+/** Keeps the active object's DOM label pinned beside it. Mount after CameraRig. */
 function LabelAnchor() {
   const active = useScene(selectActive);
-  const invalidate = useThree((s) => s.invalidate);
+  const get = useThree((s) => s.get);
   const point = useRef(new Vector3());
 
-  useEffect(() => {
-    invalidate();
-  }, [active, invalidate]);
+  const place = useCallback(
+    (camera: Camera, size: { width: number; height: number }) => {
+      const item = active ? byId.get(active) : undefined;
+      const label = active ? labelFor(active) : null;
+      if (!item || !label) return;
+      const p = point.current.set(...item.anchor).project(camera);
+      const x = (p.x * 0.5 + 0.5) * size.width;
+      const y = (-p.y * 0.5 + 0.5) * size.height;
+      label.style.transform = `translate(-50%, -100%) translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    },
+    [active],
+  );
 
-  useFrame(({ camera, size }) => {
-    const item = active ? byId.get(active) : undefined;
-    const label = document.getElementById("scene-label");
-    if (!item || !label) return;
-    const p = point.current.set(...item.anchor).project(camera);
-    const x = (p.x * 0.5 + 0.5) * size.width;
-    const y = (-p.y * 0.5 + 0.5) * size.height;
-    label.style.transform = `translate(-50%, -100%) translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-  });
+  // Before the browser paints the new label, so it never shows where the last one was.
+  useLayoutEffect(() => {
+    const { camera, size } = get();
+    place(camera, size);
+  }, [get, place]);
+
+  // And it follows its object while the camera moves.
+  useFrame(({ camera, size }) => place(camera, size));
 
   return null;
 }
@@ -128,7 +144,9 @@ let pulsed = false;
  * motion.
  */
 function Pulse() {
-  const onDesk = useScene((s) => selectView(s) === "home");
+  // On the desk itself: a page such as Credits keeps the desk view behind it, and a pulse
+  // there would be spent unseen.
+  const onDesk = useScene((s) => s.path === "/" && !s.flight);
   const reducedMotion = useScene((s) => s.reducedMotion);
   const invalidate = useThree((s) => s.invalidate);
   const start = useRef<number | null>(null);
@@ -149,6 +167,8 @@ function Pulse() {
     if (t >= 1) {
       start.current = null;
       useScene.setState({ pulse: 0 });
+      // One more frame, so the outlines are drawn at rest.
+      state.invalidate();
       return;
     }
     useScene.setState({ pulse: Math.sin(Math.PI * t) });

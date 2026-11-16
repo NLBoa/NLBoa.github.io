@@ -4,15 +4,25 @@ import Link from "next/link";
 import { useEffect, type MouseEvent } from "react";
 import { featuredProjects } from "@/content/projects";
 import { asset } from "@/lib/paths";
-import { INTERACTIVES, byId } from "./interactive";
+import { INTERACTIVES } from "./interactive";
 import { selectActive, useScene } from "./store";
 
-/** The small text label beside the hovered or focused object. The scene positions it. */
+/** Finds an object's label in the page. */
+export const labelFor = (id: string) => document.querySelector<HTMLElement>(`.scene-label[data-for="${id}"]`);
+
+/**
+ * The small text labels beside the hovered or focused object: one per object,
+ * and only the active one shows. The scene positions it.
+ *
+ * Each object has a label of its own, laid out when the desk loads, so no
+ * label's words ever change. With a single label whose words were swapped,
+ * the browser's first repaint of it stalled the desk for two or three frames
+ * on a first hover, and the label faded out as an empty box.
+ */
 export function SceneLabel() {
   const active = useScene(selectActive);
-  const onDesk = useScene((s) => s.path === "/" && !s.flight);
-  const hovering = useScene((s) => s.hovered !== null && s.path === "/");
-  const item = active ? byId.get(active) : undefined;
+  // The hand cursor is for the pointer only: keyboard focus does not change it.
+  const hovering = useScene((s) => s.hovered !== null && selectActive(s) === s.hovered);
 
   useEffect(() => {
     document.body.style.cursor = hovering ? "pointer" : "";
@@ -22,8 +32,12 @@ export function SceneLabel() {
   }, [hovering]);
 
   return (
-    <div id="scene-label" className="scene-label" data-visible={Boolean(item && onDesk)} aria-hidden="true">
-      {item?.label}
+    <div className="scene-labels" aria-hidden="true">
+      {INTERACTIVES.map((item) => (
+        <div key={item.id} className="scene-label" data-for={item.id} data-visible={item.id === active}>
+          {item.label}
+        </div>
+      ))}
     </div>
   );
 }
@@ -47,7 +61,7 @@ export function Hotspots() {
   return (
     <nav className="hotspots" aria-label="On the desk">
       {INTERACTIVES.map((item) =>
-        item.external || item.href.endsWith(".pdf") ? (
+        item.external ? (
           <a
             key={item.id}
             href={asset(item.href)}

@@ -3,7 +3,6 @@ import Page from "@/components/Page";
 import ProjectTiles from "@/components/ProjectTiles";
 import { contact } from "@/content/contact";
 import { moreProjects, projects } from "@/content/projects";
-import "./projects.css";
 
 export const metadata: Metadata = {
   title: "Projects",

@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Page from "@/components/Page";
 
-export const metadata: Metadata = { title: "Page not found" };
+export const metadata: Metadata = {
+  title: "Page not found",
+  // An address that does not exist has no canonical one.
+  alternates: { canonical: null },
+};
 
 export default function NotFound() {
   return (

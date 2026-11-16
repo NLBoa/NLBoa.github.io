@@ -1,31 +1,32 @@
-import { DATES_PLACEHOLDER, type About } from "./types";
+import type { About } from "./types";
 
 /**
- * Sources: the starter facts in the build prompt, and the GitHub profile
- * (github.com/NLBoa): its card (profile.toml) and its README. Nothing here
- * is invented; gaps are TODO(noah).
+ * Sources: the starter facts in the build prompt, the GitHub profile
+ * (github.com/NLBoa): its card (profile.toml) and its README, and, for dates
+ * and one job title, the résumé of 2026-11-16. Nothing here is invented; gaps
+ * are TODO(noah).
  */
 export const about: About = {
   name: "Noah Leibovitz",
   // The prompt name on the GitHub profile card.
   handle: "noah@leibovitz",
-  intro: [
-    "Computer science (AI specialization) and business double major at the University of Maryland, class of 2029.",
-  ],
+  // The degree follows the résumé of 2026-11-16 ("Dual Degree: B.S. Computer Science (direct admit)
+  // and B.S. Finance"), which Noah chose over the profile's wording.
+  intro: ["Dual degree in computer science and finance at the University of Maryland, class of 2029."],
   // From the profile card ("open to SWE internships"). TODO(noah): confirm, and say which term.
   status: "Open to software engineering internships",
   education: {
     school: "University of Maryland",
     classOf: 2029,
-    studies: ["Computer science (AI specialization)", "Business"],
+    studies: ["B.S. Computer Science", "B.S. Finance"],
     honors: ["Presidential Scholar", "Dean's List", "Kappa Theta Pi"],
   },
   experience: [
     {
       company: "Gulf Coast Estate Care",
       title: "Software engineering intern",
-      // TODO(noah): dates
-      dates: DATES_PLACEHOLDER,
+      // From the résumé of 2026-11-16.
+      dates: "June 2026 – present",
       // The company is pre-launch: show no usage numbers.
       // The scheduling engine is described as in the profile README. TODO(noah): confirm this wording.
       summary:
@@ -35,9 +36,9 @@ export const about: About = {
     },
     {
       company: "Seven Simple Machines (7SM)",
-      // TODO(noah): title, dates
-      title: null,
-      dates: DATES_PLACEHOLDER,
+      // Title and dates from the résumé of 2026-11-16.
+      title: "Product design intern",
+      dates: "August – September 2024",
       // TODO(noah): confirm this wording.
       summary: "I designed a Figma prototype of a dashboard for the Dynamis platform and presented it to the CEO.",
       points: ["A Figma prototype for the Dynamis platform, presented to the CEO."],

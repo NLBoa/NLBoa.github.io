@@ -13,6 +13,7 @@
     "assets:textures": "node scripts/fetch-textures.mjs",
     "assets:images": "node scripts/optimize-images.mjs",
     "assets:portrait": "node scripts/fetch-portrait.mjs",
+    "assets:resume": "node scripts/resume.mjs",
     "flows": "node scripts/flows.mjs",
     "share-image": "node scripts/share-image.mjs",
     "preview": "node scripts/serve-export.mjs"
@@ -36,6 +37,7 @@
     "@types/three": "^0.187.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "pdfjs-dist": "^6.5.438",
     "playwright-core": "^1.65.0",
     "sharp": "^0.35.5",
     "typescript": "^5",

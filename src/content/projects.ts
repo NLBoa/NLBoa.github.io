@@ -1,4 +1,4 @@
-import { DATES_PLACEHOLDER, type Project } from "./types";
+import type { Project } from "./types";
 
 /**
  * Sources: the starter facts in the build prompt, and the "Featured work"
@@ -14,8 +14,8 @@ export const projects: Project[] = [
     summary: "Always-on course hub that runs on a Raspberry Pi 4B.",
     // TODO(noah): role (solo project?)
     role: null,
-    // TODO(noah): dates
-    dates: DATES_PLACEHOLDER,
+    // Noah, 2026-11-16 (the repository was created on 2026-10-19).
+    dates: "October 2026",
     stack: ["Python", "SQLite", "Raspberry Pi", "MCP", "Tailscale"],
     built: [
       "Pulls deadlines, announcements and course materials from Canvas, Gradescope, Piazza and umd.io.",
@@ -93,8 +93,8 @@ export const projects: Project[] = [
     summary: "Touchscreen home board for our apartment, running full screen on a Raspberry Pi.",
     // TODO(noah): role wording (built with two roommates)
     role: null,
-    // TODO(noah): dates
-    dates: DATES_PLACEHOLDER,
+    // From the résumé of 2026-11-16 ("Smart Display Board, Oct. 2026").
+    dates: "October 2026",
     stack: ["Python", "JavaScript", "Raspberry Pi", "Zigbee/MQTT", "Spotify API"],
     built: [
       "Zigbee lighting: pairing, schedules, motion-sensor control and low-battery alerts.",
@@ -285,9 +285,10 @@ export const projects: Project[] = [
     slug: "shell",
     title: "Shell",
     summary: "A shell written in Java, with builtins, quoting, pipelines, redirection and background jobs.",
-    // TODO(noah): role, dates
+    // TODO(noah): role
     role: null,
-    dates: DATES_PLACEHOLDER,
+    // From the résumé of 2026-11-16 ("Java Shell, July 2026").
+    dates: "July 2026",
     stack: ["Java"],
     built: [],
     links: [{ label: "GitHub", href: "https://github.com/NLBoa/Java-Shell" }],
@@ -346,7 +347,7 @@ export const parkedProjects: Project[] = [
     summary: "A style-discovery web app in Next.js and TypeScript. Early stage.",
     // TODO(noah): role, dates, what I built, links
     role: null,
-    dates: DATES_PLACEHOLDER,
+    dates: null,
     stack: ["Next.js", "TypeScript"],
     built: [],
     links: [],
@@ -369,8 +370,8 @@ export const parkedProjects: Project[] = [
     title: "SKIBUS",
     summary: "Check-in and boarding system in C#, Razor Pages and SQL that ran for four years with real users.",
     role: "Led a 5-person student team over 4 seasons",
-    // TODO(noah): dates
-    dates: DATES_PLACEHOLDER,
+    // From the résumé of 2026-11-16 ("SKIBUS Program, Sept. 2021 – June 2025").
+    dates: "September 2021 – June 2025",
     stack: ["C#", "Razor Pages", "SQL"],
     built: [
       "Cut student check-in time roughly 10x across 180+ person-trips.",

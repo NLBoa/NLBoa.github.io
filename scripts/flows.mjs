@@ -46,6 +46,8 @@ const sceneReady = (page) => page.waitForSelector('.scene[data-ready="true"]', {
 const settle = (page) => page.waitForTimeout(3600); // fade-in + the one-time pulse
 const locate = (page, id) => page.evaluate((id) => window.__scene.locate(id), id);
 const frames = (page) => page.evaluate(() => window.__scene.frames);
+/** The words on the desk's hover label, or "" when none is showing. (Each object has its own label.) */
+const shownLabel = (page) => page.evaluate(() => document.querySelector('.scene-label[data-visible="true"]')?.textContent ?? "");
 
 // Offsets from an object's label anchor down onto the object itself.
 const onto = { "monitor-left": 120, "monitor-right": 130, "pen-cup": 75 };
@@ -68,18 +70,18 @@ async function pointAt(page, id) {
 
   await pointAt(page, "monitor-left");
   await page.waitForTimeout(400);
-  check("hovering the left monitor shows its label", (await page.textContent("#scene-label")) === "Projects");
-  check("label is visible", (await page.getAttribute("#scene-label", "data-visible")) === "true");
+  check("hovering the left monitor shows its label", (await shownLabel(page)) === "Projects");
+  check("only that one label is showing", (await page.locator('.scene-label[data-visible="true"]').count()) === 1);
   await page.screenshot({ path: path.join(out, "phase-2-hover-1440x900.png") });
 
   const cup = await pointAt(page, "pen-cup");
   await page.waitForTimeout(300);
-  check("hovering the pen cup shows Contact", (await page.textContent("#scene-label")) === "Contact");
+  check("hovering the pen cup shows Contact", (await shownLabel(page)) === "Contact");
 
   // Keyboard and trackpad are decoration.
   await page.mouse.move(660, 665, { steps: 3 });
   await page.waitForTimeout(300);
-  check("the keyboard does not react", (await page.getAttribute("#scene-label", "data-visible")) === "false");
+  check("the keyboard does not react", (await shownLabel(page)) === "");
 
   const monitor = await pointAt(page, "monitor-left");
   const t0 = Date.now();
@@ -116,7 +118,7 @@ async function pointAt(page, id) {
 
   const key = await pointAt(page, "key-0");
   await page.waitForTimeout(300);
-  check("hovering the first Stream Deck key names its project", (await page.textContent("#scene-label")) === "Argus");
+  check("hovering the first Stream Deck key names its project", (await shownLabel(page)) === "Argus");
   await page.mouse.click(key.x, key.y);
   await page.waitForURL(at("/projects/argus"), { timeout: 3000 });
   check("pressing that key opens /projects/argus", true);
@@ -145,7 +147,7 @@ async function pointAt(page, id) {
     await page.waitForTimeout(60);
     const inHotspots = await page.evaluate(() => Boolean(document.activeElement?.closest(".hotspots")));
     if (!inHotspots) break;
-    seen.push(await page.textContent("#scene-label"));
+    seen.push(await shownLabel(page));
   }
   const expected = ["Projects", "About", "Argus", "Smart Display", "Jupiterp", "Aegis Orbit", "About", "Contact", "Résumé", "GitHub", "LinkedIn", "Contact"];
   check("Tab visits monitors, then the keys, then the pen cup", JSON.stringify(seen) === JSON.stringify(expected), seen.join(", "));
@@ -153,7 +155,7 @@ async function pointAt(page, id) {
   // Shift+Tab back to the Argus key and press Enter.
   for (let i = 0; i < 9; i++) await page.keyboard.press("Shift+Tab");
   await page.waitForTimeout(100);
-  check("focus shows the label", (await page.textContent("#scene-label")) === "Argus");
+  check("focus shows the label", (await shownLabel(page)) === "Argus");
   await page.screenshot({ path: path.join(out, "phase-2-focus-1440x900.png") });
   await page.keyboard.press("Enter");
   await page.waitForURL(at("/projects/argus"), { timeout: 3000 });
@@ -541,7 +543,7 @@ async function pointAt(page, id) {
   const files = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".mjs")).sort() : [];
   for (const file of files) {
     const { default: run } = await import(pathToFileURL(path.join(dir, file)).href);
-    await run({ browser, base, out, open, check, at, a, sceneReady, settle, locate, pointAt, frames });
+    await run({ browser, base, out, open, check, at, a, sceneReady, settle, locate, pointAt, frames, shownLabel });
   }
 }
 

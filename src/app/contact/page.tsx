@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import type { CSSProperties } from "react";
 import Page from "@/components/Page";
 import CopyButton from "@/components/contact/CopyButton";
@@ -6,8 +7,7 @@ import LocalTime from "@/components/contact/LocalTime";
 import Note from "@/components/contact/Note";
 import { about } from "@/content/about";
 import { contact } from "@/content/contact";
-import { asset } from "@/lib/paths";
-import "./contact.css";
+import { RESUME_PATH } from "@/content/resume";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -80,14 +80,12 @@ export default function Contact() {
                 </a>
               </li>
             )}
-            {contact.resume && (
-              <li>
-                <a href={asset(contact.resume)} target="_blank" rel="noopener noreferrer">
-                  <span>Résumé</span>
-                  <strong>Open the PDF</strong>
-                </a>
-              </li>
-            )}
+            <li>
+              <Link href={RESUME_PATH}>
+                <span>Résumé</span>
+                <strong>Read or download it</strong>
+              </Link>
+            </li>
           </ul>
           {contact.timeZone && <LocalTime timeZone={contact.timeZone.id} sentence={`It is {time} for me (${contact.timeZone.name}).`} />}
         </section>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import type { CSSProperties } from "react";
 import Page from "@/components/Page";
 import ProfileCard from "@/components/about/ProfileCard";
@@ -6,9 +7,8 @@ import Toolbox, { type ToolboxGroup } from "@/components/about/Toolbox";
 import { about } from "@/content/about";
 import { contact } from "@/content/contact";
 import { projects } from "@/content/projects";
-import { asset } from "@/lib/paths";
+import { RESUME_PATH } from "@/content/resume";
 import { projectsUsing, toolName } from "@/lib/toolbox";
-import "./about.css";
 
 export const metadata: Metadata = {
   title: "About",
@@ -61,13 +61,9 @@ export default function About() {
                 <a href={`mailto:${contact.email}`}>Email</a>
               </li>
             )}
-            {contact.resume && (
-              <li>
-                <a href={asset(contact.resume)} target="_blank" rel="noopener noreferrer">
-                  Résumé
-                </a>
-              </li>
-            )}
+            <li>
+              <Link href={RESUME_PATH}>Résumé</Link>
+            </li>
           </ul>
         </div>
       </header>

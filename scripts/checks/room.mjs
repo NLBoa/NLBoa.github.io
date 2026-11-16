@@ -9,7 +9,7 @@ async function patch(page, left, top, size = 36) {
   return channels.slice(0, 3).map((c) => Math.round(c.mean));
 }
 
-export default async function room({ browser, base, out, open, check, at, sceneReady, settle, frames, pointAt }) {
+export default async function room({ browser, base, out, open, check, at, sceneReady, settle, frames, pointAt, shownLabel }) {
   const { context, page, errors } = await open("/");
   await sceneReady(page);
   await settle(page);
@@ -34,7 +34,7 @@ export default async function room({ browser, base, out, open, check, at, sceneR
   // The objects on the desk still answer.
   await pointAt(page, "monitor-left");
   await page.waitForTimeout(400);
-  check("room: the monitors still react in front of the window", (await page.textContent("#scene-label")) === "Projects");
+  check("room: the monitors still react in front of the window", (await shownLabel(page)) === "Projects");
   const monitor = await pointAt(page, "monitor-left");
   await page.mouse.click(monitor.x, monitor.y);
   await page.waitForURL(at("/projects"), { timeout: 3000 });

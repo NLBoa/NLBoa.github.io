@@ -16,7 +16,7 @@ const project = (slug: string, featured: boolean, extra: Partial<Project> = {}):
   ...extra,
 });
 
-const contact: Contact = { email: "a@b.c", github: "https://github.com/x", linkedin: "https://linkedin.com/in/x", resume: null, status: null, timeZone: null };
+const contact: Contact = { email: "a@b.c", github: "https://github.com/x", linkedin: "https://linkedin.com/in/x", status: null, timeZone: null };
 
 describe("deckKeys", () => {
   it("always returns 15 keys", () => {
@@ -36,9 +36,8 @@ describe("deckKeys", () => {
     expect(keys[4]).toMatchObject({ label: "GitHub", external: true });
   });
 
-  it("points Résumé at the contact page until a PDF exists", () => {
-    expect(deckKeys([], contact)[2]).toMatchObject({ label: "Résumé", href: "/contact" });
-    expect(deckKeys([], { ...contact, resume: "/resume.pdf" })[2]).toMatchObject({ href: "/resume.pdf", external: true });
+  it("opens the résumé page from the Résumé key", () => {
+    expect(deckKeys([], contact)[2]).toMatchObject({ label: "Résumé", href: "/resume", external: false });
   });
 
   it("leaves out GitHub and LinkedIn keys when there is no link", () => {

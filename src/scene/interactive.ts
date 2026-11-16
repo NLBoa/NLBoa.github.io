@@ -4,8 +4,9 @@ import { deckKeys, type DeckKey } from "@/lib/deck";
 import { MONITOR, MONITORS, PEN_CUP, STREAM_DECK, streamDeckBodyY, type Vec3 } from "./layout";
 
 /**
- * Where the camera can be. `deck` is only used while flying to a pressed key;
- * `story` is the room beside an open project page (see band.ts).
+ * Where the camera can be. `deck` is the Stream Deck up close: where the camera
+ * flies when a key is pressed, and where it stays behind the résumé. `story` is
+ * the room beside an open project page (see band.ts).
  */
 export type View = "home" | "projects" | "about" | "contact" | "deck" | "story";
 
@@ -72,5 +73,7 @@ export function viewForPath(path: string): View {
   if (path === "/projects" || path.startsWith("/projects/")) return "projects";
   if (path === "/about") return "about";
   if (path === "/contact") return "contact";
+  // The Résumé key is on the Stream Deck.
+  if (path === "/resume") return "deck";
   return "home";
 }
