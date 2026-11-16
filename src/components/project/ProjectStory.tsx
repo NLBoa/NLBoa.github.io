@@ -35,7 +35,7 @@ export default function ProjectStory({ project, story }: { project: Project; sto
   const shots = project.images.slice(0, 3);
 
   return (
-    <Page back={{ label: "All projects", href: "/projects" }} className="project" style={style}>
+    <Page back={{ label: "All projects", href: "/projects" }} className="project project-story" style={style}>
       <header className="project-head">
         <h1>{project.title}</h1>
         <div className="project-intro">

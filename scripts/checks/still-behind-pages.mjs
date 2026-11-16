@@ -18,6 +18,23 @@ export default async function stillBehindPages({ open, check, sceneReady, frames
     await context.close();
   }
 
+  // The room opens beside a project's page only. About, Contact and Résumé share a layout class
+  // with project pages, and once every stylesheet was loaded together the scrim opened beside
+  // them too, leaving the desk undimmed on the right of a wide window.
+  for (const [route, expected] of [
+    ["/about", 0],
+    ["/contact", 0],
+    ["/resume", 0],
+    ["/credits", 0],
+    ["/projects/argus", 1],
+  ]) {
+    const { context, page } = await open(route);
+    await page.waitForTimeout(1200);
+    const value = await page.evaluate(() => getComputedStyle(document.querySelector(".scrim")).getPropertyValue("--scrim-open").trim());
+    check(`still: the scrim is ${expected ? "open beside" : "closed on"} ${route}`, Number(value) === expected, `--scrim-open ${value}`);
+    await context.close();
+  }
+
   // The screens dim with the page instead of snapping to black: right after a monitor's page
   // opens, the scene is still drawing its fade.
   const { context, page } = await open("/");
