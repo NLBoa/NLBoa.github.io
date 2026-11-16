@@ -6,7 +6,7 @@ import { MeshBasicMaterial, Raycaster, Vector2, Vector3, type Group } from "thre
 import { ORB } from "../layout";
 import { materials } from "../materials";
 import { blink, easeStep, gazePoint } from "../orb";
-import { useScene } from "../store";
+import { selectActive, useScene } from "../store";
 
 const EYE = "#9fe8ff";
 
@@ -86,7 +86,8 @@ export function Orb() {
     head.current.lookAt(g.current);
 
     // The eye opens wider over anything that can be clicked, and shuts for a blink.
-    const wide = useScene.getState().hovered ? 1.16 : 1;
+    const scene = useScene.getState();
+    const wide = scene.hovered && selectActive(scene) === scene.hovered ? 1.16 : 1;
     g.open += (wide - g.open) * easeStep(dt, 12);
     if (Math.abs(wide - g.open) > 0.004) moving = true;
     const shut = g.blinkAt < 0 ? 0 : blink((performance.now() - g.blinkAt) / 1000);

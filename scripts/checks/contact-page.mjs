@@ -2,14 +2,15 @@
 import path from "node:path";
 
 export default async function contactPage({ browser, base, out, open, check }) {
-  const email = "Noah.leibovitz@outlook.com";
+  const email = "noah.leibovitz@outlook.com";
 
   // Without JavaScript the links still work.
   const plainContext = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
   const plain = await plainContext.newPage();
   await plain.goto(base + "/contact", { waitUntil: "load" });
   check("contact: without JavaScript the note's button is still a link to my address", (await plain.getAttribute(".note-send", "href")).startsWith(`mailto:${email}?subject=`));
-  check("contact: without JavaScript the three places are links", (await plain.locator(".reach li > a").count()) === 3 && (await plain.locator(".copy").count()) === 0);
+  // Email, GitHub, LinkedIn and the résumé.
+  check("contact: without JavaScript the four places are links", (await plain.locator(".reach li > a").count()) === 4 && (await plain.locator(".copy").count()) === 0);
   await plainContext.close();
 
   const { context, page, errors } = await open("/contact", { permissions: ["clipboard-read", "clipboard-write"] });

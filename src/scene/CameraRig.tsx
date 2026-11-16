@@ -68,8 +68,13 @@ export default function CameraRig() {
     to: null as Pose | null,
     t: 1,
     view: null as View | null,
+    /** True on the desk itself: the only place the camera leans toward the pointer. */
+    leaning: false,
     drift: { x: 0, y: 0, targetX: 0, targetY: 0 },
   });
+  // Some pages (Credits, an unknown address) keep the desk view behind them. It must hold
+  // still there: a page is for reading, and the desk behind it should not move with the pointer.
+  const onDesk = useScene((s) => s.path === "/");
 
   useLayoutEffect(() => {
     const r = rig.current;
@@ -85,13 +90,14 @@ export default function CameraRig() {
       r.t = 0;
     }
     r.view = view;
+    r.leaning = view === "home" && onDesk;
     // The monitors light up beside a project page only once the camera rests there.
     const beside = view === "story" && r.t === 1;
     if (useScene.getState().beside !== beside) useScene.setState({ beside });
     const { camera, invalidate } = get();
     apply(camera, r.current, r.drift, width, height);
     invalidate();
-  }, [get, view, width, height, bandLeft, reducedMotion]);
+  }, [get, view, onDesk, width, height, bandLeft, reducedMotion]);
 
   // Pointer drift, for mice and trackpads only.
   useEffect(() => {
@@ -100,8 +106,8 @@ export default function CameraRig() {
     const onMove = (event: PointerEvent) => {
       drift.targetX = (event.clientX / window.innerWidth) * 2 - 1;
       drift.targetY = (event.clientY / window.innerHeight) * 2 - 1;
-      // Only the desk view leans; a close-up behind an open page has nothing to redraw.
-      if (rig.current.view === "home") get().invalidate();
+      // Only the desk leans; behind an open page there is nothing to redraw.
+      if (rig.current.leaning) get().invalidate();
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
@@ -130,8 +136,8 @@ export default function CameraRig() {
 
     // Drift only on the desk view; close-ups hold still.
     const d = r.drift;
-    const targetX = r.view === "home" ? d.targetX : 0;
-    const targetY = r.view === "home" ? d.targetY : 0;
+    const targetX = r.leaning ? d.targetX : 0;
+    const targetY = r.leaning ? d.targetY : 0;
     const follow = 1 - Math.exp(-dt * 5);
     d.x += (targetX - d.x) * follow;
     d.y += (targetY - d.y) * follow;

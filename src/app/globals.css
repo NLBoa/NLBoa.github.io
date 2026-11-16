@@ -308,6 +308,14 @@ html[data-webgl] body:has(main.home) .site-footer {
   margin-top: 3rem;
 }
 
+/* Sized like the entries on other pages, which are one level down. */
+.credit-title {
+  margin: 0;
+  color: inherit;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
 .credit .facts {
   margin-top: 0.75rem;
 }
@@ -368,6 +376,19 @@ kbd {
 @media (hover: none) {
   kbd {
     display: none;
+  }
+
+  /* On a touch screen the links that stand alone in a row (a page's links, the way back) get a
+     finger-sized target. Links inside sentences are left as they are. */
+  .links a,
+  .page-bar > a:not(.page-close) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  .links {
+    row-gap: 0;
   }
 }
 

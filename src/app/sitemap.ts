@@ -6,6 +6,6 @@ import { asset } from "@/lib/paths";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = ["/", "/projects", ...projects.map((p) => `/projects/${p.slug}`), "/about", "/contact", "/credits"];
+  const paths = ["/", "/projects", ...projects.map((p) => `/projects/${p.slug}`), "/about", "/contact", "/resume", "/credits"];
   return paths.map((path) => ({ url: new URL(asset(path), siteUrl).toString() }));
 }

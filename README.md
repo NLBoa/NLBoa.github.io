@@ -31,6 +31,7 @@ Then open http://localhost:3000.
 | `npm run assets:models` | Rebuilds `public/models/` from `assets-src/` |
 | `npm run assets:images` | Converts project screenshots in `assets-src/projects/<slug>/` to WebP in `public/projects/<slug>/` |
 | `npm run assets:textures` | Downloads the desk texture and rebuilds `public/textures/` |
+| `npm run assets:resume -- "/path/to/Resume.pdf"` | Publishes a new résumé: copies the PDF into `public/resume/` and rebuilds the page pictures, links and text the Résumé page shows |
 | `npm run share-image` | Re-captures the link-preview image from the running site |
 
 `flows`, `checkpoint` and `share-image` drive the installed Google Chrome and read `BASE_URL` (default `http://localhost:3000`).
@@ -43,7 +44,8 @@ All copy lives in `src/content/`. Components never contain text of their own.
 |---|---|
 | `projects.ts` | Every project: title, one-line summary, role, dates, stack, what I built, links, up to three images, `featured`, and the Stream Deck `icon` |
 | `about.ts` | Intro, education, experience, and the "Outside of code" section |
-| `contact.ts` | Email, GitHub, LinkedIn, résumé PDF path |
+| `contact.ts` | Email, GitHub, LinkedIn |
+| `resume.ts`, `resume-data.json` | The résumé's data, generated from the PDF by `npm run assets:resume` (do not edit by hand) |
 | `miniatures.ts` | The words in each project's miniature: caption, status lines, button labels |
 | `credits.ts` | Third-party assets; the `/credits` page is generated from it |
 | `site.ts` | Header links and the site's public address |
@@ -52,7 +54,7 @@ Things to know:
 
 - A project with `featured: true` gets a Stream Deck key. Keys are filled in this order: featured projects, About, Contact, Résumé, GitHub, LinkedIn. There are 15 keys, so at most 10 projects can be featured.
 - A value of `null` (or an empty list) means "not known yet". The page leaves that part out. Each gap has a `TODO(noah)` comment beside it.
-- To add the résumé, put the PDF in `public/` and set `resume` in `contact.ts` (for example `"/resume.pdf"`). The header link and the Stream Deck key then point to it.
+- To publish a new résumé, run `npm run assets:resume -- "/path/to/Resume.pdf"` and commit what it writes. The Résumé page, the header link and the Stream Deck key all follow.
 - Project images go in `public/` and are listed with their pixel `width` and `height`.
 - A project with a `story` (what it is, how it works, the parts I built) gets the larger page with a miniature at the top. A project without one keeps the short facts page. `accent` is the project's own color on that page.
 

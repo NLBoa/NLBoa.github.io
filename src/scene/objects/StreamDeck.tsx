@@ -5,11 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import { CanvasTexture, SRGBColorSpace, type BufferGeometry } from "three";
 import type { DeckKey } from "@/lib/deck";
 import { slab } from "../geometry";
-import { OutlineFrame, pointerHandlers, useHighlight } from "../Highlight";
+import { OutlineFrame, pointerHandlers } from "../Highlight";
 import { DECK } from "../interactive";
 import { STREAM_DECK, streamDeckBodyY, type Vec3 } from "../layout";
 import { materials } from "../materials";
-import { useScene } from "../store";
+import { selectActive, useScene } from "../store";
 import { KEY_ICON_SIZE, drawKeyIcon } from "../textures/keyIcons";
 
 /** How far a key travels when pressed. */
@@ -41,7 +41,8 @@ function LitKey({ index, deckKey, local, geometry }: { index: number; deckKey: D
   const [face] = useState(() => new KeyFace(deckKey.icon));
   const invalidate = useThree((s) => s.invalidate);
   const pressed = useScene((s) => s.pressed === id);
-  const lit = useHighlight(id) > 0.5;
+  // Brighter while hovered or focused, and at the height of the first-load pulse.
+  const lit = useScene((s) => selectActive(s) === id || s.pulse > 0.5);
   const size = STREAM_DECK.key.size;
 
   useEffect(() => {
@@ -56,8 +57,9 @@ function LitKey({ index, deckKey, local, geometry }: { index: number; deckKey: D
   }, [face, invalidate]);
 
   return (
-    <group position={[local[0], local[1] - 0.0006 - (pressed ? PRESS : 0), local[2]]} {...pointerHandlers(id)}>
-      <mesh geometry={geometry} material={materials.keyDark} />
+    <group position={[local[0], local[1] - 0.0006 - (pressed ? PRESS : 0), local[2]]}>
+      {/* The keycap alone takes the pointer (see pointerHandlers). */}
+      <mesh geometry={geometry} material={materials.keyDark} {...pointerHandlers(id)} />
       <OutlineFrame
         id={id}
         width={size}

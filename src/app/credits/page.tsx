@@ -14,11 +14,11 @@ export default function Credits() {
       <p className="lede">The models, textures and typefaces on this site that other people made.</p>
       {credits.map((credit) => (
         <article className="entry credit" key={credit.title}>
-          <h3>
+          <h2 className="credit-title">
             <a href={credit.sourceUrl} target="_blank" rel="noopener noreferrer">
               {credit.title}
             </a>
-          </h3>
+          </h2>
           <p className="entry-meta">
             by {credit.creator}, licensed under{" "}
             <a href={credit.license.url} target="_blank" rel="noopener noreferrer license">

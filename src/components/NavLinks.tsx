@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { asset, normalizePath } from "@/lib/paths";
+import { normalizePath } from "@/lib/paths";
 
 type Props = {
   links: { label: string; href: string }[];
@@ -11,20 +11,14 @@ type Props = {
 };
 
 function Links({ links, current }: { links: Props["links"]; current: string | null }) {
-  // Two links can share a destination (Résumé leads to Contact until a PDF
-  // exists); only the first is marked as the current page.
   const active = links.find((link) => current === link.href || current?.startsWith(`${link.href}/`));
   return (
     <ul className="site-nav">
       {links.map((link) => (
         <li key={link.label}>
-          {link.href.startsWith("/") && !link.href.endsWith(".pdf") ? (
-            <Link href={link.href} aria-current={link === active ? "page" : undefined}>
-              {link.label}
-            </Link>
-          ) : (
-            <a href={asset(link.href)}>{link.label}</a>
-          )}
+          <Link href={link.href} aria-current={link === active ? "page" : undefined}>
+            {link.label}
+          </Link>
         </li>
       ))}
     </ul>

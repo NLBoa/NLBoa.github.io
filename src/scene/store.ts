@@ -4,6 +4,8 @@ import { byId, viewForPath, type View } from "./interactive";
 
 /** How long the camera takes to reach an object before its page opens. */
 export const FLIGHT_MS = 700;
+/** How long a Stream Deck key stays down. */
+const KEY_PRESS_MS = 180;
 
 type SceneState = {
   /** Current URL path, kept in step by <RouteSync>. */
@@ -59,7 +61,8 @@ export const useScene = create<SceneState>((set, get) => ({
   activate: (id) => {
     const item = byId.get(id);
     const state = get();
-    if (!item || state.pressed) return;
+    // One thing at a time: nothing else can be pressed until this click's page has opened.
+    if (!item || state.pressed || (state.flight && state.path !== state.flight.href)) return;
 
     const isKey = id.startsWith("key-");
     const release = () => set({ pressed: null });
@@ -68,7 +71,7 @@ export const useScene = create<SceneState>((set, get) => ({
       window.open(asset(item.href), "_blank", "noopener,noreferrer");
       if (isKey) {
         set({ pressed: id });
-        setTimeout(release, 180);
+        setTimeout(release, KEY_PRESS_MS);
       }
       return;
     }
@@ -79,11 +82,14 @@ export const useScene = create<SceneState>((set, get) => ({
       return;
     }
 
-    set({ flight: { view: item.view, href: item.href }, pressed: id, hovered: null });
-    if (isKey) setTimeout(release, 180);
+    const flight = { view: item.view, href: item.href };
+    set({ flight, pressed: id, hovered: null });
+    if (isKey) setTimeout(release, KEY_PRESS_MS);
     setTimeout(() => {
       set({ pressed: null });
-      get().navigate(item.href);
+      // The visitor may have gone somewhere else meanwhile (a header link, Back): then this
+      // flight is over and its page must not open on top of where they went.
+      if (get().flight === flight) get().navigate(item.href);
     }, FLIGHT_MS);
   },
 }));
@@ -91,5 +97,9 @@ export const useScene = create<SceneState>((set, get) => ({
 /** Where the camera should be right now. */
 export const selectView = (state: SceneState): View => state.flight?.view ?? viewForPath(state.path);
 
-/** The object to outline and label: hover wins over keyboard focus. */
-export const selectActive = (state: SceneState): string | null => state.hovered ?? state.focused;
+/**
+ * The object to outline and label: hover wins over keyboard focus. Only on the
+ * desk, and not while the camera is flying to something that was just clicked.
+ */
+export const selectActive = (state: SceneState): string | null =>
+  state.path === "/" && !state.flight ? (state.hovered ?? state.focused) : null;
