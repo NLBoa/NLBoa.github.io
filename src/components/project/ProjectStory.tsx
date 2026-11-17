@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
 import Page from "@/components/Page";
@@ -36,6 +37,11 @@ export default function ProjectStory({ project, story }: { project: Project; sto
 
   return (
     <Page back={{ label: "All projects", href: "/projects" }} className="project project-story" style={style}>
+      {/* The room beside the page (room.css): a click on it leaves the project for the desk. It is
+          a shortcut for the pointer; Close and Esc do the same for keyboards and screen readers. */}
+      <Link href="/" className="room-exit" tabIndex={-1} aria-hidden="true">
+        <span>Back to the desk</span>
+      </Link>
       <header className="project-head">
         <h1>{project.title}</h1>
         <div className="project-intro">
