@@ -118,6 +118,9 @@ a:hover {
   transition: opacity 0.45s ease;
 }
 
+/* `data-opening`: the camera is about to arrive at a clicked object and its page is about to
+   open (store.ts). The scrim starts then, so the desk is already dim when the page fades in. */
+html[data-opening] .scrim,
 body:has(main.page) .scrim {
   opacity: 0.94;
 }
@@ -131,7 +134,12 @@ html[data-away] {
   cursor: zoom-out;
 }
 
-/* Pages scroll under the header, so there it is solid. */
+/* Pages scroll under the header, so there it is solid. It comes up with the scrim. */
+.site-header {
+  transition: background-color 0.45s ease;
+}
+
+html[data-opening] .site-header,
 body:has(main.page) .site-header {
   background: var(--wall);
 }
@@ -247,8 +255,10 @@ body:has(main.page) .site-header {
   padding: calc(var(--header-height) + 3.5rem) var(--gutter) 6rem;
 }
 
+/* Ease-out: a page shows from its first frames, so the dark beat between the desk and the
+   page stays short. */
 .page {
-  animation: page-in 0.4s ease both;
+  animation: page-in 0.4s cubic-bezier(0.215, 0.61, 0.355, 1) both;
 }
 
 @keyframes page-in {
@@ -945,6 +955,7 @@ p {
 @media (prefers-reduced-motion: reduce) {
   .scene,
   .scrim,
+  .site-header,
   .dock,
   .scene-label {
     transition: none;

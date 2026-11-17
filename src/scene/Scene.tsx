@@ -31,6 +31,8 @@ declare global {
       invalidate: () => void;
       /** The strip beside a project page's column at this window size, if there is one (see band.ts). */
       readonly band: { left: number; width: number } | null;
+      /** How bright the monitor screens are: 1 lit, about 0.05 with a page open (written by Monitors). */
+      screens: number;
       /** Where an interactive object's label anchor is on screen (for the flow tests). */
       locate: (id: string) => { x: number; y: number } | null;
     };
@@ -76,6 +78,7 @@ function Stats() {
         const { size } = get();
         return sideBand(size.width, size.height, rootRem());
       },
+      screens: 1,
       tick: () => void frames++,
       invalidate: () => invalidate(),
       locate: (id: string) => {

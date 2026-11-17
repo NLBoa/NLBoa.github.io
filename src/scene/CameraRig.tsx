@@ -18,6 +18,7 @@ const full = (pose: CameraPose): Pose => ({ ...pose, shiftX: pose.shiftX ?? 0, s
 const mix = (a: number, b: number, k: number) => a + (b - a) * k;
 const mix3 = (a: Vec3, b: Vec3, k: number): Vec3 => [mix(a[0], b[0], k), mix(a[1], b[1], k), mix(a[2], b[2], k)];
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const samePose = (a: Pose, b: Pose) => JSON.stringify(a) === JSON.stringify(b);
 
 function apply(camera: Camera, pose: Pose, drift: { x: number; y: number }, width: number, height: number) {
   const cam = camera as PerspectiveCamera;
@@ -80,7 +81,10 @@ export default function CameraRig() {
     const r = rig.current;
     const desired = full(poseFor(view, width / height, { width, height, band: bandLeft ? { left: bandLeft, width: width - bandLeft } : null }));
     const sameView = r.view === view;
-    if (!r.current || reducedMotion || sameView) {
+    if (sameView && r.current && r.to && samePose(r.to, desired)) {
+      // Only the address changed: a clicked object's page has opened while the camera is still
+      // on its last stretch toward it. Let it arrive; a cut here would be a small jump.
+    } else if (!r.current || reducedMotion || sameView) {
       // First frame, a resize, or reduced motion: cut, don't fly.
       r.current = r.from = r.to = desired;
       r.t = 1;
@@ -95,7 +99,7 @@ export default function CameraRig() {
     const beside = view === "story" && r.t === 1;
     if (useScene.getState().beside !== beside) useScene.setState({ beside });
     const { camera, invalidate } = get();
-    apply(camera, r.current, r.drift, width, height);
+    apply(camera, r.current ?? desired, r.drift, width, height);
     invalidate();
   }, [get, view, onDesk, width, height, bandLeft, reducedMotion]);
 
