@@ -130,34 +130,22 @@
 }
 
 /*
- * The shine. The paper is white, so light cannot be added to it; instead the sheet is shaded
- * a little everywhere except around the pointer, which reads as a glare there, and a narrow
- * band of foil colors crosses it at the pointer. Both are multiplied onto the paper, so the
- * black type under them stays black, and most of the sheet stays white so it can be read.
+ * The shine: a soft glare that follows the pointer. The paper is white, so light cannot be
+ * added to it; instead the sheet is shaded a little everywhere except around the pointer,
+ * which reads as a glare there. It is multiplied onto the paper, so the black type under it
+ * stays black. (There was a band of foil colors too; Noah had it removed.)
  */
 .resume-shine {
-  /* Where the band crosses: mostly the pointer's place across the sheet, a little its height. */
-  --band: calc(var(--shine-x, 50%) * 0.8 + var(--shine-y, 50%) * 0.2);
   position: absolute;
   inset: 0;
   pointer-events: none;
   opacity: var(--shine, 0);
   mix-blend-mode: multiply;
-  background:
-    radial-gradient(
-      farthest-corner circle at var(--shine-x, 50%) var(--shine-y, 50%),
-      rgb(255 255 255 / 0) 15%,
-      rgb(38 44 78 / 0.1) 100%
-    ),
-    linear-gradient(
-      112deg,
-      rgb(255 255 255 / 0) calc(var(--band) - 17%),
-      hsl(188 95% 80% / 0.5) calc(var(--band) - 9%),
-      hsl(262 95% 86% / 0.55) calc(var(--band) - 3%),
-      hsl(328 95% 86% / 0.55) calc(var(--band) + 3%),
-      hsl(42 100% 80% / 0.5) calc(var(--band) + 9%),
-      rgb(255 255 255 / 0) calc(var(--band) + 17%)
-    );
+  background: radial-gradient(
+    farthest-corner circle at var(--shine-x, 50%) var(--shine-y, 50%),
+    rgb(255 255 255 / 0) 15%,
+    rgb(38 44 78 / 0.1) 100%
+  );
 }
 
 .resume-zoom {

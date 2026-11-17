@@ -60,6 +60,7 @@ export const about: About = {
     { name: "Data and ML", tools: ["pandas", "NumPy", "Matplotlib", "XGBoost"] },
     { name: "Tools", tools: ["Git", "Docker", "Azure", "Google Cloud", "Tailscale", "MCP", "JUnit"] },
   ],
-  // From the profile card's "Hobbies". TODO(noah): you planned to write this section yourself; replace these lines when you do.
-  outsideOfCode: ["Outdoors: skiing, scuba diving, running and traveling.", "Indoors: ping pong, and sleeping."],
+  // From the profile card's "Hobbies", less "sleeping", which Noah had removed on 2026-11-16.
+  // TODO(noah): you planned to write this section yourself; replace these lines when you do.
+  outsideOfCode: ["Outdoors: skiing, scuba diving, running and traveling.", "Indoors: ping pong."],
 };

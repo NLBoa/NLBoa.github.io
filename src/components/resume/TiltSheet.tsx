@@ -9,7 +9,7 @@ const SETTLE = 6;
 
 /**
  * One sheet of the résumé that tips toward the pointer like a card held in
- * the hand, with a shine that follows it.
+ * the hand, with a soft glare that follows it.
  *
  * It is for a mouse or trackpad only: a touch does nothing, and under reduced
  * motion the sheet holds still. The tilt is written straight to CSS variables

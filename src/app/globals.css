@@ -126,6 +126,11 @@ body:has(main.page) .scene {
   pointer-events: none;
 }
 
+/* Away from the open page's content a click closes the page (components/ClickAway): the cursor says so. */
+html[data-away] {
+  cursor: zoom-out;
+}
+
 /* Pages scroll under the header, so there it is solid. */
 body:has(main.page) .site-header {
   background: var(--wall);
