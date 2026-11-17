@@ -52,6 +52,8 @@ export default async function resumePage({ browser, base, open, check, at, a, sc
   check("résumé: the sheet tilts with the pointer, one way on the right and the other on the left", right.y > 2 && left.y < -2 && right.transform !== "none", `right ${right.y.toFixed(1)} deg, left ${left.y.toFixed(1)} deg`);
   check("résumé: the tilt stays gentle", Math.abs(right.y) <= 8 && Math.abs(left.y) <= 8 && Math.abs(right.x) <= 8);
   check("résumé: a shine shows while the pointer is on the sheet", left.shine > 0.5, `opacity ${left.shine}`);
+  const shineLayers = await page.evaluate(() => getComputedStyle(document.querySelector(".resume-shine")).backgroundImage);
+  check("résumé: the shine is a plain glare, with no band of foil colors", shineLayers.includes("radial-gradient") && !shineLayers.includes("linear-gradient"), shineLayers.slice(0, 60));
   check("résumé: tilting causes no sideways scrolling", left.overflow <= 0 && right.overflow <= 0, `${Math.max(left.overflow, right.overflow)}px`);
   await page.mouse.move(40, 500, { steps: 4 });
   await page.waitForTimeout(1500);

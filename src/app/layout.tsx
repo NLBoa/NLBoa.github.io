@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Schibsted_Grotesk } from "next/font/google";
 import { Suspense } from "react";
+import ClickAway from "@/components/ClickAway";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import RouteSync from "@/components/RouteSync";
@@ -52,6 +53,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense fallback={null}>
           <RouteSync />
         </Suspense>
+        {/* A click away from an open page closes it. */}
+        <ClickAway />
       </body>
     </html>
   );
