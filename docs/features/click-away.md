@@ -1,6 +1,6 @@
 # A click away closes the page
 
-Branch: `resume-no-foil` (2026-11-16).
+Branch: `resume-no-foil` (2026-11-16). Published the same day.
 
 ## What it is
 
