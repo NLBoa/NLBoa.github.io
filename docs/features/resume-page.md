@@ -20,7 +20,10 @@ That one command copies the PDF to `public/resume/Noah-Leibovitz-Resume.pdf`, dr
 - **The PDF is still one press away**: Download (with the size shown), "Open the PDF in a new tab", and pressing the sheet itself, which is how a phone gets a view it can zoom.
 - **Links on the sheet are real links**, laid over the picture from the PDF's own link positions. On a phone the sheet is small and they are a few pixels tall, so there a press anywhere opens the PDF instead.
 - **Screen readers and search engines get the text**: the PDF's text is in the page, visually hidden, and the picture is marked as decoration.
-- **Layout.** On a wide window the title and the download sit in a column on the left that stays in view while the sheet scrolls; room is kept on the right so the Close button never covers the sheet. Narrower, the title and download sit above the sheet.
+- **Layout** (changed 2026-11-16 at Noah's request: "Center the resume on the page"). The title, the download and the sheet are one column, centered in the window and as wide as the sheet. From 70rem up, room is kept on each side so the Close button never covers the sheet.
+- **The sheet tilts like a card** (Noah: a "3D tilt effect" with "a holographic or foil shine", as on event tickets). With a mouse or trackpad on it, the sheet turns up to 4.5° sideways and 3° up and down, the side under the pointer tipping away, and its shadow slides with it. `src/lib/tilt.ts` holds the math (tested); `components/resume/TiltSheet.tsx` writes CSS variables from an animation frame, so React renders nothing while it moves, and removes the transform entirely at rest so the type stays sharp. A touch does nothing, and under reduced motion the sheet holds still.
+- **The shine is multiplied, not added.** The paper is white, so a bright glare would not show. The sheet is shaded slightly everywhere except around the pointer, and a narrow diagonal band of foil colors crosses it at the pointer. Both are `mix-blend-mode: multiply`, so black type stays black. The first version tinted the whole sheet and made it hard to read; the band is kept narrow on purpose.
+- The sheet stays at reading size (up to 54rem wide) rather than shrinking to fit the window like a ticket, because the first priority is that it can be read on the page.
 - **Printing the page prints the résumé**, not the site around it.
 - The picture is `loading="lazy"` so the home page does not fetch it ahead of time just because the header links here; on this page it is in view and loads at once.
 - **The camera** rests on the Stream Deck behind this page (`viewForPath`), since its Résumé key opens it.
@@ -34,4 +37,4 @@ That one command copies the PDF to `public/resume/Noah-Leibovitz-Resume.pdf`, dr
 
 ## Files
 
-`src/app/resume/page.tsx`, `src/app/resume/resume.css`, `src/content/resume.ts`, `src/content/resume-data.json` (generated), `src/lib/resume.ts` (tested), `scripts/resume.mjs`, `public/resume/`, `scripts/checks/resume-page.mjs`.
+`src/app/resume/page.tsx`, `src/app/resume/resume.css`, `src/components/resume/TiltSheet.tsx`, `src/lib/tilt.ts` (tested), `src/content/resume.ts`, `src/content/resume-data.json` (generated), `src/lib/resume.ts` (tested), `scripts/resume.mjs`, `public/resume/`, `scripts/checks/resume-page.mjs`.

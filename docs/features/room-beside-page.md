@@ -33,3 +33,7 @@ Keep: merge the branch into `main`. Drop: delete the branch. It touches `CameraR
 ## Not checked
 
 Frame rate on a slower laptop with the rain running beside a long page. An ultrawide window (band wider than it is tall) was not looked at.
+
+## A click on the room leaves the project (2026-11-16)
+
+Noah: "Can you make if you click over where it pulls you out of the project." The band is now a link to `/` (`.room-exit`, rendered by `ProjectStory`, styled in `room.css` inside the same media query as the band). The camera flies back to the desk as it does for Close and Esc. While the pointer is over the room a small "Back to the desk" label shows at the foot of the band, and the cursor is the zoom-out one. It is a pointer shortcut only (`tabIndex={-1}`, `aria-hidden`), since Close and Esc already serve keyboards and screen readers. It goes to the desk, not to the Projects list; "All projects" at the top of the page still does that. Checks: `scripts/checks/room-exit.mjs`.

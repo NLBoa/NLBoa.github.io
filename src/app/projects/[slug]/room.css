@@ -4,6 +4,8 @@
  * edge of the desk show beside the text. The strip is "the band": its size is
  * defined in src/scene/band.ts, and the numbers here must match it.
  *
+ * A click on the band leaves the project for the desk (`.room-exit`).
+ *
  * Only a project's story page opens the scrim (`.project-story`). About, Contact
  * and Résumé share the wider `.project` layout class, and must stay fully dimmed.
  *
@@ -16,7 +18,46 @@
   initial-value: 0;
 }
 
+/* The room is clickable: it leads back to the desk. Only where there is a band (below). */
+.room-exit {
+  display: none;
+}
+
 @media (min-width: 83.875rem) and (min-aspect-ratio: 1001/1000) {
+  /* Covers the band: from 2rem past the column (band.ts) to the window's right edge. */
+  html[data-webgl] .room-exit {
+    position: fixed;
+    inset: var(--header-height) 0 0 calc(var(--gutter) + 62rem);
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 2.25rem;
+    cursor: zoom-out;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* What a click does, shown while the pointer is over the room. */
+  .room-exit span {
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--wall) 88%, transparent);
+    color: var(--paper);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateY(0.25rem);
+    transition:
+      opacity 0.18s ease-out,
+      transform 0.18s ease-out;
+  }
+
+  .room-exit:hover span {
+    opacity: 1;
+    transform: none;
+  }
+
   html[data-webgl] .scrim {
     --edge: calc(var(--gutter) + 60rem);
     mask-image: linear-gradient(
@@ -50,7 +91,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-webgl] .scrim {
+  html[data-webgl] .scrim,
+  .room-exit span {
     transition: none;
   }
 }

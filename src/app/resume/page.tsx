@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Page from "@/components/Page";
+import TiltSheet from "@/components/resume/TiltSheet";
 import { about } from "@/content/about";
 import { resume } from "@/content/resume";
 import { asset } from "@/lib/paths";
@@ -15,7 +16,8 @@ export const metadata: Metadata = {
 const ACCENT = "#cfe0ff";
 
 /**
- * The résumé as a sheet of paper on the desk. Each page of the PDF is shown
+ * The résumé as a sheet of paper on the desk, centered in the window. It tips
+ * toward the pointer like a card, with a shine that follows (see TiltSheet). Each page of the PDF is shown
  * as a picture, so it looks the same on every device (a phone will not show a
  * PDF inside a page), with the PDF's own links laid over it and its text
  * underneath for screen readers. The PDF itself is one press away.
@@ -50,7 +52,7 @@ export default function Resume() {
 
         <div className="resume-sheets">
           {resume.pages.map((page) => (
-            <div className="resume-sheet" key={page.image} style={{ aspectRatio: `${page.width} / ${page.height}` }}>
+            <TiltSheet key={page.image} style={{ aspectRatio: `${page.width} / ${page.height}` }}>
               {/* Pressing the sheet opens the PDF, where a phone can zoom. It is a shortcut for the
                   pointer only: the link above does the same for keyboards and screen readers, and
                   the text below stands in for the picture. */}
@@ -71,7 +73,7 @@ export default function Resume() {
                   style={{ left: `${link.left * 100}%`, top: `${link.top * 100}%`, width: `${link.width * 100}%`, height: `${link.height * 100}%` }}
                 />
               ))}
-            </div>
+            </TiltSheet>
           ))}
         </div>
       </div>
