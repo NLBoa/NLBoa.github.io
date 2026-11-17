@@ -22,6 +22,18 @@ export default function RouteSync() {
     useScene.setState({ navigate: (href) => router.push(href) });
   }, [router]);
 
+  // Just before a clicked object's page opens, the scrim and the header come up (globals.css).
+  useEffect(() => {
+    const mark = (opening: boolean) => document.documentElement.toggleAttribute("data-opening", opening);
+    const stop = useScene.subscribe((state, before) => {
+      if (state.opening !== before.opening) mark(state.opening);
+    });
+    return () => {
+      stop();
+      mark(false);
+    };
+  }, []);
+
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => useScene.setState({ reducedMotion: query.matches });

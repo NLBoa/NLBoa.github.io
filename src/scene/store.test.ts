@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { viewForPath } from "./interactive";
-import { FLIGHT_MS, selectActive, selectView, useScene } from "./store";
+import { FLIGHT_MS, OPEN_LEAD_MS, PAGE_LEAD_MS, selectActive, selectView, useScene } from "./store";
 
 const initial = useScene.getState();
 
@@ -76,6 +76,46 @@ describe("clicking an object on the desk", () => {
     useScene.getState().activate("monitor-right");
     vi.advanceTimersByTime(FLIGHT_MS);
     expect(visits).toEqual(["/projects", "/about"]);
+  });
+});
+
+describe("making way for the page", () => {
+  it("starts before the camera arrives, and before the page is asked for", () => {
+    const visits = router();
+    useScene.getState().activate("monitor-left");
+    vi.advanceTimersByTime(FLIGHT_MS - OPEN_LEAD_MS - 1);
+    expect(useScene.getState().opening).toBe(false);
+    vi.advanceTimersByTime(1);
+    expect(useScene.getState().opening).toBe(true);
+    expect(visits).toEqual([]);
+    expect(OPEN_LEAD_MS).toBeGreaterThan(PAGE_LEAD_MS);
+  });
+
+  it("is over once the page is open", () => {
+    const visits = router();
+    useScene.getState().activate("monitor-left");
+    vi.advanceTimersByTime(FLIGHT_MS - PAGE_LEAD_MS);
+    expect(visits).toEqual(["/projects"]);
+    expect(useScene.getState().opening).toBe(false);
+    // The camera keeps the view it flew to.
+    expect(selectView(useScene.getState())).toBe(viewForPath("/projects"));
+  });
+
+  it("never starts if the visitor went somewhere else during the flight", () => {
+    router();
+    useScene.getState().activate("monitor-left");
+    vi.advanceTimersByTime(100);
+    useScene.getState().setPath("/contact");
+    vi.advanceTimersByTime(FLIGHT_MS);
+    expect(useScene.getState().opening).toBe(false);
+  });
+
+  it("does not happen under reduced motion", () => {
+    router();
+    useScene.setState({ reducedMotion: true });
+    useScene.getState().activate("monitor-left");
+    vi.advanceTimersByTime(FLIGHT_MS);
+    expect(useScene.getState().opening).toBe(false);
   });
 });
 

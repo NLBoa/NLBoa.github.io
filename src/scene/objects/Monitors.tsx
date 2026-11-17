@@ -2,7 +2,7 @@
 
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
-import { Color, Quaternion, Vector3, type MeshBasicMaterial } from "three";
+import { Quaternion, SRGBColorSpace, Vector3, type MeshBasicMaterial } from "three";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { about } from "@/content/about";
 import { portraitFront } from "@/content/portrait-front";
@@ -26,22 +26,25 @@ const screens: Record<MonitorPlacement["id"], ScreenDrawer> = {
 /** How far the mount sits behind the panel's center. */
 const MOUNT_DEPTH = 0.045;
 
-/** A screen's tint while lit, and while a page is open over it. */
-const LIT = new Color("#ffffff");
-const DARK = new Color("#0c0c0c");
+/** How bright a screen stays while a page is open over it: 1 is lit (the tint #0c0c0c). */
+const DARK = 12 / 255;
 /**
  * Seconds a screen takes to dim or light up. Long enough that it is a fade and not a cut to
- * black, and well inside the page's own 0.4 s fade-in, so the screen's text is gone before the
- * page's text is readable over it.
+ * black. After a click it starts OPEN_LEAD_MS before the camera arrives (store.ts), so the
+ * screen has all but dimmed when the page is asked for and is dark before the page can be
+ * read. When a header link opens a page there is no lead; then it is well inside the page's
+ * own 0.4 s fade-in.
  */
-const DIM = 0.2;
+const DIM = 0.16;
 
 function Monitor({ placement, screenLight }: { placement: MonitorPlacement; screenLight: number }) {
   const texture = useScreenTexture(screens[placement.id]);
   // With a page open the screens go dark, so their text never shows through behind the page's own.
   // Beside a project page the room is in view with no text over it, so there they light up
-  // again, once the camera has arrived.
-  const pageOpen = useScene((s) => s.path !== "/" && !s.beside);
+  // again, once the camera has arrived. They start to dim just before a clicked object's page
+  // opens (`opening`), so the screen's picture is gone by the time the page's fades in: the two
+  // are alike but never line up, and seen together they read as a glitch.
+  const pageOpen = useScene((s) => s.opening || (s.path !== "/" && !s.beside));
   const invalidate = useThree((s) => s.invalidate);
   const screen = useRef<MeshBasicMaterial>(null);
   // 0 lit, 1 dark. A direct load of a page starts dark; after that the screens fade quickly,
@@ -59,9 +62,13 @@ function Monitor({ placement, screenLight }: { placement: MonitorPlacement; scre
       dim.current = target > dim.current ? Math.min(target, dim.current + step) : Math.max(target, dim.current - step);
       if (dim.current !== target) state.invalidate();
     }
-    // Ease out: most of the change comes first.
+    // Ease out: most of the change comes first. The brightness is mixed as the eye sees it
+    // (sRGB), not in linear light: mixed in linear light the text stayed readable until the
+    // last frames of the fade, and showed through the page that was fading in over it.
     const k = 1 - (1 - dim.current) * (1 - dim.current);
-    screen.current?.color.lerpColors(LIT, DARK, k);
+    const level = 1 - k * (1 - DARK);
+    screen.current?.color.setRGB(level, level, level, SRGBColorSpace);
+    if (window.__scene) window.__scene.screens = level;
   });
   const shell = useMemo(
     () =>
