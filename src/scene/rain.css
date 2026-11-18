@@ -146,6 +146,9 @@
    no light shows through behind the page's text. */
 .rain {
   transition: opacity 0.45s ease;
+  /* Keeps the weather on a layer of its own all the time. Otherwise Safari's engine makes one
+     when the fade starts and drops it when it ends, and repaints the whole city both times. */
+  will-change: opacity;
 }
 
 body:has(main.page) .rain {

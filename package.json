@@ -15,6 +15,7 @@
     "assets:portrait": "node scripts/fetch-portrait.mjs",
     "assets:resume": "node scripts/resume.mjs",
     "flows": "node scripts/flows.mjs",
+    "frames": "node scripts/browser-frames.mjs",
     "share-image": "node scripts/share-image.mjs",
     "preview": "node scripts/serve-export.mjs"
   },

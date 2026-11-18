@@ -98,19 +98,44 @@ function Glyph({ sign }: { sign: Sign }) {
   }
 }
 
-function SignShape({ sign, glow }: { sign: Sign; glow: boolean }) {
-  const color = NEON[sign.color];
+/**
+ * The glow round a sign: the sign's own strokes drawn again, wider and fainter, widest first.
+ * Laid over each other they fall off the way a 3.2-unit blur of a 3.2-unit stroke does.
+ *
+ * It used to be that blur, as an SVG filter. Safari's engine works an SVG filter out again on
+ * the main thread every time the picture it belongs to is repainted: about a tenth of a second
+ * at laptop size, each time a mast light blinked, the pointer's cursor changed or a page
+ * opened. Plain strokes cost next to nothing in any browser. Do not bring a filter back into
+ * the city (see docs/features/cyber-city.md).
+ */
+const GLOW = [
+  { width: 18, opacity: 0.019 },
+  { width: 14, opacity: 0.047 },
+  { width: 10.5, opacity: 0.079 },
+  { width: 7.5, opacity: 0.106 },
+  { width: 4.5, opacity: 0.097 },
+  { width: 2, opacity: 0.053 },
+];
+
+/** A sign's outline and marks, with no stroke of their own: `SignShape` draws them several times. */
+function SignLines({ sign, index }: { sign: Sign; index: number }) {
   return (
-    <g
-      className={sign.flicker ? "city-flicker" : undefined}
-      fill="none"
-      stroke={glow ? color.glow : color.core}
-      strokeWidth={glow ? 3.2 : 1.3}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <g id={`city-sign-${index}`}>
       <rect x={sign.x} y={sign.y} width={sign.width} height={sign.height} rx={2.5} />
       <Glyph sign={sign} />
+    </g>
+  );
+}
+
+function SignShape({ sign, index }: { sign: Sign; index: number }) {
+  const color = NEON[sign.color];
+  const lines = `#city-sign-${index}`;
+  return (
+    <g className={sign.flicker ? "city-flicker" : undefined} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {GLOW.map((ring) => (
+        <use key={ring.width} href={lines} stroke={color.glow} strokeWidth={ring.width} strokeOpacity={ring.opacity} />
+      ))}
+      <use href={lines} stroke={color.core} strokeWidth={1.3} />
     </g>
   );
 }
@@ -203,9 +228,6 @@ export default function City() {
             <stop offset="0" stopColor="#fff" stopOpacity={0.55} />
             <stop offset="1" stopColor="#fff" stopOpacity={0} />
           </linearGradient>
-          <filter id="city-glow" x="-50%" y="-20%" width="200%" height="140%">
-            <feGaussianBlur stdDeviation="3.2" />
-          </filter>
           <linearGradient id="city-haze" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#3a1a5e" stopOpacity={0} />
             <stop offset="1" stopColor="#3a1a5e" stopOpacity={0.6} />
@@ -223,19 +245,19 @@ export default function City() {
       ))}
 
       <svg className="city-layer city-near" viewBox={box} aria-hidden="true">
+        <defs>
+          {city.signs.map((sign, index) => (
+            <SignLines key={sign.x} sign={sign} index={index} />
+          ))}
+        </defs>
         {city.near.map((tower) => (
           <TowerShape key={tower.x} tower={tower} layer="near" />
         ))}
         {city.boards.map((board, index) => (
           <BoardShape key={board.x} board={board} index={index} />
         ))}
-        <g filter="url(#city-glow)" opacity={0.9}>
-          {city.signs.map((sign) => (
-            <SignShape key={sign.x} sign={sign} glow />
-          ))}
-        </g>
-        {city.signs.map((sign) => (
-          <SignShape key={sign.x} sign={sign} glow={false} />
+        {city.signs.map((sign, index) => (
+          <SignShape key={sign.x} sign={sign} index={index} />
         ))}
       </svg>
 

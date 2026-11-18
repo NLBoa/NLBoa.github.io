@@ -10,7 +10,7 @@ async function walk(page, from, to) {
   const state = () =>
     page.evaluate(() => {
       const label = document.querySelector('.scene-label[data-visible="true"]');
-      return document.body.style.cursor === "pointer" && label ? label.textContent : "";
+      return document.querySelector(".scene canvas").style.cursor === "pointer" && label ? label.textContent : "";
     });
   // Park the pointer first, so the camera's lean toward it has settled before the walk.
   await page.mouse.move(from.x, from.y);
@@ -64,7 +64,7 @@ export default async function hoverSteady({ open, check, at, sceneReady, settle,
   for (let i = 0; i < 8; i++) {
     await page.mouse.move(monitor.x + 40 * (i % 2 ? 1 : -1), monitor.y + 60 + i * 20);
     await page.waitForTimeout(50);
-    during.push(await page.evaluate(() => document.body.style.cursor));
+    during.push(await page.evaluate(() => document.querySelector(".scene canvas").style.cursor));
   }
   check("hover: nothing reacts while the camera is flying to a clicked object", during.every((c) => c === ""), during.join(","));
   await page.waitForURL(at("/projects"), { timeout: 3000 });

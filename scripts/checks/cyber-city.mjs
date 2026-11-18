@@ -16,6 +16,9 @@ const city = (page) =>
       beacon: style(".city-beacon").animationName,
       flicker: style(".city-flicker").animationName,
       x: cars.map((car) => car.getBoundingClientRect().left),
+      // Anything Safari's engine would have to work out again on every repaint of the city.
+      filters: document.querySelectorAll(".city filter, .city [filter]").length + [...document.querySelectorAll(".city, .city *")].filter((el) => getComputedStyle(el).filter !== "none").length,
+      signs: document.querySelectorAll(".city-near > g > use").length,
     };
   });
 
@@ -29,6 +32,19 @@ export default async function cyberCity({ open, check, at, sceneReady, settle, f
   check("city: it covers the whole view", before.covers);
   check("city: there are towers, signs that flicker and lights that blink", before.towers > 15 && before.flicker === "city-flicker" && before.beacon === "city-beacon", `${before.towers} towers`);
   check("city: cars fly at two distances", before.cars === 5 && before.fly === "city-fly" && before.state === "running", `${before.cars} cars, ${before.fly}`);
+
+  // Safari's engine computes an SVG filter again each time the city repaints (0.1 s at laptop
+  // size, measured 2026-11-18): the glow round the signs is drawn with plain strokes instead.
+  check("city: no filter anywhere in it, and the signs still have their glow", before.filters === 0 && before.signs >= 14, `${before.filters} filters, ${before.signs} sign strokes`);
+  // The hand cursor goes on the canvas: on <body> every element inherits it and Safari repaints them all.
+  const sign = await pointAt(page, "monitor-left");
+  await page.mouse.move(sign.x, sign.y);
+  await page.waitForTimeout(250);
+  const cursor = await page.evaluate(() => ({ canvas: document.querySelector(".scene canvas").style.cursor, body: document.body.style.cursor, root: document.documentElement.style.cursor }));
+  check("city: hovering an object changes the cursor on the canvas only", cursor.canvas === "pointer" && cursor.body === "" && cursor.root === "", JSON.stringify(cursor));
+  // Away again, and let the outline's fade and the camera's lean finish before counting frames.
+  await page.mouse.move(4, 400);
+  await settle(page);
 
   const drawn = await frames(page);
   await page.waitForTimeout(1200);
