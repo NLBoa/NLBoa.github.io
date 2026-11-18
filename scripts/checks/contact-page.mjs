@@ -1,4 +1,4 @@
-// Feature: the Contact page as a sheet of note paper (branch feature/contact-page).
+// The Contact page: the places to reach me, and nothing else.
 import path from "node:path";
 
 export default async function contactPage({ browser, base, out, open, check }) {
@@ -8,33 +8,23 @@ export default async function contactPage({ browser, base, out, open, check }) {
   const plainContext = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
   const plain = await plainContext.newPage();
   await plain.goto(base + "/contact", { waitUntil: "load" });
-  check("contact: without JavaScript the note's button is still a link to my address", (await plain.getAttribute(".note-send", "href")).startsWith(`mailto:${email}?subject=`));
+  check("contact: without JavaScript the first row writes to my address", (await plain.getAttribute(".reach li > a", "href")) === `mailto:${email}`);
   // Email, GitHub, LinkedIn and the résumé.
   check("contact: without JavaScript the four places are links", (await plain.locator(".reach li > a").count()) === 4 && (await plain.locator(".copy").count()) === 0);
   await plainContext.close();
 
   const { context, page, errors } = await open("/contact", { permissions: ["clipboard-read", "clipboard-write"] });
-  await page.waitForSelector('.note-send[data-ready="true"]');
-  const fold = await page.evaluate(() => document.querySelector(".note").getBoundingClientRect().bottom);
-  check("contact: the note fits a 1440x900 screen", fold <= 900, `bottom ${fold.toFixed(0)}px`);
+  await page.waitForSelector(".copy");
+  check("contact: there is no form on the page", (await page.locator("main.page form, main.page input, main.page textarea").count()) === 0);
+  const fold = await page.evaluate(() => document.querySelector(".reach").getBoundingClientRect().bottom);
+  check("contact: everything fits a 1440x900 screen", fold <= 900, `bottom ${fold.toFixed(0)}px`);
+  const columns = await page.evaluate(() => {
+    const box = (selector) => document.querySelector(selector).getBoundingClientRect();
+    return { lede: box(".contact-head .lede").left, list: box(".reach").left, title: box(".contact-head h1").right };
+  });
+  check("contact: the places line up under the line that introduces them", Math.abs(columns.lede - columns.list) < 1 && columns.list > columns.title, JSON.stringify(columns));
+  await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(out, "contact-page-1440x900.png") });
-
-  // What is written on the note becomes the draft.
-  await page.fill(".note input", "Ada Lovelace");
-  await page.fill(".note textarea", "Hello Noah.\nI liked Argus & the desk: 100% yes.");
-  const href = await page.getAttribute(".note-send", "href");
-  const query = Object.fromEntries(href.split("?")[1].split("&").map((pair) => pair.split("=").map(decodeURIComponent)));
-  check("contact: the note is addressed to me", href.startsWith(`mailto:${email}?`));
-  check("contact: the subject names the sender", query.subject === "A note from Ada Lovelace", query.subject);
-  check("contact: the note and the name become the draft's body", query.body === "Hello Noah.\r\nI liked Argus & the desk: 100% yes.\r\n\r\nAda Lovelace", JSON.stringify(query.body));
-  check("contact: the link is safely encoded", !/[\s#]/.test(href));
-
-  // The page sends nothing itself.
-  const sent = [];
-  page.on("request", (request) => request.method() !== "GET" && sent.push(request.url()));
-  await page.keyboard.press("Enter");
-  await page.waitForTimeout(300);
-  check("contact: writing a note sends nothing from the page", sent.length === 0 && new URL(page.url()).pathname.replace(/\/$/, "").endsWith("/contact"));
 
   await page.click(".copy");
   await page.waitForFunction(() => document.querySelector(".copy").dataset.state === "done", null, { timeout: 3000 });
@@ -47,10 +37,10 @@ export default async function contactPage({ browser, base, out, open, check }) {
   await context.close();
 
   const phone = await open("/contact", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
-  await phone.page.waitForSelector('.note-send[data-ready="true"]');
+  await phone.page.waitForSelector(".copy");
   const overflow = await phone.page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check("contact: phone: nothing overflows sideways", overflow <= 0, `${overflow}px`);
-  const smallest = await phone.page.evaluate(() => Math.min(...[...document.querySelectorAll(".note-send, .copy, .reach li > a")].map((el) => el.getBoundingClientRect().height)));
+  const smallest = await phone.page.evaluate(() => Math.min(...[...document.querySelectorAll(".copy, .reach li > a")].map((el) => el.getBoundingClientRect().height)));
   check("contact: phone: every control is at least 44px tall", smallest >= 44, `${smallest}px`);
   const clash = await phone.page.evaluate(() => {
     const close = document.querySelector(".page-close").getBoundingClientRect();
@@ -58,6 +48,7 @@ export default async function contactPage({ browser, base, out, open, check }) {
     return title.top < close.bottom && title.right > close.left;
   });
   check("contact: phone: Close does not cover the heading", !clash);
+  await phone.page.waitForTimeout(500);
   await phone.page.screenshot({ path: path.join(out, "contact-page-390x844.png") });
   await phone.context.close();
 }

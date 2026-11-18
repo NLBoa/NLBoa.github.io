@@ -32,7 +32,7 @@ function away(event: MouseEvent): boolean {
   return isAway(event.clientX, event.clientY, pageContent());
 }
 
-/** A note being written, or any other field with something typed in it. */
+/** Any field with something typed in it. No page has one today; this is here for the day one does. */
 function hasDraft(): boolean {
   return [...document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("main.page input, main.page textarea")].some((field) => field.value.trim() !== "");
 }
@@ -46,7 +46,7 @@ function hasDraft(): boolean {
  * header, or in the gaps inside the content. Not the end of a drag (selecting
  * text out past the column), and not a click that only clears a selection or
  * leaves a field. Never while something is typed into a form: a stray click
- * must not throw a note away. A mouse or pen only: on a phone the page fills
+ * must not throw it away. A mouse or pen only: on a phone the page fills
  * the screen, and a tap near its edge should do nothing.
  */
 export default function ClickAway() {
