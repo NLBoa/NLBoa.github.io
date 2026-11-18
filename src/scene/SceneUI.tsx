@@ -24,10 +24,15 @@ export function SceneLabel() {
   // The hand cursor is for the pointer only: keyboard focus does not change it.
   const hovering = useScene((s) => s.hovered !== null && selectActive(s) === s.hovered);
 
+  // The cursor goes on the canvas, which is what the pointer is over. On <body> it is inherited
+  // by every element on the page, and Safari's engine then repaints all of them, the city
+  // behind the window included, on every hover: a stalled frame each time.
   useEffect(() => {
-    document.body.style.cursor = hovering ? "pointer" : "";
+    const canvas = document.querySelector<HTMLElement>(".scene canvas");
+    if (!canvas) return;
+    canvas.style.cursor = hovering ? "pointer" : "";
     return () => {
-      document.body.style.cursor = "";
+      canvas.style.cursor = "";
     };
   }, [hovering]);
 

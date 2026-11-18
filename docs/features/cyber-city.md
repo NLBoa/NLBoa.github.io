@@ -17,6 +17,14 @@ Behind the rain there is now a city at night: two rows of towers with lit window
 - The cars and signs stop with the rain while a page is open (the rule in `rain.css` covers them). Under reduced motion nothing moves and each car is parked in the air.
 - The old blurred street lights and the passing headlight glow from the rain layer are kept in front of the city: they read as lights out of focus on wet glass.
 
+## No filters in the city (2026-11-18)
+
+The glow round the neon signs was an SVG blur filter. In Safari's engine (Safari, DuckDuckGo) an SVG filter is worked out again on the main thread every time the picture it belongs to repaints, which took about a tenth of a second at laptop size, and the city repainted whenever a mast light blinked, the hand cursor appeared or a page opened. On Noah's MacBook that showed as the desk stalling several times a second.
+
+The glow is now the sign's own lines drawn six more times under the bright one, each wider and fainter (`GLOW` in `City.tsx`); together they fall off like the blur did. Each sign's lines are written once in `<defs>` and drawn with `<use>`. One element per sign flickers now, so a sign's glow and its lines always blink together.
+
+Do not put an SVG filter, or a CSS `filter`, on anything inside `.city`: `scripts/checks/cyber-city.mjs` checks for both. To see what a change costs in that engine, `npm run build` and then `npm run frames -- Safari`.
+
 ## To confirm with Noah
 
 - On the home page most of the window is behind the left monitor, so only part of the city shows there. It shows best beside a project page (branch `feature/room-beside-page`).
