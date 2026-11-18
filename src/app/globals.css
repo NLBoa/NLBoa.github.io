@@ -107,7 +107,7 @@ a:hover {
   opacity: 1;
 }
 
-/* A page is open: the desk sits dimmed behind it and stops taking clicks. */
+/* A page is open: the desk sits dimmed behind it. */
 .scrim {
   position: fixed;
   inset: 0;
@@ -125,9 +125,11 @@ body:has(main.page) .scrim {
   opacity: 0.94;
 }
 
-body:has(main.page) .scene {
-  pointer-events: none;
-}
+/* There used to be `pointer-events: none` on `.scene` here. It never reached the canvas (R3F
+   sets `pointer-events: auto` on its own wrapper), so all it did was restyle every element of
+   the weather and the city, which inherit it, in the very frame a page mounts. What keeps the
+   desk quiet behind a page is the store: nothing is hovered or opened unless the path is "/"
+   (`selectActive`, `setPath`), and a click away closes the page (components/ClickAway). */
 
 /* Away from the open page's content a click closes the page (components/ClickAway): the cursor says so. */
 html[data-away] {

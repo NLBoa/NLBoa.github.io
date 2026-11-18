@@ -14,7 +14,7 @@ The desk used to stand in front of a blank wall. It now stands in a room: an ord
 - **It is a window in a wall, not a wall of glass** (Noah, after the first version: "it looks like the window is the entire wall"). The first version ran floor to ceiling across the whole left of the view. Now wall shows on every side: a strip beside it at the left of the view with the window's trim, wall under the sill (the sill sits 9 cm above the desk so it shows under the monitors), and wall above its head (visible on a phone). The sizes are those of a real window: sill 84 cm above the floor, head 187 cm, 90 cm wide.
 - Window bars: one upright in the middle and one cross bar, high enough to stay clear of the header on a wide screen.
 - A faint cool light comes in from the window on the desk's left; the warm fill on the right is unchanged.
-- With a page open, the rain pauses and dims to 15%, so no light shows through behind the page's text.
+- With a page open, the rain pauses and dims to 15%, so no light shows through behind the page's text. Since 2026-11-18 it does so 0.7 s after a page opened from the desk has arrived (at once on a page loaded directly): resting it in the instant the page mounts cost Safari's engine a late frame or two in the middle of the hand-off. `src/scene/weather.ts` holds the rule; `<RouteSync>` sets `html[data-resting]`, which `rain.css` reads.
 - Reduced motion: the rain is a still picture. Without WebGL there is no scene and no rain.
 - Not done, on purpose: sound, lightning, or weather that follows the real forecast.
 
