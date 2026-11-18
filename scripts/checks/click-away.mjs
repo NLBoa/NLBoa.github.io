@@ -82,21 +82,6 @@ export default async function clickAway({ open, check, at, sceneReady }) {
     await context.close();
   }
 
-  // A note in progress is never thrown away by a stray click.
-  {
-    const { context, page } = await open("/contact");
-    await page.waitForTimeout(700);
-    await page.click(".note textarea");
-    await stays(page, "/contact", 1300, 700, "away: with the note in focus, a click away only leaves the field");
-    await page.fill(".note textarea", "Hello Noah");
-    await page.mouse.click(1300, 700);
-    await stays(page, "/contact", 1300, 700, "away: with a note written, clicks away do not close the page");
-    await page.keyboard.press("Escape");
-    await page.waitForURL(home, { timeout: 2500 }).catch(() => {});
-    check("away: Esc still closes it", home(page.url()));
-    await context.close();
-  }
-
   // Touch: the page fills a phone, so a tap near its edge does nothing.
   {
     const { context, page } = await open("/about", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });

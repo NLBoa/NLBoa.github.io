@@ -1,21 +1,23 @@
-# Contact page as a sheet of note paper
-
-Branch: `feature/contact-page` (on top of `fix/page-close`).
+# Contact page: the places to reach me
 
 ## What it is
 
-The Contact page was three lines. The pen cup opens it, so it is now a sheet of ruled note paper on the dark desk, in the cup's own paper color. A visitor writes their name and a note; the button opens a draft in their own mail app, addressed to Noah, with the note as its body. Beside the paper are the other ways to reach him, each a whole row to press, a Copy button for the address, a line saying what he is open to, and his local time.
+The pen cup opens it. The heading on the left; beside it one line of introduction, a line saying what Noah is open to, and the places to reach him, each a whole row to press: email (with a Copy button), GitHub, LinkedIn and the résumé. Under them, his local time.
+
+## History
+
+- 2026-11-11: built as a sheet of ruled note paper with these links beside it (branch `feature/contact-page`). A visitor wrote a name and a note, and a button opened a draft in their own mail app.
+- 2026-11-18: **the note paper was removed** (Noah: "just keep the find me information not the weird note thing on the side. The goal is to provide some more links to reach me, that's all."). `Note.tsx` and `src/lib/mailto.ts` are deleted; they are in git history before the branch `contact-links-only` if ever wanted. Do not bring a form or a note back without asking.
 
 ## Decisions
 
-- **The page sends nothing.** The site is static, so there is no form handler. The button is an ordinary `mailto:` link whose subject and body are built from what is typed (`src/lib/mailto.ts`, tested). The page says so in plain words under the button. Without JavaScript the button still opens a blank draft.
+- **Links only.** No form, no fields. To add a place, add it to `src/content/contact.ts` and a row in `src/app/contact/page.tsx`; never invent an address.
+- The rows sit in the second column, under the introduction, at most 34rem wide; on a phone everything is one column.
+- The list has no visible heading: the line above it ("Find me in any of these places.") introduces it, and the section is labeled "Find me" for screen readers.
 - **Local time** ("It is 1:49 am for me (US Eastern time).") tells a visitor when to expect an answer. It comes from the visitor's clock and a time zone in `contact.ts`, so it appears only once JavaScript runs.
 - **The status line** ("Open to software engineering internships") is from the GitHub profile card.
-- Copy uses the clipboard and confirms in the button; if the browser refuses, it says to copy by hand.
-- The note uses the site's two typefaces: labels in the sans, what you type in the monospace. No handwriting font.
-- The paper is not rotated: at a slight angle its ruled lines turned jagged on ordinary screens.
+- Copy uses the clipboard and confirms in the button; if the browser refuses, it says to copy by hand. Without JavaScript the button is not shown and the rows are still links.
 - The scrim is a little heavier on this page (97.5%), because the pale pen cup sits right behind it.
-- Not done: a server-side form. It would need a backend or a third-party form service, and GitHub Pages has neither.
 
 ## To confirm with Noah
 
@@ -23,8 +25,4 @@ The status line, and that he is happy to show his local time.
 
 ## Files
 
-`src/app/contact/page.tsx`, `src/app/contact/contact.css`, `src/components/contact/`, `src/content/contact.ts`, `src/lib/mailto.ts`, `scripts/checks/contact-page.mjs`.
-
-## To drop it
-
-Delete the branch. Nothing else depends on it.
+`src/app/contact/page.tsx`, `src/app/contact/contact.css`, `src/components/contact/` (`CopyButton`, `LocalTime`), `src/content/contact.ts`, `scripts/checks/contact-page.mjs`.

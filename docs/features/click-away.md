@@ -16,7 +16,7 @@ The page's content is the box around all of its blocks (the direct children of `
 - A click on anything pressable (links, buttons, fields), or anywhere in the header.
 - The end of a drag, such as selecting text out past the column.
 - The first click away while text is selected or a field has focus: that click only clears the selection or leaves the field. (Out beside the page the browser does neither by itself, so the code does it.)
-- Any click while something is typed into a form: a stray click must not throw away a note on the Contact page. Close and Esc still work there.
+- Any click while something is typed into a form: a stray click must not throw it away. Close and Esc still work there. (No page has a form since the Contact note was removed on 2026-11-18; the rule stays for the day one does, and has no browser check until then.)
 - A touch. On a phone the page fills the screen, and a tap near its edge should do nothing.
 - Modified clicks and other mouse buttons.
 
