@@ -57,7 +57,7 @@ export default async function cyberCity({ open, check, at, sceneReady, settle, f
   const monitor = await pointAt(page, "monitor-left");
   await page.mouse.click(monitor.x, monitor.y);
   await page.waitForURL(at("/projects"), { timeout: 3000 });
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(1500); // the weather rests a moment after the page has arrived
   check("city: with a page open the cars stop", (await city(page)).state === "paused");
   check("city: no console errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   await context.close();

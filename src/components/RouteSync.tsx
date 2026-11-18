@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { normalizePath, sitePath } from "@/lib/paths";
 import { useScene } from "@/scene/store";
+import { restDelay } from "@/scene/weather";
 
 /**
  * Keeps the 3D layer in step with the URL: tells it the current path, lets
@@ -21,6 +22,25 @@ export default function RouteSync() {
   useEffect(() => {
     useScene.setState({ navigate: (href) => router.push(href) });
   }, [router]);
+
+  // Behind an open page the weather outside the window rests (rain.css). Opened from the desk,
+  // it rests a moment after the page has arrived, not while it is arriving (scene/weather.ts).
+  const from = useRef<string | null>(null);
+  useEffect(() => {
+    const root = document.documentElement;
+    const delay = restDelay(from.current, pathname);
+    from.current = pathname;
+    if (delay === null) {
+      root.removeAttribute("data-resting");
+      return;
+    }
+    if (delay === 0) {
+      root.setAttribute("data-resting", "");
+      return;
+    }
+    const timer = setTimeout(() => root.setAttribute("data-resting", ""), delay);
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   // Just before a clicked object's page opens, the scrim and the header come up (globals.css).
   useEffect(() => {

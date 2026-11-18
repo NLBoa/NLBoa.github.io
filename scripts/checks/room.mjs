@@ -38,12 +38,34 @@ export default async function room({ browser, base, out, open, check, at, sceneR
   const monitor = await pointAt(page, "monitor-left");
   await page.mouse.click(monitor.x, monitor.y);
   await page.waitForURL(at("/projects"), { timeout: 3000 });
-  await page.waitForTimeout(700);
-  const state = await page.evaluate(() => ({
-    paused: getComputedStyle(document.querySelector(".rain-near")).animationPlayState,
-    opacity: Number(getComputedStyle(document.querySelector(".rain")).opacity),
-  }));
+  const weather = () =>
+    page.evaluate(() => ({
+      paused: getComputedStyle(document.querySelector(".rain-near")).animationPlayState,
+      opacity: Number(getComputedStyle(document.querySelector(".rain")).opacity),
+    }));
+  // While the page arrives the weather is left alone: resting it in that instant cost
+  // Safari's engine a late frame or two in the middle of the hand-off (scene/weather.ts).
+  const arriving = await weather();
+  check("room: the rain does not rest while the page is arriving", arriving.paused === "running" && arriving.opacity === 1, `${arriving.paused}, opacity ${arriving.opacity}`);
+  await page.waitForTimeout(1500);
+  const state = await weather();
   check("room: with a page open the rain rests and dims", state.paused === "paused" && state.opacity < 0.3, `${state.paused}, opacity ${state.opacity}`);
+  // Back on the desk it falls again at once.
+  await page.keyboard.press("Escape");
+  await page.waitForURL(at("/"), { timeout: 3000 });
+  await page.waitForTimeout(100);
+  const back = await weather();
+  check("room: back on the desk the rain falls again at once", back.paused === "running" && !(await page.evaluate(() => document.documentElement.hasAttribute("data-resting"))), back.paused);
+  // Leaving before the weather has rested: it never rests on the desk.
+  await page.waitForTimeout(1200);
+  const again = await pointAt(page, "monitor-left");
+  await page.mouse.click(again.x, again.y);
+  await page.waitForURL(at("/projects"), { timeout: 3000 });
+  await page.keyboard.press("Escape");
+  await page.waitForURL(at("/"), { timeout: 3000 });
+  await page.waitForTimeout(1200);
+  const left = await weather();
+  check("room: a page closed at once leaves the rain falling", left.paused === "running" && left.opacity === 1, `${left.paused}, opacity ${left.opacity}`);
   check("room: no console errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   await context.close();
 

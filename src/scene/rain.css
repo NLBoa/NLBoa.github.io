@@ -143,7 +143,9 @@
 }
 
 /* With a page open the desk is behind a scrim: the weather rests and dims, so
-   no light shows through behind the page's text. */
+   no light shows through behind the page's text. `data-resting` is set by <RouteSync>: at
+   once on a page loaded directly, and a moment after a page opened from the desk has arrived
+   (scene/weather.ts says why). */
 .rain {
   transition: opacity 0.45s ease;
   /* Keeps the weather on a layer of its own all the time. Otherwise Safari's engine makes one
@@ -151,11 +153,11 @@
   will-change: opacity;
 }
 
-body:has(main.page) .rain {
+html[data-resting] .rain {
   opacity: 0.15;
 }
 
-body:has(main.page) .rain * {
+html[data-resting] .rain * {
   animation-play-state: paused;
 }
 

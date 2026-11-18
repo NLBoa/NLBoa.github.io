@@ -105,11 +105,13 @@ p{position:fixed;left:8px;bottom:8px;margin:0;padding:2px 6px;background:#000c;c
 /** One line per run: for each part of the visit, the usual frame, the longest, and how many came late. */
 function summarize(report) {
   const part = (from, to) => {
-    const times = report.frames.filter(([at]) => at >= report.marks[from] && at < report.marks[to]).map(([, took]) => took);
-    if (!times.length) return "no frames";
+    const rows = report.frames.filter(([at]) => at >= report.marks[from] && at < report.marks[to]);
+    if (!rows.length) return "no frames";
+    const times = rows.map(([, took]) => took);
     const usual = [...times].sort((a, b) => a - b)[Math.floor(times.length / 2)];
-    const late = times.filter((took) => took > usual * 1.4).length;
-    return `${Math.round(usual)} ms usual, ${String(Math.round(Math.max(...times))).padStart(3)} ms longest, ${late} late`;
+    // A late frame, and when it came: milliseconds after this part of the visit began.
+    const late = rows.filter(([, took]) => took > usual * 1.4).map(([at, took]) => `${Math.round(took)} ms at ${Math.round(at - report.marks[from])}`);
+    return `${Math.round(usual)} ms usual, ${String(Math.round(Math.max(...times))).padStart(3)} ms longest, ${late.length} late${late.length ? ` (${late.join(", ")})` : ""}`;
   };
   const wrong = report.opened !== "/projects/" || report.closed !== "/" ? `  (the page did not open and close: ${report.opened}, ${report.closed})` : "";
   const unseen = report.seen ? "" : "  (the window was not in front: these numbers mean nothing)";
