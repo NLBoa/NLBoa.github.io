@@ -11,6 +11,8 @@ const context = await browser.newContext({ viewport: { width: 1200, height: 630 
 const page = await context.newPage();
 await page.goto(base + "/", { waitUntil: "networkidle" });
 await page.waitForSelector('.scene[data-ready="true"]', { timeout: 15000 });
+// The cat arrives a moment after the desk; the picture should have it in.
+await page.waitForFunction(() => window.__cat, null, { timeout: 10000 }).catch(() => {});
 // Only the desk and the name: no nav, footer or dev tools in the picture.
 await page.addStyleTag({ content: ".site-nav, .site-footer, nextjs-portal { display: none !important; }" });
 await page.waitForTimeout(1500);
