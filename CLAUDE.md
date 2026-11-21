@@ -26,6 +26,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - **Contact is links only: merged into `main` and published 2026-11-18** (Noah: "Publish it"). The note paper is gone; see the 2026-11-18 decision below and `docs/features/contact-page.md`. The branch `contact-links-only` still exists locally and is fully contained in `main`. Live site checked after the deploy, with screenshots at both sizes: every route 200, an unknown address 404, Contact shows the four rows and no form, nothing overflows on a phone, an empty console. (The in-app browser pane can freeze CSS animations at phone size, which leaves a page looking dim; check phone screenshots with Playwright instead.)
 - **Smooth in Safari's engine: merged into `main` and published 2026-11-18** (Noah: "Publish it"). Noah filmed frame drops in DuckDuckGo; the cause and the fix are in the 2026-11-18 decisions below. The branch `safari-smooth` still exists locally and is fully contained in `main`. Live site checked after the deploy in Chrome: every route 200, a parked project and an unknown address 404, no filter in the city, the hand cursor on the canvas only, the left monitor opens Projects and Esc closes it, no frame over 17 ms, an empty console at both sizes. The live site was not measured in Safari or DuckDuckGo (`npm run frames` measures the local build, which is the same code); the before and after numbers below are from the local build.
 - **The weather rests after a page has arrived: merged into `main` and published 2026-11-18** (Noah: "Yes, do it" to removing the last hitch when a page opens, then "Publish it"). See the last 2026-11-18 decisions below. The branch `weather-rest-later` still exists locally and is fully contained in `main`. Live site checked after the deploy in Chrome: every route 200, a parked project and an unknown address 404; opening Projects from the desk, the weather is still running as the page arrives and rests 1.5 s later; back on the desk it runs again at once; a page loaded directly rests at once; beside a project page it keeps going; behind About no label and no hand cursor; no frame over 17 ms; an empty console. Not measured on the live site in Safari or DuckDuckGo (`npm run frames` measures the local build, which is the same code).
+- **A cat on the desk: built on the branch `feature/desk-cat`, not merged, not published** (2026-11-21). Noah turned down two found models ("create your own") and asked for real-feeling fur, smooth motion and five emotes (purr, clean, loaf, roll over, stare). Everything about it is in `docs/features/desk-cat.md`: read that before touching `src/scene/cat/`. Noah has not seen it yet; the likeness, its place and how emotes are asked for are his to confirm.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -50,6 +51,8 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - `npm run assets:models` — `assets-src/keyboard.glb` → `public/models/keyboard-keys.glb` (crop, normalize, meshopt, WebP ≤ 1024 px)
 - `npm run assets:images` — `assets-src/projects/<slug>/*.png|jpg` → `public/projects/<slug>/*.webp` (max 1600 px wide); prints each file's pixel size for the content file
 - `npm run assets:resume -- "/path/to/Resume.pdf"` — a new résumé: copies the PDF into `public/resume/`, draws each page to WebP and writes `src/content/resume-data.json` (links, text, date). Uses pdf.js in the installed Chrome.
+- `npm run assets:cat` — rebuilds `public/models/cat.bin` from the cat's shape in `src/scene/cat/build/` (Node runs those TypeScript files directly, so they import each other with `.ts`)
+- `npm run cat:film -- <emote|all|still>` — with the dev server running: plays an emote in Chrome and lays twelve frames on one sheet in `test-results/cat/` (`--desk` for the visitor's view, `still --pose sit` for one picture)
 - `npm run assets:textures` — downloads the Poly Haven walnut maps into `assets-src/textures/` and writes WebP into `public/textures/`
 
 ## Layout
@@ -77,13 +80,15 @@ src/scene/       layout.ts      every size and position in meters (single source
                  SceneUI.tsx    DOM beside the canvas: label, hotspot links, phone dock
                  SceneMount.tsx WebGL check, error boundary, dynamic import with ssr: false
                  Lights.tsx, materials.ts, geometry.ts
-                 objects/       Room, Monitors, StreamDeck, PenCup, Keyboard, Orb
+                 objects/       Room, Monitors, StreamDeck, PenCup, Keyboard, Orb, Cat
+                 cat/           the cat: rig.ts (skeleton), build/ (shape -> model file), fur.ts, body.ts,
+                                pose.ts + stances.ts, motion.ts (clips, emotes, idle life), brain.ts (what it decides)
                  Rain.tsx, City.tsx (+ skyline.ts)  the weather and the city behind it: page layers, CSS only
                  band.ts        the strip beside a project page where the room shows
                  orb.ts         where the orb looks (pure, tested)
                  textures/      screens.ts, useScreenTexture.ts, keyIcons.ts
 scripts/         checkpoint.mjs, flows.mjs, browser-frames.mjs, optimize-models.mjs, fetch-textures.mjs
-public/models/   keyboard-keys.glb      public/textures/  walnut-diff.webp, walnut-normal.webp
+public/models/   keyboard-keys.glb, cat.bin (generated: never edit)      public/textures/  walnut-diff.webp, walnut-normal.webp
 docs/checkpoints/ screenshots from each phase
 reference/       desk-reference.jpg (+ original HEIC)   — git-ignored
 assets-src/      keyboard.glb, textures/                — git-ignored
@@ -206,8 +211,16 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-18 — **`pointer-events: none` on `.scene` is gone; it never did what its comment said.** R3F sets `pointer-events: auto` on its own wrapper, so the rule never reached the canvas (on the live site the canvas was `auto` behind every page). All it did was restyle every element of the weather and the city, which inherit it, in the frame a page mounts. The desk is quiet behind a page because of the store (`selectActive` and `setPath` need the path to be "/") and `ClickAway`; checked after the change: behind Credits, Projects and About no label, no hand cursor, no frames drawn.
 - 2026-11-18 — **What is still left when a page opens, in Safari's engine on battery:** in about 4 runs of 10 the frame in which the page mounts takes 47 to 72 ms instead of 33 (18 runs in DuckDuckGo; before these two changes it was nearly every run, and before the day's first fix 144 to 167 ms every time). Without the city it does not happen, so the city is still repainted by something at that instant; not found. Closing shows one late frame of about 50 ms, usually the very first after Esc. The measurements are noisy at this size: single runs prove nothing, compare batches of eight or more (`--runs 8`), and `npm run frames` prints when each late frame fell.
 
+- 2026-11-21 — **The cat is the one thing on the desk that draws frames on its own** (it breathes). This sets aside the 2026-11-11 rule "nothing may draw 3D frames on a timer" for the cat only, and only while the desk itself is on show: behind a page, in a hidden tab and under reduced motion it draws nothing. While it only breathes it is redrawn about 30 times a second, not every frame. `npm run flows` holds it still (`window.__catHold`) for every check that counts idle frames; those checks still guard everything else.
+- 2026-11-21 — **The cat is made in code, not downloaded**, so the credits are unchanged. Its fur is drawn in layers ("shells") with alpha-to-coverage for soft edges; because the canvas is see-through at the window, the coat does not write alpha and a puffed-out copy of the skin fills it in. Do not turn the coat into a blended (transparent) material: the layers would need sorting.
+- 2026-11-21 — **Smooth motion is a test** (`src/scene/cat/cat.test.ts`): a minute of emotes at 60 frames a second, with cuts from one into another, fails if a joint turns more than 8 degrees or the body's height moves more than 7 mm in one frame. A new emote or stance must pass it.
+- 2026-11-21 — **Plugged in, Safari's engine runs at 60 frames a second.** `npm run frames` in DuckDuckGo and Safari with the MacBook on mains power: 17 ms a frame resting and with the pointer moving, none late. That settles the open question of 2026-11-18: the steady 30 was Low Power Mode on battery.
+- 2026-11-21 — **`npm run flows` has `ONLY`**: `ONLY=desk-cat npm run flows` runs just the feature checks whose file name contains that. The hand-off timing checks (`ONLY=handoff`) are only reliable against the production build (`BASE_URL=http://localhost:3200` after a build with `NEXT_PUBLIC_SCENE_STATS=1` and `npm run preview`); against the dev server three of them fail by a frame or two, with or without the cat.
+
 ## Open questions for Noah
 
 Every story is a draft for Noah to read. Aegis Orbit: role wording; teammates and who built what; any result at Technica; whether the README's figures belong; which parts of the sandbox HUD were his; OK to use the two screenshots. Argus: OK to use the two demo-data screenshots; order of the steps; whether the FlowSavvy hand-off is described correctly. Jupiterp: a usage figure, if the maintainers have one. Smart Display: whether the tap-to-light chain is right for the board; whether to name the roommates. Shell: whether each replayed output matches what the shell prints. MID: what it does; whether to link its public repository.
 
-See `npm run todos` for content gaps (some roles, images, "Outside of code", MID details). Beyond those: whether to keep the cropped full-size keyboard model or supply a compact one, an optional `assets-src/pencup.jpg` pattern for the pen cup, a frame-rate check on a real phone, and a run of `npm run frames -- DuckDuckGo` with the MacBook plugged in (to confirm the 30 fps is Low Power Mode).
+The cat (branch `feature/desk-cat`): whether it looks like his cat (coat, face markings, eye color, size); its place on the desk; whether emotes should also be on the Stream Deck's dark keys; whether it should ever purr aloud.
+
+See `npm run todos` for content gaps (some roles, images, "Outside of code", MID details). Beyond those: whether to keep the cropped full-size keyboard model or supply a compact one, an optional `assets-src/pencup.jpg` pattern for the pen cup, and a frame-rate check on a real phone (more pressing now that the cat is drawn in half a million triangles).

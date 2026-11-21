@@ -30,8 +30,14 @@ function check(name, ok, detail = "") {
 
 const browser = await chromium.launch({ channel: "chrome" });
 
-async function open(route, options = {}) {
+/**
+ * Opens a page. The cat on the desk is held still unless `cat: true` is passed: it breathes, so
+ * it redraws the desk all the time, and most checks here count frames to prove that nothing
+ * else does. Its own checks (scripts/checks/desk-cat.mjs) let it live.
+ */
+async function open(route, { cat = false, ...options } = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...options });
+  if (!cat) await context.addInitScript(() => void (window.__catHold = true));
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -58,6 +64,12 @@ async function pointAt(page, id) {
   return { x: p.x, y };
 }
 
+// ONLY=<part of a file name> runs just the matching feature checks from scripts/checks/,
+// for example ONLY=desk-cat or ONLY=handoff.
+const only = process.env.ONLY;
+
+everything: {
+if (only) break everything;
 // 1. Desk: hover, label, click, Esc, Back --------------------------------------
 {
   const { context, page, errors } = await open("/");
@@ -172,6 +184,8 @@ async function pointAt(page, id) {
   check("/projects/argus is in the server's HTML", html.includes("Always-on course hub") && html.includes("What I built"));
   await page.waitForSelector("main.page h1");
   await sceneReady(page);
+  // The cat arrives a moment after the desk and draws one frame to appear; count from then.
+  await page.waitForFunction(() => window.__cat, null, { timeout: 10000 }).catch(() => {});
   await page.waitForTimeout(300);
   const before = await frames(page);
   await page.waitForTimeout(1200);
@@ -537,10 +551,12 @@ async function pointAt(page, id) {
   await phone.context.close();
 }
 
+}
+
 // Checks that belong to one feature live in scripts/checks/, one file each.
 {
   const dir = path.resolve(import.meta.dirname, "checks");
-  const files = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".mjs")).sort() : [];
+  const files = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".mjs") && (!only || f.includes(only))).sort() : [];
   for (const file of files) {
     const { default: run } = await import(pathToFileURL(path.join(dir, file)).href);
     await run({ browser, base, out, open, check, at, a, sceneReady, settle, locate, pointAt, frames, shownLabel });

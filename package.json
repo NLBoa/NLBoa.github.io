@@ -17,7 +17,9 @@
     "flows": "node scripts/flows.mjs",
     "frames": "node scripts/browser-frames.mjs",
     "share-image": "node scripts/share-image.mjs",
-    "preview": "node scripts/serve-export.mjs"
+    "preview": "node scripts/serve-export.mjs",
+    "assets:cat": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/bake-cat.mjs",
+    "cat:film": "node scripts/cat-film.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

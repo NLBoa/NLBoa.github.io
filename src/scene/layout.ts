@@ -210,6 +210,16 @@ export const ORB = {
   reach: 0.45,
 };
 
+// The cat: on the desk's right end, turned a little toward the middle ---------
+
+export const CAT = {
+  position: onDesk(0.86, 0.66),
+  /** On a narrow screen the desk's right end is out of frame, so it sits a little further in. */
+  phonePosition: onDesk(0.79, 0.66),
+  /** Which way it faces: 0 is straight at the viewer, negative turns it toward the desk's middle. */
+  yaw: deg(-28),
+};
+
 // Keyboard and trackpad (decoration) ----------------------------------------
 
 export const KEYBOARD = {
