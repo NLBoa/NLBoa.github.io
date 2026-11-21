@@ -210,14 +210,15 @@ export const ORB = {
   reach: 0.45,
 };
 
-// The cat: on the desk's right end, turned a little toward the middle ---------
+// The cat: on the open left side of the desk, in front of the left monitor, turned a little
+// toward the middle. (It began on the right end; Noah moved it: "there is a lot of space".)
 
 export const CAT = {
-  position: onDesk(0.86, 0.66),
-  /** On a narrow screen the desk's right end is out of frame, so it sits a little further in. */
-  phonePosition: onDesk(0.79, 0.66),
-  /** Which way it faces: 0 is straight at the viewer, negative turns it toward the desk's middle. */
-  yaw: deg(-28),
+  position: onDesk(0.16, 0.64),
+  /** On a narrow screen the desk's ends are out of frame, so it sits a little further in. */
+  phonePosition: onDesk(0.21, 0.66),
+  /** Which way it faces: 0 is straight at the viewer, positive turns it toward the desk's middle from the left. */
+  yaw: deg(28),
 };
 
 // Keyboard and trackpad (decoration) ----------------------------------------

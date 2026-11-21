@@ -92,7 +92,7 @@ function toCat(place: readonly number[], x: number, y: number, z: number, out: V
 
 /**
  * The cat on the desk. It is decoration: it opens nothing, has no label and takes no part in the
- * Tab order. For now it only lies in the loaf and breathes (see ONLY_BREATHING in cat/brain.ts);
+ * Tab order. For now it only lies in the loaf, breathes and watches the pointer (see ONLY_BREATHING in cat/brain.ts);
  * everything else it can do is still here. It moves only while the desk itself is on show.
  */
 export default function Cat() {
@@ -262,7 +262,7 @@ export default function Cat() {
     body.show(motion.pose, motion.world, motion.ribs, motion.eyeYaw, motion.eyePitch, motion.converge, s.seconds);
 
     // Something is moving: draw the next frame. Only breathing: a gentler pace will do.
-    if (busy || (attention > 0.02 && !motion.quiet)) three.invalidate();
+    if (busy || attention > 0.02) three.invalidate();
     else if (!s.timer)
       s.timer = setTimeout(() => {
         s.timer = null;
@@ -318,8 +318,8 @@ export default function Cat() {
       {/* What the pointer touches: a plain rounded shape about the size of the cat, never drawn. */}
       {
         <mesh
-          position={[0, 0.15, 0.03]}
-          scale={[0.15, 0.19, 0.27]}
+          position={[0, 0.11, 0.03]}
+          scale={[0.14, 0.13, 0.25]}
           visible={false}
           onPointerOver={onOver}
           onPointerOut={onOut}
