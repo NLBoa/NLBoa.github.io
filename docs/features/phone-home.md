@@ -1,6 +1,6 @@
 # The phone home page: desk on top, tiles below
 
-Status: **built and tested on the branch `phone-home`; not merged, not published.** Noah approved the design on 2026-11-21 ("Approve, build it"). Not yet tried on a real phone.
+Status: **merged into `main` 2026-11-21 (Noah: "Merge it"); not published.** Noah approved the design the same day ("Approve, build it"). Not yet tried on a real phone.
 
 ## Why
 
@@ -81,4 +81,4 @@ Screenshots: `docs/checkpoints/phone-home-390x660.png`, `-390x844.png`, `-1440x9
 
 ## To drop it
 
-Delete the branch. Nothing else depends on it.
+Revert the merge commit of `phone-home` on `main`. Nothing else depends on it.
