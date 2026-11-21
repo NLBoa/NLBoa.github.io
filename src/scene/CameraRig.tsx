@@ -14,6 +14,10 @@ const DRIFT = { yaw: 3, pitch: 1.5 };
 
 type Pose = { position: Vec3; target: Vec3; fov: number; shiftX: number; shiftY: number };
 
+/** A camera position set by hand for looking closely at something while building it (see Cat.tsx). */
+export const inspect: { pose: Pose | null } = { pose: null };
+const STILL = { x: 0, y: 0 };
+
 const full = (pose: CameraPose): Pose => ({ ...pose, shiftX: pose.shiftX ?? 0, shiftY: pose.shiftY ?? 0 });
 const mix = (a: number, b: number, k: number) => a + (b - a) * k;
 const mix3 = (a: Vec3, b: Vec3, k: number): Vec3 => [mix(a[0], b[0], k), mix(a[1], b[1], k), mix(a[2], b[2], k)];
@@ -147,7 +151,8 @@ export default function CameraRig() {
     d.y += (targetY - d.y) * follow;
     if (Math.abs(targetX - d.x) > 0.002 || Math.abs(targetY - d.y) > 0.002) moving = true;
 
-    apply(state.camera, r.current, d, state.size.width, state.size.height);
+    if (inspect.pose) apply(state.camera, inspect.pose, STILL, state.size.width, state.size.height);
+    else apply(state.camera, r.current, d, state.size.width, state.size.height);
     if (moving) state.invalidate();
   });
 

@@ -2,7 +2,7 @@
 
 import { ContactShadows } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { Vector3, setConsoleFunction, type Camera } from "three";
 import CameraRig from "./CameraRig";
 import { byId } from "./interactive";
@@ -18,6 +18,9 @@ import { StreamDeck } from "./objects/StreamDeck";
 import { Dock, Hotspots, SceneLabel, labelFor } from "./SceneUI";
 import { rootRem, sideBand } from "./band";
 import { selectActive, useScene } from "./store";
+
+// The cat arrives after the desk: its own chunk and model, and never part of the baked shadows.
+const Cat = lazy(() => import("./objects/Cat"));
 
 declare global {
   interface Window {
@@ -222,6 +225,11 @@ export default function Scene() {
             <Ready />
             <Pulse />
           </Suspense>
+          {ready && (
+            <Suspense fallback={null}>
+              <Cat />
+            </Suspense>
+          )}
           {STATS && <Stats />}
         </Canvas>
       </div>
