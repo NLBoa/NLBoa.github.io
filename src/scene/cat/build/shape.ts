@@ -56,14 +56,14 @@ add({ a: [0, 0.184, 0.116], b: [0, 0.192, 0.134], ra: 0.047, rb: 0.04, k: 0.03, 
 add({ a: [0, 0.222, 0.138], b: [0, 0.256, 0.19], ra: 0.044, rb: 0.039, k: 0.028, fur: 0.05, lay: 0.56, comb: [0, -0.85, -0.5], tag: "ruff", bones: ["neck"] });
 
 // Head: a broad rounded wedge with full cheeks and a short strong muzzle.
-const head = { k: 0.014, fur: 0.021, lay: 0.6, comb: [0, 0.25, -1] as Vec3, tag: "head" as Tag };
+const head = { k: 0.014, fur: 0.027, lay: 0.5, comb: [0, 0.25, -1] as Vec3, tag: "head" as Tag };
 add({ ...head, a: [0, 0.277, 0.204], b: [0, 0.2745, 0.224], ra: 0.0425, rb: 0.041, squash: [1.14, 0.95, 1.02], bones: ["head"] });
 for (const s of [1, -1]) {
   add({ a: [s * 0.027, 0.2585, 0.226], b: [s * 0.03, 0.256, 0.218], ra: 0.0235, rb: 0.022, k: 0.016, fur: 0.04, lay: 0.5, comb: [s * 0.7, -0.55, -0.5], tag: "cheek", bones: ["head"] });
   // Jowls: the long fur that frames a Siberian's face and runs down into the ruff.
   add({ a: [s * 0.035, 0.249, 0.214], b: [s * 0.039, 0.243, 0.202], ra: 0.02, rb: 0.018, k: 0.016, fur: 0.05, lay: 0.48, comb: [s * 0.75, -0.7, -0.25], tag: "cheek", bones: ["head"] });
   // Brow ridge over each eye.
-  add({ ...head, a: [s * 0.019, 0.2835, 0.2365], b: [s * 0.027, 0.2815, 0.23], ra: 0.0145, rb: 0.013, k: 0.012, fur: 0.013, bones: ["head"] });
+  add({ ...head, a: [s * 0.019, 0.2835, 0.2365], b: [s * 0.027, 0.2815, 0.23], ra: 0.0145, rb: 0.013, k: 0.012, fur: 0.016, bones: ["head"] });
   // Whisker pads.
   add({ a: [s * 0.009, 0.2532, 0.2655], b: [s * 0.0104, 0.2532, 0.2635], ra: 0.0096, rb: 0.009, k: 0.005, fur: 0.0035, lay: 0.85, comb: [s * 0.5, 0, -1], tag: "muzzle", bones: ["head"] });
 }
@@ -296,15 +296,11 @@ export function describe(p: Vec3, n: Vec3): Described {
   if (face > 0.3) {
     const h: Vec3 = [x - FACE.center[0], y - FACE.center[1], z - FACE.center[2]];
     const ax = Math.abs(h[0]);
-    // The tabby "M": lines running back over the forehead between the ears.
-    const forehead = smooth(0.011, 0.02, h[1]) * smooth(0.042, 0.034, ax) * m("head");
-    const lines = smooth(0.35, 0.75, 0.5 + 0.5 * Math.cos((2 * Math.PI * ax) / 0.0125 + grain * 0.8));
-    stripe = Math.max(stripe, forehead * lines * 0.95);
-    // Two stripes back across each cheek from the eye's outer corner.
-    const mirrored: Vec3 = [ax, h[1], h[2]];
-    const cheek1 = toSegment(mirrored, [0.031, 0.002, 0.024], [0.05, -0.006, -0.012]);
-    const cheek2 = toSegment(mirrored, [0.03, -0.012, 0.02], [0.048, -0.022, -0.008]);
-    stripe = Math.max(stripe, smooth(0.0042, 0.0018, cheek1) * 0.75, smooth(0.0038, 0.0016, cheek2) * 0.6);
+    // No drawn lines on the head: a real coat has none. The crown is a smoky, slightly darker
+    // grey that breaks up softly and unevenly, and the fur itself does the rest.
+    const crown = smooth(0.008, 0.03, h[1]) * smooth(0.046, 0.026, ax) * m("head");
+    const smoke = smooth(0.3, 0.8, fbm(x * 42, y * 42, z * 42));
+    stripe = Math.max(stripe, crown * (0.16 + 0.2 * smoke));
     // Pale muzzle and chin, a warmer bridge, pale "spectacles" round the eyes inside a dark liner.
     const muzzle = m("muzzle");
     const bridge = smooth(0.006, 0.0, ax - 0.004) * smooth(-0.012, 0.004, h[1]) * smooth(0.02, 0.035, h[2]) * muzzle;

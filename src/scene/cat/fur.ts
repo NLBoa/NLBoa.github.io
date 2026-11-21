@@ -65,7 +65,7 @@ export function catGeometry(file: ArrayBuffer, shells: number): { body: Instance
     geometry.instanceCount = layers;
     return geometry;
   };
-  return { body: part(0, headStart, shells), head: part(headStart, indexCount - headStart, Math.max(8, Math.round(shells * 0.6))) };
+  return { body: part(0, headStart, shells), head: part(headStart, indexCount - headStart, Math.max(8, Math.round(shells * 0.75))) };
 }
 
 /**

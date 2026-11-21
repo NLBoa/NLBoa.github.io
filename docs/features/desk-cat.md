@@ -37,6 +37,7 @@ It is decoration: it opens nothing, has no label and no place in the Tab order. 
 - **Colors are cooler than the photo** on purpose: the room's fill light is warm, and lit by it the coat comes out the brown-grey of the photo.
 - Its place and facing are `CAT` in `src/scene/layout.ts`. On a narrow screen the desk's right end is out of frame, so it sits 10 cm further in (`phonePosition`).
 - **Noah's first notes, 2026-11-21, while it was being built:** the eyes were "a little creepy" and should be more open; the paws needed to be more defined; the face should be fluffier and closer to the real cat. Done the same day: lids open wider with almost no slant, pupils rounder, a darker iris shaded by the upper lid; four toes on each paw with the lines between them; longer fur on the forehead, brows, cheeks and jowls, longer ear tufts, a visible nose and mouth, and a muzzle that is pale grey, not white. He has not yet said whether that is enough.
+- **No drawn lines on the head** (Noah, 2026-11-21: "instead of lines on the cat's head make it more fluffy like and less lines. In actuality cats don't have lines like that"). The tabby "M" on the forehead and the two stripes across each cheek are gone. The crown is a soft, uneven, slightly darker grey, and the head's fur is longer (27 mm) and stands out more, drawn in 17 layers. The body's stripes and the tail's rings are still there, and faint at desk size; he was speaking of the head. Do not bring crisp markings back on the face.
 
 ## Measured (2026-11-21, M3 Pro MacBook on mains power)
 
