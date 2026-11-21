@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, type MouseEvent } from "react";
-import { featuredProjects } from "@/content/projects";
 import { asset } from "@/lib/paths";
 import { INTERACTIVES } from "./interactive";
 import { selectActive, useScene } from "./store";
@@ -89,32 +88,6 @@ export function Hotspots() {
           </Link>
         ),
       )}
-    </nav>
-  );
-}
-
-/**
- * Phones only: the featured projects as plain links in the space under the
- * desk, because the Stream Deck's keys are too small to tap there.
- */
-export function Dock() {
-  const ready = useScene((s) => s.ready);
-  return (
-    <nav className="dock" aria-label="Featured projects" data-ready={ready}>
-      <ul>
-        {featuredProjects.map((project) => (
-          <li key={project.slug}>
-            <Link href={`/projects/${project.slug}`}>
-              <span className="project-title">{project.title}</span>
-              <span className="project-summary">{project.summary}</span>
-            </Link>
-          </li>
-        ))}
-        <li className="dock-more">
-          <Link href="/projects">All projects</Link>
-          <Link href="/credits">Credits</Link>
-        </li>
-      </ul>
     </nav>
   );
 }

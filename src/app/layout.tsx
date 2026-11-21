@@ -13,6 +13,7 @@ import "./miniatures.css";
 // its page instead, each became a separate file that the browser preloaded whenever a link to
 // that page was on screen, and then warned in the console that it was "preloaded but not used".
 // Their rules are all scoped to their own page.
+import "./home.css";
 import "./about/about.css";
 import "./contact/contact.css";
 import "./projects/projects.css";

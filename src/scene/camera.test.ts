@@ -52,14 +52,51 @@ describe("homePose", () => {
     }
   });
 
-  it("keeps both monitors in frame on a phone in portrait", () => {
-    const aspect = 390 / 844;
-    const pose = homePose(aspect);
-    for (const point of FRAME_POINTS.monitors) {
-      const p = project(pose, aspect, point);
-      expect(Math.abs(p.x)).toBeLessThanOrEqual(1);
-      expect(Math.abs(p.y)).toBeLessThanOrEqual(1);
+  it("fits the whole desk whatever the frame's shape: there is no separate portrait view", () => {
+    for (const aspect of [390 / 844, 1, 390 / 332]) {
+      const pose = homePose(aspect);
+      expect(pose.shiftY).toBeUndefined();
+      for (const point of FRAME_POINTS.desk) {
+        const p = project(pose, aspect, point);
+        expect(Math.abs(p.x)).toBeLessThanOrEqual(1);
+        expect(Math.abs(p.y)).toBeLessThanOrEqual(1);
+      }
     }
+  });
+
+  // The phone's banner: the header lies over its top 3rem and its bottom 1rem fades into the wall.
+  it.each([
+    [390, 332],
+    [375, 245],
+    [768, 653],
+  ])("in a %i x %i banner the desk sits between the strips kept clear at the top and bottom", (width, height) => {
+    const aspect = width / height;
+    const clear = { top: 48 / height, bottom: 16 / height };
+    const pose = homePose(aspect, clear);
+    expect(pose.fov).toBe(35);
+    expect(pose.shiftY).toBeCloseTo((clear.bottom - clear.top) / 2, 9);
+    // Where each point lands on screen once the picture has been slid: -1 bottom, 1 top.
+    const seen = FRAME_POINTS.desk.map((point) => {
+      const p = project(pose, aspect, point);
+      return { x: p.x, y: p.y + 2 * (pose.shiftY ?? 0) };
+    });
+    for (const p of seen) {
+      expect(Math.abs(p.x)).toBeLessThanOrEqual(1);
+      expect(p.y).toBeGreaterThanOrEqual(-1 + 2 * clear.bottom - 1e-9);
+      expect(p.y).toBeLessThanOrEqual(1 - 2 * clear.top + 1e-9);
+    }
+    // And it is as large as that allows: something reaches the 0.96 margin.
+    const middle = clear.bottom - clear.top;
+    const half = 1 - clear.top - clear.bottom;
+    const reach = Math.max(...seen.map((p) => Math.max(Math.abs(p.x), Math.abs(p.y - middle) / half)));
+    expect(reach).toBeCloseTo(0.96, 6);
+  });
+
+  it("is the same view as ever when nothing is kept clear", () => {
+    expect(homePose(1.6, { top: 0, bottom: 0 })).toEqual(homePose(1.6));
+    expect(poseFor("home", 1.6, { width: 1440, height: 900, band: null })).toEqual(homePose(1.6));
+    const clear = { top: 48 / 332, bottom: 16 / 332 };
+    expect(poseFor("home", 390 / 332, { width: 390, height: 332, band: null, clear })).toEqual(homePose(390 / 332, clear));
   });
 
   it("looks down at about 30 degrees on a laptop", () => {

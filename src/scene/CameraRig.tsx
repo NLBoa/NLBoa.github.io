@@ -4,6 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { Camera, PerspectiveCamera } from "three";
 import { isStoryPath, rootRem, sideBand } from "./band";
+import { bannerClear } from "./banner";
 import { poseFor, type CameraPose } from "./camera";
 import type { View } from "./interactive";
 import type { Vec3 } from "./layout";
@@ -65,6 +66,9 @@ export default function CameraRig() {
   const band = story ? sideBand(width, height, rootRem()) : null;
   const view: View = band ? "story" : routeView;
   const bandLeft = band?.left ?? 0;
+  // On an upright screen the canvas is a banner with the header over its top (see banner.ts).
+  // Read here, in render: the canvas is resized whenever the window is, which renders this again.
+  const { top: clearTop, bottom: clearBottom } = bannerClear(window.innerWidth, window.innerHeight, height, rootRem());
   const reducedMotion = useScene((s) => s.reducedMotion);
 
   const rig = useRef({
@@ -83,7 +87,7 @@ export default function CameraRig() {
 
   useLayoutEffect(() => {
     const r = rig.current;
-    const desired = full(poseFor(view, width / height, { width, height, band: bandLeft ? { left: bandLeft, width: width - bandLeft } : null }));
+    const desired = full(poseFor(view, width / height, { width, height, band: bandLeft ? { left: bandLeft, width: width - bandLeft } : null, clear: { top: clearTop, bottom: clearBottom } }));
     const sameView = r.view === view;
     if (sameView && r.current && r.to && samePose(r.to, desired)) {
       // Only the address changed: a clicked object's page has opened while the camera is still
@@ -105,7 +109,7 @@ export default function CameraRig() {
     const { camera, invalidate } = get();
     apply(camera, r.current ?? desired, r.drift, width, height);
     invalidate();
-  }, [get, view, onDesk, width, height, bandLeft, reducedMotion]);
+  }, [get, view, onDesk, width, height, bandLeft, clearTop, clearBottom, reducedMotion]);
 
   // Pointer drift, for mice and trackpads only.
   useEffect(() => {

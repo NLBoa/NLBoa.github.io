@@ -93,7 +93,9 @@ export default async function room({ browser, base, out, open, check, at, sceneR
   await settle(phone.page);
   const sky = await patch(phone.page, 100, 62, 28);
   check("room: phone: the window shows above the monitors", sky[2] > sky[0] + 8, `rgb ${sky.join(" ")}`);
-  const under = await patch(phone.page, 60, 470, 28);
+  // The desk is a banner on a phone: look just above its lower edge (and above the 24px fade there).
+  const foot = await phone.page.evaluate(() => document.querySelector(".scene").getBoundingClientRect().bottom);
+  const under = await patch(phone.page, 60, foot - 50, 20);
   check("room: phone: under the desk it is wall, not window", under[2] <= under[0] + 6, `rgb ${under.join(" ")}`);
   const overflow = await phone.page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check("room: phone: nothing overflows sideways", overflow <= 0, `${overflow}px`);

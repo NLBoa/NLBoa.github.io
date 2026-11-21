@@ -1,4 +1,5 @@
 import type { Band } from "./band";
+import type { Clear } from "./banner";
 import type { View } from "./interactive";
 import { FRAME_POINTS, MONITORS, PEN_CUP, STREAM_DECK, WALL_Z, WINDOW, monitorCorners, type Vec3 } from "./layout";
 
@@ -6,14 +7,17 @@ export type CameraPose = {
   position: Vec3;
   target: Vec3;
   fov: number; // vertical, degrees
-  /** Fraction of the viewport height to slide the picture up by. */
+  /** Fraction of the viewport height to slide the picture up by (negative: down). */
   shiftY?: number;
   /** Fraction of the viewport width to slide the picture right by. */
   shiftX?: number;
 };
 
-/** The window a pose is for: its size in pixels and the band beside the page, if any. */
-export type Viewport = { width: number; height: number; band: Band | null };
+/**
+ * The frame a pose is for: its size in pixels, the band beside the page, if any, and what the
+ * home view keeps clear at its top and bottom (see homePose).
+ */
+export type Viewport = { width: number; height: number; band: Band | null; clear?: Clear };
 
 type FitInput = {
   target: Vec3;
@@ -29,6 +33,7 @@ type FitInput = {
 };
 
 const rad = (d: number) => (d * Math.PI) / 180;
+const deg = (r: number) => (r * 180) / Math.PI;
 
 /**
  * Places a camera looking at `target` from `pitch` degrees above and `yaw`
@@ -66,39 +71,37 @@ export function fitCamera({ target, pitch, yaw = 0, fov, aspect, points, fill = 
   };
 }
 
-/** The idle "home" view for a given viewport aspect ratio. */
-export function homePose(aspect: number): CameraPose {
-  if (aspect < 1) {
-    // Phones in portrait: closer on the monitors and Stream Deck. Width is
-    // the limit, so the desk sits in the upper part of the screen and the
-    // space below is left for page content.
-    return {
-      ...fitCamera({
-        target: [0, 0.3, -0.2],
-        pitch: 22,
-        fov: 45,
-        aspect,
-        points: FRAME_POINTS.monitors,
-        fill: 0.96,
-      }),
-      shiftY: 0.16,
-    };
-  }
-  return fitCamera({
-    target: [0, 0.2, -0.02],
-    pitch: 30,
-    fov: 35,
-    aspect,
-    points: FRAME_POINTS.desk,
+/** How much of its frame the desk may fill: on a laptop, and in the small banner of an upright screen. */
+const HOME_FILL = { window: 0.9, banner: 0.96 };
+
+/**
+ * The idle "home" view: the whole desk top and both monitors, whatever the
+ * frame's shape.
+ *
+ * `clear` is for the banner on an upright screen (banner.ts): the site's
+ * header lies over the top of the picture and its lower edge fades out, so
+ * those strips are kept free and the desk is fitted into what is between them.
+ */
+export function homePose(aspect: number, clear?: Clear): CameraPose {
+  const view = { target: [0, 0.2, -0.02] as Vec3, pitch: 30, points: FRAME_POINTS.desk };
+  const fov = 35;
+  const rest = clear ? 1 - clear.top - clear.bottom : 1;
+  if (!clear || rest >= 1) return fitCamera({ ...view, fov, aspect, fill: HOME_FILL.window });
+  // Fit as if the frame were only the part between the strips (shorter, so narrower in angle
+  // and wider in shape), then slide the picture until that part is where it belongs.
+  const fit = fitCamera({
+    ...view,
+    fov: deg(2 * Math.atan(Math.tan(rad(fov) / 2) * rest)),
+    aspect: aspect / rest,
+    fill: HOME_FILL.banner,
   });
+  return { ...fit, fov, shiftY: (clear.bottom - clear.top) / 2 };
 }
 
 const center = (points: Vec3[]): Vec3 => {
   const sum = points.reduce((a, p) => [a[0] + p[0], a[1] + p[1], a[2] + p[2]], [0, 0, 0]);
   return [sum[0] / points.length, sum[1] / points.length, sum[2] / points.length];
 };
-
-const deg = (r: number) => (r * 180) / Math.PI;
 
 /**
  * The room beside an open project page. The picture is a tall slice that runs
@@ -171,6 +174,6 @@ export function poseFor(view: View, aspect: number, viewport?: Viewport): Camera
       return fitCamera({ target: [x, 0.045, z], pitch: 32, fov: 35, aspect, points, fill: 0.5 });
     }
     default:
-      return homePose(aspect);
+      return homePose(aspect, viewport?.clear);
   }
 }

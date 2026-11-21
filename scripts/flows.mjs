@@ -243,13 +243,13 @@ if (only) break everything;
   const { context, page } = await open("/", phone);
   await sceneReady(page);
   await settle(page);
-  check("phone: the featured projects are listed under the desk", await page.isVisible(`.dock ${a("/projects/argus")}`));
+  check("phone: the projects are tiles under the desk", await page.isVisible(`.home-tiles ${a("/projects/argus")}`));
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check("phone: nothing overflows sideways", overflow <= 0, `${overflow}px`);
   const nav = await page.evaluate(() => document.querySelector(".site-nav").getBoundingClientRect().right);
   check("phone: the header fits", nav <= 390, `right edge ${nav.toFixed(0)}px`);
   const p = await locate(page, "monitor-left");
-  await page.touchscreen.tap(p.x, p.y + 50);
+  await page.touchscreen.tap(p.x, p.y + 30); // the desk is a banner there, and the monitor small
   await page.waitForURL(at("/projects"), { timeout: 3000 });
   check("phone: tapping the left monitor opens /projects", true);
   await page.waitForTimeout(700);

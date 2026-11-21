@@ -15,7 +15,7 @@ import { PenCup } from "./objects/PenCup";
 import { Desk, Room } from "./objects/Room";
 import Rain from "./Rain";
 import { StreamDeck } from "./objects/StreamDeck";
-import { Dock, Hotspots, SceneLabel, labelFor } from "./SceneUI";
+import { Hotspots, SceneLabel, labelFor } from "./SceneUI";
 import { rootRem, sideBand } from "./band";
 import { selectActive, useScene } from "./store";
 
@@ -237,7 +237,6 @@ export default function Scene() {
         <>
           <SceneLabel />
           <Hotspots />
-          <Dock />
         </>
       )}
     </>
