@@ -215,8 +215,6 @@ export const ORB = {
 
 export const CAT = {
   position: onDesk(0.16, 0.64),
-  /** On a narrow screen the desk's ends are out of frame, so it sits a little further in. */
-  phonePosition: onDesk(0.21, 0.66),
   /** Which way it faces: 0 is straight at the viewer, positive turns it toward the desk's middle from the left. */
   yaw: deg(28),
 };
@@ -247,13 +245,7 @@ const deskCorners: Vec3[] = [
 
 const allMonitorCorners = MONITORS.flatMap(monitorCorners);
 
+/** What the home view keeps in frame: both monitors and the whole desk top. */
 export const FRAME_POINTS = {
-  /** Landscape: both monitors and the whole desk top. */
   desk: [...deskCorners, ...allMonitorCorners],
-  /** Portrait: the monitors and the Stream Deck. */
-  monitors: [
-    ...allMonitorCorners,
-    [STREAM_DECK.position[0] - 0.07, 0, STREAM_DECK.position[2] + 0.06] as Vec3,
-    [STREAM_DECK.position[0] + 0.07, 0, STREAM_DECK.position[2] + 0.06] as Vec3,
-  ],
 };

@@ -8,7 +8,8 @@ const city = (page) =>
     const style = (selector) => getComputedStyle(document.querySelector(selector));
     return {
       first: document.querySelector(".rain").firstElementChild.classList.contains("city"),
-      covers: box.left <= 0 && box.top <= 0 && box.right >= innerWidth && box.bottom >= innerHeight,
+      // The scene is the whole window, or the banner across the top of an upright screen.
+      covers: ((scene) => box.left <= scene.left && box.top <= scene.top && box.right >= scene.right && box.bottom >= scene.bottom)(document.querySelector(".scene").getBoundingClientRect()),
       towers: document.querySelectorAll(".city-near > g").length,
       cars: cars.length,
       fly: style(".city-car").animationName,
@@ -73,6 +74,6 @@ export default async function cyberCity({ open, check, at, sceneReady, settle, f
   await sceneReady(phone.page);
   const small = await city(phone.page);
   const overflow = await phone.page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  check("city: phone: it covers the view and nothing overflows sideways", small.covers && overflow <= 0, `${overflow}px`);
+  check("city: phone: it covers the banner and nothing overflows sideways", small.covers && overflow <= 0, `${overflow}px`);
   await phone.context.close();
 }

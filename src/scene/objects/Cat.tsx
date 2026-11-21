@@ -100,7 +100,7 @@ export default function Cat() {
   const invalidate = useThree((s) => s.invalidate);
   const get = useThree((s) => s.get);
   const phone = useThree((s) => s.size.width <= 640);
-  const place = phone ? CAT.phonePosition : CAT.position;
+  const place = CAT.position;
 
   const motion = useMemo(() => new CatMotion("loaf", Math.random, ONLY_BREATHING), []);
   const brain = useMemo(() => new CatBrain(), []);

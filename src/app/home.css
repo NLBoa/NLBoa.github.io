@@ -1,0 +1,188 @@
+/*
+ * The home page on an upright screen (a phone, a tablet held upright): the
+ * desk is a banner across the top and every project is a tile under it.
+ * See docs/features/phone-home.md. A wide window is untouched: there the desk
+ * fills the window and none of this applies.
+ *
+ * The sizes are worked out here in CSS, from the window alone, so the banner
+ * is the same size on every page and nothing is measured in JavaScript:
+ *
+ *   --home-row    one row of tiles: what is left of the screen under a banner
+ *                 0.85 times as tall as the screen is wide, split between the
+ *                 rows, and kept between a finger-sized and a generous tile
+ *   --home-panel  the tiles and the Credits row together
+ *   --banner      the rest of the screen, header included
+ *
+ * `svh`, not `dvh`: the banner holds a WebGL canvas, which must not be resized
+ * each time a phone's browser bars slide in or out.
+ */
+.home-tiles {
+  display: none;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  :root {
+    --home-cols: 2;
+    --home-rows: 3;
+    --home-gap: 0.5rem;
+    --home-top: 0.75rem;
+    --home-row-min: 4.75rem;
+    --home-row-max: 8.5rem;
+    /* The Credits row: a 44 px target, clear of a phone's home bar. */
+    --home-foot: calc(2.75rem + max(0.5rem, env(safe-area-inset-bottom)));
+    --home-extras: calc(var(--home-top) + (var(--home-rows) - 1) * var(--home-gap) + var(--home-foot));
+    --home-row: clamp(var(--home-row-min), (100svh - 85vw - var(--home-extras)) / var(--home-rows), var(--home-row-max));
+    --home-panel: calc(var(--home-rows) * var(--home-row) + var(--home-extras));
+    /* Never taller than it is wide (the desk is a wide thing; on a very tall, narrow window the
+       space left over stays empty under the tiles), and never so short that the desk is a strip
+       (on a screen that small the page scrolls). */
+    --banner: max(min(100svh - var(--home-panel), 100vw), var(--header-height) + 11rem);
+  }
+
+  /* The desk is drawn in the banner only, on every page, so nothing is resized when one opens. */
+  .scene {
+    inset: 0 0 auto 0;
+    height: var(--banner);
+  }
+
+  /* Its lower edge melts into the wall the tiles sit on. */
+  .scene::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1.5rem;
+    background: linear-gradient(transparent, var(--wall));
+    pointer-events: none;
+  }
+
+  /*
+   * The tiles stand in for the desk's objects from the first paint: while the
+   * desk loads (`data-webgl`, set before the page shows) and for as long as it
+   * is mounted (`.scene`). With no WebGL neither holds, and the plain index is
+   * the page.
+   */
+  html[data-webgl] main.home,
+  body:has(.scene) main.home {
+    padding-top: var(--banner);
+  }
+
+  body:has(.scene) .home-index {
+    display: none;
+  }
+
+  html[data-webgl] .home-tiles,
+  body:has(.scene) .home-tiles {
+    position: relative;
+    z-index: 2;
+    display: block;
+    padding: var(--home-top) var(--gutter) 0;
+    background: var(--wall);
+  }
+
+  .home-tiles ul {
+    display: grid;
+    grid-template-columns: repeat(var(--home-cols), minmax(0, 1fr));
+    grid-auto-rows: var(--home-row);
+    gap: var(--home-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* One button: the cover, then the title. The colors are the monitor screen's (projects.css). */
+  .home-tile {
+    --accent: var(--screen-light);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid #1e2b40;
+    border-radius: 10px;
+    background: #111a29;
+    text-decoration: none;
+    transition: transform 0.1s ease;
+  }
+
+  .home-tile:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
+
+  /* Pressed, like a key. */
+  .home-tile:active {
+    transform: scale(0.98);
+    border-color: var(--accent);
+  }
+
+  .home-tile-art {
+    display: block;
+    flex: 1 1 0;
+    min-height: 0;
+    border-bottom: 1px solid #1e2b40;
+    background: color-mix(in srgb, var(--accent) 7%, #0b111c);
+  }
+
+  .home-tile-art .cover {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+  }
+
+  .home-tile-title {
+    flex: none;
+    overflow: hidden;
+    padding: 0.35rem 0.7rem 0.45rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* "Setting up the desk" waits in the middle of the banner. */
+  html[data-webgl] .home-loading {
+    inset: calc(var(--banner) / 2) 0 auto 0;
+  }
+
+  /* Credits: one row under the tiles, the last thing on the screen. */
+  html[data-webgl] body:has(main.home) .site-footer,
+  body:has(.scene):has(main.home) .site-footer {
+    position: relative;
+    inset: auto;
+    display: flex;
+    align-items: center;
+    height: var(--home-foot);
+    padding: 0 var(--gutter) max(0.5rem, env(safe-area-inset-bottom));
+    background: var(--wall);
+  }
+
+  .home ~ .site-footer a {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+}
+
+/* A tablet held upright: three across, two rows. */
+@media (max-aspect-ratio: 1/1) and (min-width: 36rem) {
+  :root {
+    --home-cols: 3;
+    --home-rows: 2;
+    --home-gap: 0.75rem;
+    --home-row-min: 6.5rem;
+    --home-row-max: 11rem;
+  }
+
+  .home-tile-title {
+    padding: 0.5rem 0.9rem 0.6rem;
+    font-size: 1.0625rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-tile {
+    transition: none;
+  }
+}

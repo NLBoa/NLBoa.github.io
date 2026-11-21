@@ -185,68 +185,6 @@ body:has(main.page) .site-header {
   outline: none;
 }
 
-/* Phones: the featured projects, in the space under the desk. */
-.dock {
-  display: none;
-}
-
-@media (max-aspect-ratio: 1/1) {
-  .dock {
-    position: fixed;
-    inset: auto 0 0 0;
-    z-index: 2;
-    display: block;
-    padding: 0 var(--gutter) max(1.25rem, env(safe-area-inset-bottom));
-    opacity: 0;
-    transition: opacity 0.7s ease;
-  }
-
-  .dock[data-ready="true"] {
-    opacity: 1;
-  }
-
-  .dock ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .dock a {
-    display: block;
-    padding: 0.5rem 0;
-    text-decoration: none;
-  }
-
-  .dock .project-title {
-    display: block;
-    font-size: 1.0625rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-
-  .dock .project-summary {
-    display: block;
-    color: var(--dim);
-    font-size: 0.875rem;
-    line-height: 1.35;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .dock .dock-more {
-    display: flex;
-    gap: 1.5rem;
-  }
-
-  .dock .dock-more a {
-    color: var(--dim);
-    font-size: 0.9375rem;
-    text-decoration: underline;
-    text-decoration-color: var(--faint);
-  }
-}
-
 /* Pages -------------------------------------------------------------------- */
 
 .page,
@@ -314,12 +252,7 @@ html[data-webgl] body:has(main.home) .site-footer {
   padding-bottom: 1.25rem;
 }
 
-@media (max-aspect-ratio: 1/1) {
-  /* On phones the Credits link sits in the dock instead. */
-  html[data-webgl] body:has(main.home) .site-footer {
-    display: none;
-  }
-}
+/* On an upright screen it is a row under the tiles instead (home.css). */
 
 .lede + .credit {
   margin-top: 3rem;
@@ -958,7 +891,6 @@ p {
   .scene,
   .scrim,
   .site-header,
-  .dock,
   .scene-label {
     transition: none;
   }

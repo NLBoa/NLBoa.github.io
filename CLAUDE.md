@@ -27,6 +27,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - **Smooth in Safari's engine: merged into `main` and published 2026-11-18** (Noah: "Publish it"). Noah filmed frame drops in DuckDuckGo; the cause and the fix are in the 2026-11-18 decisions below. The branch `safari-smooth` still exists locally and is fully contained in `main`. Live site checked after the deploy in Chrome: every route 200, a parked project and an unknown address 404, no filter in the city, the hand cursor on the canvas only, the left monitor opens Projects and Esc closes it, no frame over 17 ms, an empty console at both sizes. The live site was not measured in Safari or DuckDuckGo (`npm run frames` measures the local build, which is the same code); the before and after numbers below are from the local build.
 - **The weather rests after a page has arrived: merged into `main` and published 2026-11-18** (Noah: "Yes, do it" to removing the last hitch when a page opens, then "Publish it"). See the last 2026-11-18 decisions below. The branch `weather-rest-later` still exists locally and is fully contained in `main`. Live site checked after the deploy in Chrome: every route 200, a parked project and an unknown address 404; opening Projects from the desk, the weather is still running as the page arrives and rests 1.5 s later; back on the desk it runs again at once; a page loaded directly rests at once; beside a project page it keeps going; behind About no label and no hand cursor; no frame over 17 ms; an empty console. Not measured on the live site in Safari or DuckDuckGo (`npm run frames` measures the local build, which is the same code).
 - **A cat on the desk: merged into `main` and published 2026-11-21** (Noah: "Merge it", then "Publish it"). Noah turned down two found models ("create your own"), so it is made in code. After seeing it he ruled: no drawn lines or stripes on it; it sits on the left side of the desk; and it only lies in the loaf, breathes and watches the pointer. The five emotes he first asked for (purr, clean, loaf, roll over, stare) are built and tested but switched off. Everything about it is in `docs/features/desk-cat.md`: read that before touching `src/scene/cat/`. The branches `feature/desk-cat` and `cat-watches-pointer` still exist locally and are fully contained in `main`. Before the push: 175 unit tests, and all 353 browser checks against the production build. Live site checked after the deploy in Chrome, with pictures: every route 200, a parked project and an unknown address 404, the cat's model served, the cat on the left of the desk at both sizes, its head turning to the pointer at the right, the near left and the top, still breathing after the pointer has rested, a click on it opens nothing, Projects opens, an empty console at both sizes. Not measured on the live site in Safari or DuckDuckGo, on battery, or on a real phone.
+- **The phone home page: built and tested on the branch `phone-home`, not merged, not published** (Noah, 2026-11-21, with a screenshot from his phone: make the phone experience better; he chose "Desk on top, tiles" from four options and approved the design). On an upright window the desk is a banner across the top and the five projects plus "More on GitHub" are tiles under it; the list that sat over the desk's legs is gone. Everything about it is in `docs/features/phone-home.md`. 184 unit tests, and all 384 browser checks against the production build. **Not tried on a real phone**: Noah's phone is the test before it is published.
 - Stop at the end of each phase, show screenshots at 1440×900 and 390×844, and wait.
 
 ## Stack
@@ -43,7 +44,7 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 - `npm run dev` — dev server on :3000
 - `npm run build` (writes the static site to `out/`), `npm run preview` (serves `out/` like GitHub Pages, port 3200), `npm run lint`, `npm test` (vitest, pure logic only)
 - `npm run checkpoint -- <label> [route]` — with the dev server running: screenshots at both review sizes into `docs/checkpoints/`, triangles, draw calls, frames drawn while idle, 3D asset bytes, open TODOs. Uses the installed Google Chrome through playwright-core.
-- `npm run flows` — with the dev server running: about 340 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
+- `npm run flows` — with the dev server running: about 380 end-to-end checks (hover, click, Esc, Back, Tab order, direct URLs, 404, no WebGL, reduced motion, phone) plus page screenshots
 - `npm run frames -- Safari` (or `DuckDuckGo`, `--runs 3`, `--css "<rules>"`) — after `npm run build`: opens the built site in that browser and reports frame times while resting, moving the pointer, opening Projects and closing it. The only check that runs in Safari's engine; it brings that browser to the front, so it is not part of `flows`. `--css` repeats the visit with extra rules (for example `.city{display:none}`) to find what costs.
 - `npm run todos` — list every `TODO(noah)` in the content files
 - `npm run share-image` — re-captures `src/app/opengraph-image.png` (1200×630) from the running site; run it again after the look or the content on the screens changes
@@ -59,10 +60,12 @@ Priorities, in order: (1) any project is readable within two clicks, on a phone 
 
 ```
 src/app/         layout.tsx: header, <SceneMount/> (once, so the canvas persists), scrim, page
-                 globals.css (site and the miniature frame), miniatures.css (each miniature's drawing)
+                 globals.css (site and the miniature frame), miniatures.css (each miniature's drawing),
+                 home.css (the home page on an upright screen: the desk as a banner, the tiles under it)
                  page.tsx (home: the Projects index, hidden while the desk is up),
                  projects/, projects/[slug]/, about/, contact/, resume/   — all static HTML
-src/components/  Header, NavLinks, Page (frame with Close), ProjectList, RouteSync
+src/components/  Header, NavLinks, Page (frame with Close), ProjectList, RouteSync,
+                 HomeTiles (the home page's tiles on an upright screen)
                  project/ProjectStory (the story layout), project/ProjectPager
 src/content/     all site copy, typed (types, projects, about, contact, site, miniatures),
                  resume.ts + resume-data.json (generated from the PDF; never edit by hand)
@@ -77,7 +80,7 @@ src/scene/       layout.ts      every size and position in meters (single source
                  CameraRig.tsx  owns the camera: poses, flights, pointer drift
                  Highlight.tsx  outline frames, pointer handlers
                  Scene.tsx      the <Canvas>, label anchor, ready flag, pulse, dev stats
-                 SceneUI.tsx    DOM beside the canvas: label, hotspot links, phone dock
+                 SceneUI.tsx    DOM beside the canvas: label, hotspot links
                  SceneMount.tsx WebGL check, error boundary, dynamic import with ssr: false
                  Lights.tsx, materials.ts, geometry.ts
                  objects/       Room, Monitors, StreamDeck, PenCup, Keyboard, Orb, Cat
@@ -85,6 +88,7 @@ src/scene/       layout.ts      every size and position in meters (single source
                                 pose.ts + stances.ts, motion.ts (clips, emotes, idle life), brain.ts (what it decides)
                  Rain.tsx, City.tsx (+ skyline.ts)  the weather and the city behind it: page layers, CSS only
                  band.ts        the strip beside a project page where the room shows
+                 banner.ts      what the camera keeps clear in the phone's banner (pure, tested)
                  orb.ts         where the orb looks (pure, tested)
                  textures/      screens.ts, useScreenTexture.ts, keyIcons.ts
 scripts/         checkpoint.mjs, flows.mjs, browser-frames.mjs, optimize-models.mjs, fetch-textures.mjs
@@ -102,7 +106,7 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - Monitor bottom edges sit 21 cm above the desk so the pens clear the right monitor.
 - `frameloop="demand"`: nothing is drawn unless something calls `invalidate()`. Never give `useFrame` a render priority (it switches off R3F's own rendering).
 - Pixel ratio capped at 2, 1.5 under 640 px wide.
-- Camera: landscape looks down 30° with the whole desk top and both monitors in frame. Portrait frames the monitors and Stream Deck by width and shifts the picture up (`shiftY`), leaving the lower part of the screen for page content.
+- Camera: the home view looks down 30° with the whole desk top and both monitors in frame, whatever the frame's shape. On an upright window the canvas is only a banner across the top (`home.css`), and the desk is fitted between the header's text and the banner's faded lower edge (`banner.ts`, `homePose(aspect, clear)`, `shiftY`). There is no separate portrait view any more.
 
 ## Decisions
 
@@ -134,7 +138,7 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-10 — **How navigation works.** Every route is a real static page. The store's `view` is `flight?.view ?? viewForPath(path)`. Clicking an object calls `activate(id)`: the camera eases there (700 ms), then `router.push`. Header links and direct loads skip the flight; a direct load starts with the camera already on that route's pose. Esc pushes `/`. Under reduced motion `activate` pushes at once and the camera cuts.
 - 2026-11-10 — **Accessibility model.** `SceneUI.Hotspots` renders a real link for each interactive object (visually hidden, in Tab order: monitors, lit keys, pen cup). Focus on one outlines and labels its object in the scene; Enter is an ordinary link activation. The canvas itself is `aria-hidden`. Keyboard and trackpad have no handlers.
 - 2026-11-10 — **Fallbacks.** An inline head script sets `html[data-webgl]` when the browser has WebGL2; that hides the home page's HTML index. `SceneMount` removes the mark if the context cannot be created or the scene throws, so the index comes back. Header and pages never depend on the scene.
-- 2026-11-10 — **Phones.** Stream Deck keys are too small to tap, so on portrait screens the four featured projects are listed as links under the desk (`SceneUI.Dock`). Pixel ratio 1.5, shadows baked once.
+- 2026-11-10 — (Superseded 2026-11-21 by the phone home page.) **Phones.** Stream Deck keys are too small to tap, so on portrait screens the four featured projects are listed as links under the desk (`SceneUI.Dock`). Pixel ratio 1.5, shadows baked once.
 - 2026-11-10 — Outlines are explicit geometry (`OutlineFrame` rings, `OutlineHull` for the cup). drei's `<Outlines>` rendered nothing visible here; do not go back to it without checking a screenshot.
 - 2026-11-10 — With a page open the scrim is 94% and the monitor screens go dark, otherwise the screen text ghosts behind the page text.
 - 2026-11-10 — (Superseded by the static export, below.) `/projects/[slug]` used `export const instant = false` under Cache Components so an unknown slug was a real 404.
@@ -142,7 +146,7 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-10 — Design tokens: wall `#121110`, paper `#ece6da`, dim `#a8a093`, faint `#756e63`, screen light `#cfe0ff` (focus rings and outlines). Left-aligned single column, no cards, no all-caps labels, no rules between rows.
 - 2026-11-10 — The idle camera drift (3° yaw, 1.5° pitch) is for mouse and trackpad only, only on the desk view.
 
-- 2026-11-10 — **Credits.** `src/content/credits.ts` is the typed manifest (title, creator, source, exact license link, changes) and `/credits` is generated from it; the footer links there (on phones the link sits in the dock). The keyboard's license link is the one the Sketchfab API reports for the model: `http://creativecommons.org/licenses/by/4.0/`. Fonts are listed too.
+- 2026-11-10 — **Credits.** `src/content/credits.ts` is the typed manifest (title, creator, source, exact license link, changes) and `/credits` is generated from it; the footer links there (on an upright screen it is a row under the tiles). The keyboard's license link is the one the Sketchfab API reports for the model: `http://creativecommons.org/licenses/by/4.0/`. Fonts are listed too.
 - 2026-11-10 — **Share image** is a 1200×630 capture of the desk (`opengraph-image.png` at the app root, so every page uses it); titles follow `<page> | Noah Leibovitz`. `metadataBase`, the sitemap and robots use `siteUrl` from `src/content/site.ts`: `NEXT_PUBLIC_SITE_URL`, else localhost.
 - 2026-11-10 — **Loading.** Header and page shell render at once. On the home page a quiet "Setting up the desk" note appears after 0.9 s if the scene is not ready, and after 8 s the HTML Projects index stands in until it is.
 - 2026-11-10 — **404.** `src/app/not-found.tsx`, exported as `out/404.html`, which GitHub Pages serves with status 404 for any unknown address.
@@ -218,9 +222,15 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-21 — **`npm run flows` has `ONLY`**: `ONLY=desk-cat npm run flows` runs just the feature checks whose file name contains that. The hand-off timing checks (`ONLY=handoff`) are only reliable against the production build (`BASE_URL=http://localhost:3200` after a build with `NEXT_PUBLIC_SCENE_STATS=1` and `npm run preview`); against the dev server three of them fail by a frame or two, with or without the cat.
 - 2026-11-21 — **Noah's rulings on the cat, after seeing it:** no drawn lines or stripes anywhere on it ("cats don't have lines like that"): the coat is soft, uneven shading only. And it **only lies in the loaf, breathes and watches the pointer** ("keep the cat only in loaf mode", then "Only breathing", then, when the pointer-watching went with the rest, "It's no longer looking at the mouse"): it breathes, blinks and turns its head and eyes to the pointer, with no emotes, no ear or tail flicks and nothing in answer to a stroke or a click. It sits on the **left** side of the desk, in front of the left monitor ("there is a lot of space"). When Noah asks for less, take away only what he named. The five emotes are still in the code and tested, switched off by `ONLY_BREATHING` and `REPERTOIRE` in `src/scene/cat/brain.ts`. Do not bring stripes, emotes or reactions back without asking.
 
+- 2026-11-21 — **On an upright window the desk is a banner and the projects are tiles under it** (branch `phone-home`; Noah chose it over no 3D on phones, patching the full-screen desk, and a desk rebuilt for portrait). The sizes are worked out in CSS from the window alone (`home.css`: `--home-row`, `--home-panel`, `--banner`), in `svh` so a phone's sliding browser bars never resize the canvas, and the banner is the same size on every page. The tiles show the cover and the title only: a summary line would shrink the banner to a strip on his phone. Without WebGL the page is the plain index, not the tiles. "No 3D on phones" is the fallback if the desk is slow on a real phone: only the banner would change. Do not bring the old list over the desk back.
+- 2026-11-21 — **The cat has one position.** `CAT.phonePosition` existed because the old phone view cut off the desk's ends; the banner shows the whole desk, so it sits where Noah put it on every screen.
+- 2026-11-21 — **`.claude/launch.json` has `portfolio-preview`** (`npm run preview`, port 3200), so the built site can be served from the app for the production-build checks.
+
 ## Open questions for Noah
 
 Every story is a draft for Noah to read. Aegis Orbit: role wording; teammates and who built what; any result at Technica; whether the README's figures belong; which parts of the sandbox HUD were his; OK to use the two screenshots. Argus: OK to use the two demo-data screenshots; order of the steps; whether the FlowSavvy hand-off is described correctly. Jupiterp: a usage figure, if the maintainers have one. Smart Display: whether the tap-to-light chain is right for the board; whether to name the roommates. Shell: whether each replayed output matches what the shell prints. MID: what it does; whether to link its public repository.
+
+The phone home page: how it feels on his real phone (smoothness, and whether the banner jumps as the browser's bars move); whether the tiles should carry a line of summary after all.
 
 The cat: whether it now looks enough like his cat (coat, face, eye color, size); its place on the desk; whether it should keep blinking (he asked for "only breathing"; the blink was kept as a judgment call).
 
