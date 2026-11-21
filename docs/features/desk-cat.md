@@ -1,6 +1,6 @@
 # A cat on the desk
 
-Branch: `feature/desk-cat` (from `main`, 2026-11-20). Merged into `main` 2026-11-21 (Noah: "Merge it"); not published.
+Branch: `feature/desk-cat` (from `main`, 2026-11-20). Merged into `main` and published 2026-11-21 (Noah: "Merge it", then "Publish it").
 
 Noah sent a photo of his cat, a grey tabby Siberian, and asked for it to live on the site "as a sentient creature" so the site feels "less stale and more representative of who I am". Two found models were shown and turned down ("I don't like either. Instead create your own"). He asked for a smooth cat, a coat that "should feel like actual fur", smooth movement, and five emotes: purr ("where it shakes a little"), clean, loaf, roll over, stare ("feels as though it stares at the user").
 
