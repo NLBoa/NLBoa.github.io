@@ -351,6 +351,8 @@ export class CatMotion {
   private now = 0;
   private breath = 0;
   private readonly look: V3 = [0, 0.3, 1];
+  /** 0 to 1: how far the head and eyes are given over to what it is watching. */
+  private watch: number;
   private blinkAt: number;
   private blinkT = -1;
   private twitchAt: number;
@@ -364,12 +366,14 @@ export class CatMotion {
     stance: StanceName = "loaf",
     private readonly random: () => number = Math.random,
     /**
-     * Quiet: nothing but breathing and blinking. No ear or tail flicks, no wave in the tail, and
-     * the head stays where the pose puts it instead of following the pointer or wandering.
+     * Quiet: it breathes, blinks and watches the pointer, and that is all. No ear or tail flicks,
+     * no wave in the tail, no wandering gaze: when nothing holds its interest the head rests
+     * where the pose puts it.
      */
     readonly quiet = false,
   ) {
     this.stance = stance;
+    this.watch = quiet ? 0 : 1;
     this.clip = rest(stance);
     this.clip.sample(0, this.base);
     copyPose(this.from, this.base);
@@ -550,7 +554,7 @@ export class CatMotion {
     let ty = hy + Math.sin(pitch) * 0.6 + 0.02;
     let tz = hz + Math.cos(yaw) * 0.6;
     let speed = 1.6;
-    const interest = input.pointer && !this.quiet ? clamp(input.attention) * (1 - staring) : 0;
+    const interest = input.pointer ? clamp(input.attention) * (1 - staring) : 0;
     if (input.pointer && interest > 0) {
       tx = lerp(tx, input.pointer[0], interest);
       ty = lerp(ty, input.pointer[1], interest);
@@ -571,9 +575,12 @@ export class CatMotion {
     // Following something is quick and wants every frame; the idle wander is slow and does not.
     if ((interest > 0.02 || staring > 0.02) && Math.abs(this.look[0] + this.look[1] + this.look[2] - before) > 0.0006) busy = true;
 
-    // Quiet, the head and eyes stay as the pose has them (unless an emote is played by hand).
-    const held = this.quiet && staring < 0.01 && !clip.busy;
-    const gaze = held ? 0 : pose.ch[CH.gaze];
+    // Quiet, the head and eyes turn only as far as something holds its interest, and come back to
+    // the pose as that fades. The turn itself eases in and out, so it never starts with a jerk.
+    const drawn = this.quiet && !clip.busy ? Math.max(interest, staring) : 1;
+    this.watch += (drawn - this.watch) * (1 - Math.exp(-dt * (drawn > this.watch ? 5 : 2.5)));
+    if (Math.abs(drawn - this.watch) > 0.004) busy = true;
+    const gaze = pose.ch[CH.gaze] * this.watch;
     if (gaze > 0.001) {
       this.aim(B.neck, 0.4 * gaze, 0.6, this.look[0], this.look[1], this.look[2]);
       this.aim(B.head, gaze, 0.75, this.look[0], this.look[1], this.look[2]);
@@ -586,7 +593,7 @@ export class CatMotion {
     // Into the head's own frame: the inverse turn is the same quaternion with its axis flipped.
     const hq = [-w.q[B.head * 4], -w.q[B.head * 4 + 1], -w.q[B.head * 4 + 2], w.q[B.head * 4 + 3]];
     qRotate(local, 0, hq, 0, lx / ll, ly / ll, lz / ll);
-    const eyes = held ? 0 : Math.max(gaze, 0.25);
+    const eyes = this.quiet ? gaze : Math.max(gaze, 0.25);
     const eyeYaw = clamp(Math.atan2(local[0], Math.max(0.05, local[2])), -0.42, 0.42) * 0.9 * eyes;
     const eyePitch = clamp(-Math.asin(clamp(local[1], -1, 1)), -0.3, 0.3) * 0.9 * eyes;
     const quick = 1 - Math.exp(-dt * 16);

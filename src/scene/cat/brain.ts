@@ -15,8 +15,9 @@ import type { EmoteName } from "./motion";
 type Stance = "sit" | "loaf" | "side";
 
 /**
- * The cat lies in the loaf and breathes (and blinks): no emotes, no watching the pointer, no ear
- * or tail flicks, nothing in answer to a stroke or a click.
+ * The cat lies in the loaf, breathes, blinks and watches the pointer: no emotes, no ear or tail
+ * flicks, nothing in answer to a stroke or a click. (Watching the pointer was switched off with
+ * the rest at first; Noah missed it at once: "It's no longer looking at the mouse".)
  */
 export const ONLY_BREATHING = true;
 

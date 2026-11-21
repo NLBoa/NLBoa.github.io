@@ -30,7 +30,7 @@ await mkdir(out, { recursive: true });
 
 const SECONDS = { loaf: 5, purr: 9, clean: 11.5, roll: 9.5, stare: 9 };
 // The cat's place on the desk and the way it faces (see CAT in src/scene/layout.ts).
-const CAT = { x: 0.504, z: 0.112, yaw: -28 };
+const CAT = { x: -0.476, z: 0.098, yaw: 28 };
 
 const browser = await chromium.launch({ channel: "chrome" });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
@@ -69,7 +69,7 @@ if (which === "still") {
   process.exit(0);
 }
 
-const clip = desk ? { x: 960, y: 400, width: 400, height: 300 } : { x: 360, y: 150, width: 720, height: 540 };
+const clip = desk ? { x: 90, y: 400, width: 400, height: 300 } : { x: 360, y: 150, width: 720, height: 540 };
 const tile = { width: 360, height: 270 };
 
 for (const emote of which === "all" ? Object.keys(SECONDS) : [which]) {

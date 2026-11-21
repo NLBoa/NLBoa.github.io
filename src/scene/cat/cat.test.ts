@@ -191,9 +191,8 @@ describe("as it is now: only breathing", () => {
     expect(brain.moved(400, true)).toBeNull();
   });
 
-  test("the quiet cat breathes and blinks, and nothing else moves", () => {
+  test("left alone, the quiet cat breathes and blinks, and nothing else moves", () => {
     const motion = new CatMotion("loaf", dice(6), true);
-    const pointer: [number, number, number] = [0.6, 0.2, 0.3];
     const still = ["head", "earL", "earR", "tail1", "tail4", "tail7", "hips", "chest"].map(bone);
     const first = new Float32Array(BONE_COUNT * 4);
     let ribsLow = 1;
@@ -201,8 +200,7 @@ describe("as it is now: only breathing", () => {
     let eyeLow = 1;
     let worst = 0;
     for (let i = 0; i < 60 * 40; i++) {
-      // A pointer waving about beside it: it takes no notice.
-      motion.update(1 / 60, { pointer, attention: 0.9, camera: [0.3, 0.7, 1.4] });
+      motion.update(1 / 60, input);
       if (i === 0) first.set(motion.pose.q);
       for (const b of still) {
         const dot = Math.abs(first[b * 4] * motion.pose.q[b * 4] + first[b * 4 + 1] * motion.pose.q[b * 4 + 1] + first[b * 4 + 2] * motion.pose.q[b * 4 + 2] + first[b * 4 + 3] * motion.pose.q[b * 4 + 3]);
@@ -218,6 +216,39 @@ describe("as it is now: only breathing", () => {
     // The ribs swell and sink by about two percent, and it blinked at least once.
     expect(ribsHigh - ribsLow).toBeGreaterThan(0.03);
     expect(eyeLow).toBeLessThan(0.2);
+  });
+
+  test("it watches the pointer: the head turns to it smoothly, and back when interest fades", () => {
+    const motion = new CatMotion("loaf", dice(6), true);
+    const head = bone("head");
+    const forward = () => {
+      const q = motion.world.q.subarray(head * 4, head * 4 + 4);
+      return [2 * (q[0] * q[2] + q[3] * q[1]), 2 * (q[1] * q[2] - q[3] * q[0]), 1 - 2 * (q[0] * q[0] + q[1] * q[1])];
+    };
+    for (let i = 0; i < 60; i++) motion.update(1 / 60, input);
+    const rest = forward();
+    // The pointer appears well off to the cat's left.
+    const pointer: [number, number, number] = [0.7, 0.25, 0.5];
+    const last = new Float32Array(4);
+    let worst = 0;
+    for (let i = 0; i < 60 * 3; i++) {
+      last.set(motion.pose.q.subarray(head * 4, head * 4 + 4));
+      motion.update(1 / 60, { pointer, attention: 0.9, camera: [0.3, 0.7, 1.4] });
+      const q = motion.pose.q;
+      const dot = Math.abs(last[0] * q[head * 4] + last[1] * q[head * 4 + 1] + last[2] * q[head * 4 + 2] + last[3] * q[head * 4 + 3]);
+      worst = Math.max(worst, (2 * Math.acos(Math.min(1, dot)) * 180) / Math.PI);
+    }
+    const watching = forward();
+    // It has turned its head to the left, toward the pointer, without any frame jumping.
+    expect(watching[0] - rest[0]).toBeGreaterThan(0.25);
+    expect(worst).toBeLessThan(4);
+    expect(motion.eyeYaw).toBeGreaterThan(0.02);
+    // The pointer stops; interest fades; the head comes back to where the pose has it.
+    for (let i = 0; i < 60 * 6; i++) motion.update(1 / 60, { pointer, attention: 0, camera: [0.3, 0.7, 1.4] });
+    const back = forward();
+    expect(Math.hypot(back[0] - rest[0], back[1] - rest[1], back[2] - rest[2])).toBeLessThan(0.02);
+    // Ears and tail took no part.
+    expect(motion.doing).toBe("loaf");
   });
 });
 
