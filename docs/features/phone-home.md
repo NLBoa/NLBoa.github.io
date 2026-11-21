@@ -1,6 +1,6 @@
 # The phone home page: desk on top, tiles below
 
-Status: **merged into `main` 2026-11-21 (Noah: "Merge it"); not published.** Noah approved the design the same day ("Approve, build it"). Not yet tried on a real phone.
+Status: **merged into `main` and published 2026-11-21 (Noah: "Merge it", then "Publish it").** The live site was checked after the deploy in Chrome at 390 × 660, 375 × 553 and 1440 × 900. Noah approved the design the same day ("Approve, build it"). Not yet tried on a real phone.
 
 ## Why
 
