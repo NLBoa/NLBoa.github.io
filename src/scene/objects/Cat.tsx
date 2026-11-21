@@ -6,7 +6,7 @@ import { Raycaster, ShaderMaterial, Vector2, Vector3, type Mesh } from "three";
 import { asset } from "@/lib/paths";
 import { inspect } from "../CameraRig";
 import { CatBody } from "../cat/body";
-import { CatBrain } from "../cat/brain";
+import { CatBrain, ONLY_BREATHING } from "../cat/brain";
 import type { V3 } from "../cat/math";
 import { CatMotion, EMOTES, type EmoteName } from "../cat/motion";
 import { buildPose, layTail, makeWorld, settle, type PoseSpec } from "../cat/pose";
@@ -91,8 +91,9 @@ function toCat(place: readonly number[], x: number, y: number, z: number, out: V
 }
 
 /**
- * The cat on the desk. It is decoration with a life of its own: it opens nothing, has no label
- * and takes no part in the Tab order. It moves only while the desk itself is on show.
+ * The cat on the desk. It is decoration: it opens nothing, has no label and takes no part in the
+ * Tab order. For now it only lies in the loaf and breathes (see ONLY_BREATHING in cat/brain.ts);
+ * everything else it can do is still here. It moves only while the desk itself is on show.
  */
 export default function Cat() {
   const [body, setBody] = useState<CatBody | null>(null);
@@ -101,7 +102,7 @@ export default function Cat() {
   const phone = useThree((s) => s.size.width <= 640);
   const place = phone ? CAT.phonePosition : CAT.position;
 
-  const motion = useMemo(() => new CatMotion("loaf"), []);
+  const motion = useMemo(() => new CatMotion("loaf", Math.random, ONLY_BREATHING), []);
   const brain = useMemo(() => new CatBrain(), []);
   const shadows = useRef<(Mesh | null)[]>([]);
   const shadowMaterials = useMemo(() => SHADOWS.map((s) => shadowMaterial(s.strength)), []);
@@ -261,7 +262,7 @@ export default function Cat() {
     body.show(motion.pose, motion.world, motion.ribs, motion.eyeYaw, motion.eyePitch, motion.converge, s.seconds);
 
     // Something is moving: draw the next frame. Only breathing: a gentler pace will do.
-    if (busy || attention > 0.02) three.invalidate();
+    if (busy || (attention > 0.02 && !motion.quiet)) three.invalidate();
     else if (!s.timer)
       s.timer = setTimeout(() => {
         s.timer = null;
@@ -290,7 +291,8 @@ export default function Cat() {
     (event: ThreeEvent<MouseEvent>) => {
       if (!alive()) return;
       event.stopPropagation();
-      motion.play(brain.poke());
+      const trick = brain.poke();
+      if (trick) motion.play(trick);
       invalidate();
     },
     [brain, motion, invalidate],

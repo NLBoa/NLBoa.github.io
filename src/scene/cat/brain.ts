@@ -1,7 +1,11 @@
 /**
- * What the cat decides to do. It mostly rests; every so often it does something of its own
- * accord; and it answers the visitor: it looks up when they arrive, purrs when stroked, and
- * does its next trick when clicked.
+ * What the cat decides to do.
+ *
+ * As built it mostly rested, did something of its own accord every so often, and answered the
+ * visitor: a look when they arrived, a purr when stroked, its next trick when clicked. Noah then
+ * asked for less, twice (2026-11-21): first "keep the cat only in loaf mode", then, asked whether
+ * it should still purr and stare, "Only breathing". So its repertoire is empty: it decides
+ * nothing, and all of this stands ready for the day he wants some of it back.
  *
  * Time and chance are handed in, so this can be tested.
  */
@@ -11,14 +15,20 @@ import type { EmoteName } from "./motion";
 type Stance = "sit" | "loaf" | "side";
 
 /**
- * What the cat will do. Noah asked for it to stay in the loaf (2026-11-21), so only the things a
- * loafing cat does: settle itself, purr, stare. Cleaning (which sits it up) and rolling over
- * (which lays it on its side) are still built and tested; put them back here to bring them back.
+ * The cat lies in the loaf and breathes (and blinks): no emotes, no watching the pointer, no ear
+ * or tail flicks, nothing in answer to a stroke or a click.
  */
-export const REPERTOIRE: readonly EmoteName[] = ["loaf", "purr", "stare"];
+export const ONLY_BREATHING = true;
 
-/** What a click asks for, in turn. */
-export const TRICKS: EmoteName[] = (["stare", "clean", "roll", "loaf"] as EmoteName[]).filter((emote) => REPERTOIRE.includes(emote));
+/**
+ * What the cat will do of its own accord or when asked. Everything is still built and tested:
+ * "loaf", "purr" and "stare" keep it in the loaf; "clean" sits it up and "roll" lays it on its
+ * side. Put names back here (and set ONLY_BREATHING to false) to bring them back.
+ */
+export const REPERTOIRE: readonly EmoteName[] = ONLY_BREATHING ? [] : ["loaf", "purr", "stare"];
+
+/** What a click asks for, in turn, of the things it will do. */
+export const TRICK_ORDER: readonly EmoteName[] = ["stare", "clean", "roll", "loaf"];
 
 /** Seconds of quiet between things it does unasked. */
 const GAP = { min: 11, max: 24 };
@@ -40,7 +50,14 @@ export class CatBrain {
   private sideSince: number | null = null;
   private poked = false;
 
-  constructor(private readonly random: () => number = Math.random) {}
+  constructor(
+    private readonly random: () => number = Math.random,
+    private readonly repertoire: readonly EmoteName[] = REPERTOIRE,
+  ) {}
+
+  private can(emote: EmoteName): boolean {
+    return this.repertoire.includes(emote);
+  }
 
   private gap() {
     return GAP.min + this.random() * (GAP.max - GAP.min);
@@ -56,7 +73,7 @@ export class CatBrain {
   moved(now: number, resting: boolean): EmoteName | null {
     const away = now - this.movedAt;
     this.movedAt = now;
-    if (this.greeted && resting && away > AWAY_AFTER) return this.started("stare");
+    if (this.can("stare") && this.greeted && resting && away > AWAY_AFTER) return this.started("stare");
     return null;
   }
 
@@ -68,19 +85,21 @@ export class CatBrain {
     } else if (this.overSince === null && !this.poked) this.overSince = now;
   }
 
-  /** True while the pointer has rested on the cat long enough to be a stroke. */
+  /** True while the pointer has rested on the cat long enough to be a stroke (and it purrs at all). */
   stroked(now: number): boolean {
-    return this.overSince !== null && now - this.overSince >= STROKE_AFTER;
+    return this.can("purr") && this.overSince !== null && now - this.overSince >= STROKE_AFTER;
   }
 
   /**
-   * A click on the cat: its next trick. The pointer is still on it afterwards, and that is not
-   * a stroke: it must leave and come back before it counts as one again.
+   * A click on the cat: its next trick, or null if it has none. The pointer is still on it
+   * afterwards, and that is not a stroke: it must leave and come back before it counts as one again.
    */
-  poke(): EmoteName {
+  poke(): EmoteName | null {
+    const tricks = TRICK_ORDER.filter((emote) => this.can(emote));
+    if (tricks.length === 0) return null;
     this.poked = true;
     this.overSince = null;
-    const emote = TRICKS[this.trick % TRICKS.length];
+    const emote = tricks[this.trick % tricks.length];
     this.trick++;
     return this.started(emote);
   }
@@ -90,6 +109,7 @@ export class CatBrain {
    * `doing` is what the motion reports; `resting` is true when nothing is playing or queued.
    */
   think(now: number, resting: boolean, stance: Stance, doing: string): EmoteName | null {
+    if (this.repertoire.length === 0) return null;
     // Being stroked comes before anything it had in mind.
     if (this.stroked(now) && doing !== "purr" && doing !== "clean" && doing !== "roll") return this.started("purr");
 
@@ -109,10 +129,10 @@ export class CatBrain {
 
     if (!this.greeted) {
       this.greeted = true;
-      return this.started("stare");
+      if (this.can("stare")) return this.started("stare");
     }
     // It does not lie on its side for ever.
-    if (this.sideSince !== null && now - this.sideSince > 14) return this.started("loaf");
+    if (this.sideSince !== null && now - this.sideSince > 14 && this.can("loaf")) return this.started("loaf");
 
     const choices: [EmoteName, number][] = [
       ["clean", 3],
@@ -122,7 +142,10 @@ export class CatBrain {
       ["stare", 3],
       ["purr", 2],
     ];
-    const open = choices.filter(([name, weight]) => weight > 0 && name !== this.last && REPERTOIRE.includes(name));
+    let open = choices.filter(([name, weight]) => weight > 0 && this.can(name));
+    // Not the same thing twice running, unless it is the only thing it does.
+    if (open.length > 1) open = open.filter(([name]) => name !== this.last);
+    if (open.length === 0) return null;
     let pick = this.random() * open.reduce((sum, [, weight]) => sum + weight, 0);
     for (const [name, weight] of open) {
       pick -= weight;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { CatBrain, REPERTOIRE, TRICKS } from "./brain";
+import { CatBrain, ONLY_BREATHING, REPERTOIRE, TRICK_ORDER } from "./brain";
 import { CatMotion, EMOTES, plan, route } from "./motion";
 import { CH, buildPose, layTail, lowest, makeWorld, settle, solve } from "./pose";
 import { BONE_COUNT, TAIL_BONES, bone } from "./rig";
@@ -176,9 +176,54 @@ describe("motion", () => {
   });
 });
 
-describe("what it decides", () => {
+/** The things a cat can do without leaving the loaf. */
+const LOAFING = ["loaf", "purr", "stare"] as const;
+
+describe("as it is now: only breathing", () => {
+  test("it decides nothing: no greeting, nothing unasked, nothing for a stroke or a click", () => {
+    expect(ONLY_BREATHING).toBe(true);
+    expect(REPERTOIRE).toEqual([]);
+    const brain = new CatBrain(dice(1));
+    for (let t = 0; t < 300; t += 0.25) expect(brain.think(t, true, "loaf", "loaf")).toBeNull();
+    brain.over(10, true);
+    expect(brain.stroked(20)).toBe(false);
+    expect(brain.poke()).toBeNull();
+    expect(brain.moved(400, true)).toBeNull();
+  });
+
+  test("the quiet cat breathes and blinks, and nothing else moves", () => {
+    const motion = new CatMotion("loaf", dice(6), true);
+    const pointer: [number, number, number] = [0.6, 0.2, 0.3];
+    const still = ["head", "earL", "earR", "tail1", "tail4", "tail7", "hips", "chest"].map(bone);
+    const first = new Float32Array(BONE_COUNT * 4);
+    let ribsLow = 1;
+    let ribsHigh = 1;
+    let eyeLow = 1;
+    let worst = 0;
+    for (let i = 0; i < 60 * 40; i++) {
+      // A pointer waving about beside it: it takes no notice.
+      motion.update(1 / 60, { pointer, attention: 0.9, camera: [0.3, 0.7, 1.4] });
+      if (i === 0) first.set(motion.pose.q);
+      for (const b of still) {
+        const dot = Math.abs(first[b * 4] * motion.pose.q[b * 4] + first[b * 4 + 1] * motion.pose.q[b * 4 + 1] + first[b * 4 + 2] * motion.pose.q[b * 4 + 2] + first[b * 4 + 3] * motion.pose.q[b * 4 + 3]);
+        worst = Math.max(worst, (2 * Math.acos(Math.min(1, dot)) * 180) / Math.PI);
+      }
+      ribsLow = Math.min(ribsLow, motion.ribs);
+      ribsHigh = Math.max(ribsHigh, motion.ribs);
+      eyeLow = Math.min(eyeLow, motion.pose.ch[CH.eye]);
+      expect(motion.doing).toBe("loaf");
+    }
+    // Head, ears, tail and body hold their pose to within a small fraction of a degree.
+    expect(worst).toBeLessThan(0.2);
+    // The ribs swell and sink by about two percent, and it blinked at least once.
+    expect(ribsHigh - ribsLow).toBeGreaterThan(0.03);
+    expect(eyeLow).toBeLessThan(0.2);
+  });
+});
+
+describe("what it decides, when it is given things to do", () => {
   test("it greets the visitor first, then leaves quiet spells between the things it does", () => {
-    const brain = new CatBrain(dice(4));
+    const brain = new CatBrain(dice(4), EMOTES);
     expect(brain.think(1, true, "loaf", "loaf")).toBeNull();
     expect(brain.think(2.5, true, "loaf", "loaf")).toBe("stare");
     // While that plays, nothing new.
@@ -193,7 +238,7 @@ describe("what it decides", () => {
   });
 
   test("it never does the same thing twice running", () => {
-    const brain = new CatBrain(dice(9));
+    const brain = new CatBrain(dice(9), EMOTES);
     let t = 0;
     let last: string | null = null;
     for (let n = 0; n < 60; n++) {
@@ -206,7 +251,7 @@ describe("what it decides", () => {
   });
 
   test("on its side it never rolls again, and before long it gets up into the loaf", () => {
-    const brain = new CatBrain(dice(9));
+    const brain = new CatBrain(dice(9), EMOTES);
     brain.think(2.5, true, "side", "side");
     brain.think(3, false, "side", "stare");
     const did: string[] = [];
@@ -221,8 +266,8 @@ describe("what it decides", () => {
     expect(did).toContain("loaf");
   });
 
-  test("it stays in the loaf: it never chooses to clean or roll over, by itself or when clicked", () => {
-    const brain = new CatBrain(dice(11));
+  test("told to stay in the loaf, it never chooses to clean or roll over, by itself or when clicked", () => {
+    const brain = new CatBrain(dice(11), LOAFING);
     const did = new Set<string>();
     let t = 0;
     for (let n = 0; n < 80; n++) {
@@ -231,14 +276,14 @@ describe("what it decides", () => {
       did.add(next);
       brain.think((t += 0.25), false, "loaf", next);
     }
-    for (let n = 0; n < 6; n++) did.add(brain.poke());
+    for (let n = 0; n < 6; n++) did.add(brain.poke() ?? "nothing");
     expect([...did].sort()).toEqual(["loaf", "purr", "stare"]);
     // And none of those leaves the loaf.
-    for (const emote of REPERTOIRE) expect(plan(emote, "loaf").every((clip) => clip.stance === "loaf")).toBe(true);
+    for (const emote of LOAFING) expect(plan(emote, "loaf").every((clip) => clip.stance === "loaf")).toBe(true);
   });
 
   test("a stroke is the pointer resting on it; it answers with a purr", () => {
-    const brain = new CatBrain(dice(1));
+    const brain = new CatBrain(dice(1), EMOTES);
     brain.think(2.5, true, "loaf", "loaf");
     brain.think(10, true, "loaf", "loaf");
     brain.over(12, true);
@@ -250,7 +295,7 @@ describe("what it decides", () => {
   });
 
   test("a click is not a stroke: the pointer has to leave and come back", () => {
-    const brain = new CatBrain(dice(1));
+    const brain = new CatBrain(dice(1), EMOTES);
     brain.think(2.5, true, "loaf", "loaf");
     brain.over(10, true);
     expect(brain.poke()).toBe("stare");
@@ -263,12 +308,12 @@ describe("what it decides", () => {
   });
 
   test("clicks go through its tricks in turn", () => {
-    const brain = new CatBrain(dice(1));
-    expect([brain.poke(), brain.poke(), brain.poke(), brain.poke(), brain.poke()]).toEqual(Array.from({ length: 5 }, (_, i) => TRICKS[i % TRICKS.length]));
+    const brain = new CatBrain(dice(1), EMOTES);
+    expect([brain.poke(), brain.poke(), brain.poke(), brain.poke(), brain.poke()]).toEqual(Array.from({ length: 5 }, (_, i) => TRICK_ORDER[i % TRICK_ORDER.length]));
   });
 
   test("a pointer that comes back after a long quiet gets a look", () => {
-    const brain = new CatBrain(dice(1));
+    const brain = new CatBrain(dice(1), EMOTES);
     brain.think(2.5, true, "loaf", "loaf");
     expect(brain.moved(3, true)).toBeNull();
     expect(brain.moved(20, true)).toBeNull();

@@ -13,11 +13,11 @@ export default async function deskCat({ open, check, sceneReady, settle, frames,
   // Park the pointer away from the cat and the desk's objects.
   await page.mouse.move(700, 40);
 
-  // It greets the visitor by looking up at them, a moment after it appears.
-  await page.waitForFunction(() => window.__cat.doing === "stare", null, { timeout: 8000 }).catch(() => {});
-  check("cat: it looks at the visitor soon after arriving", (await doing(page)) === "stare", await doing(page));
+  // It only lies in the loaf and breathes: nothing of its own accord.
+  await page.waitForTimeout(6000);
+  check("cat: it stays in the loaf, doing nothing of its own accord", (await doing(page)) === "loaf", await doing(page));
 
-  // Every emote plays through and comes to rest.
+  // The emotes are switched off, not removed: started by hand, each still plays through and comes to rest.
   for (const [emote, rest] of [
     ["loaf", "loaf"],
     ["purr", "loaf"],
@@ -37,7 +37,7 @@ export default async function deskCat({ open, check, sceneReady, settle, frames,
     check(`cat: "${emote}" plays and comes to rest`, seen.has(emote) && (await doing(page)) === rest, [...seen].join(" -> "));
   }
 
-  // At rest it only breathes: frames keep coming, at a calm pace.
+  // It breathes: frames keep coming, at a calm pace.
   await play(page, "loaf");
   await page.waitForFunction(() => window.__cat.doing === "loaf", null, { timeout: 20000 });
   // The pointer stopped a while ago, so it has lost interest in it.
@@ -48,22 +48,16 @@ export default async function deskCat({ open, check, sceneReady, settle, frames,
   check("cat: at rest it breathes, redrawn at a calm pace", calm >= 20 && calm <= 90, `${calm} frames in 2 s`);
   await page.screenshot({ path: path.join(out, "cat-1440x900.png") });
 
-  // A click on it is answered with its next trick.
+  // A click on it, or the pointer resting on it, is answered with nothing; and it opens nothing.
   const at = await page.evaluate(() => window.__cat.locate());
   await page.mouse.move(at.x, at.y, { steps: 5 });
   await page.mouse.click(at.x, at.y);
-  await page.waitForTimeout(500);
-  const afterClick = await doing(page);
-  check("cat: a click starts a trick", afterClick === "stare", afterClick);
-  check("cat: a click on it opens nothing", new URL(page.url()).pathname === new URL(page.url()).pathname.replace(/[^/]+\/?$/, "") && !(await page.locator(".page-close").count()), page.url());
-
-  // Stroking it (the pointer resting on it) makes it purr.
-  await page.mouse.move(700, 40, { steps: 4 });
-  await page.waitForFunction(() => ["loaf", "sit", "side"].includes(window.__cat.doing), null, { timeout: 25000 });
-  await page.mouse.move(at.x - 60, at.y - 120, { steps: 3 });
+  await page.waitForTimeout(1200);
+  check("cat: a click on it changes nothing", (await doing(page)) === "loaf", await doing(page));
+  check("cat: a click on it opens nothing", !(await page.locator(".page-close").count()), page.url());
   await page.mouse.move(at.x + 4, at.y + 3, { steps: 3 });
-  await page.waitForTimeout(900);
-  check("cat: it purrs when stroked", (await doing(page)) === "purr", await doing(page));
+  await page.waitForTimeout(1200);
+  check("cat: the pointer resting on it changes nothing", (await doing(page)) === "loaf", await doing(page));
   await page.mouse.move(700, 40, { steps: 4 });
 
   // Behind an open page it holds still: nothing is drawn.

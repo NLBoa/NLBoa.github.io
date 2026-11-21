@@ -6,7 +6,9 @@ Noah sent a photo of his cat, a grey tabby Siberian, and asked for it to live on
 
 ## What it does
 
-**Since 2026-11-21 the cat stays in the loaf** (Noah: "keep the cat only in loaf mode"). Of what is described below it now does only what a loafing cat does: it settles itself, purrs and stares. Cleaning and rolling over are still built, tested and playable from `window.__cat.play(...)`, but the cat never chooses them and a click never asks for them. To bring them back, add them to `REPERTOIRE` in `src/scene/cat/brain.ts`.
+**Since 2026-11-21 the cat only lies in the loaf and breathes.** Noah first asked to "keep the cat only in loaf mode"; asked whether it should still purr and stare there, he answered "Only breathing". So it breathes and blinks, and that is all: no emotes of its own accord, no greeting, no watching the pointer, no ear or tail flicks, and nothing in answer to a stroke or a click. (It still blinks because eyes that never close look wrong; that is my call, not his.)
+
+Everything described below is still built and tested, just switched off: `ONLY_BREATHING` and `REPERTOIRE` in `src/scene/cat/brain.ts` decide what it does, and each emote can still be started by hand in development with `window.__cat.play("purr")`. To bring things back, set `ONLY_BREATHING` to false and list the emotes wanted in `REPERTOIRE` ("loaf", "purr" and "stare" keep it in the loaf; "clean" sits it up; "roll" lays it on its side). Do not bring any of it back without asking.
 
 A long-haired grey tabby rests on the desk's right end, turned a little toward the middle. Nothing about it is downloaded: body, coat and motion are all made in code.
 

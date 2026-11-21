@@ -363,6 +363,11 @@ export class CatMotion {
   constructor(
     stance: StanceName = "loaf",
     private readonly random: () => number = Math.random,
+    /**
+     * Quiet: nothing but breathing and blinking. No ear or tail flicks, no wave in the tail, and
+     * the head stays where the pose puts it instead of following the pointer or wandering.
+     */
+    readonly quiet = false,
   ) {
     this.stance = stance;
     this.clip = rest(stance);
@@ -478,7 +483,7 @@ export class CatMotion {
     // Ears: pricked or laid back, and now and then one of them flicks.
     const back = Math.max(pose.ch[CH.ears], 0);
     const pricked = Math.max(-pose.ch[CH.ears], 0);
-    if (now > this.twitchAt) {
+    if (!this.quiet && now > this.twitchAt) {
       this.twitchT = 0;
       this.twitchSide = this.random() < 0.5 ? 1 : -1;
       this.twitchAt = now + 3.5 + this.random() * 7;
@@ -497,8 +502,8 @@ export class CatMotion {
     turn(pose, B.earR, -22 * back + 5 * pricked, -18 * flickR, 16 * back - 7 * pricked + 6 * flickR);
 
     // Tail: a slow wave that grows toward the tip, and sometimes a flick of the end.
-    const lively = pose.ch[CH.tail];
-    if (now > this.flickAt) {
+    const lively = this.quiet ? 0 : pose.ch[CH.tail];
+    if (!this.quiet && now > this.flickAt) {
       this.flickT = 0;
       this.flickWay = this.random() < 0.5 ? 1 : -1;
       this.flickAt = now + (1.2 + this.random() * 5) / Math.max(0.15, lively);
@@ -539,13 +544,13 @@ export class CatMotion {
     const hx = w.p[B.head * 3];
     const hy = w.p[B.head * 3 + 1];
     const hz = w.p[B.head * 3 + 2];
-    const yaw = 0.5 * wander(now * 0.14, 1) + 0.12 * wander(now * 0.5, 4);
-    const pitch = 0.14 * wander(now * 0.11, 2);
+    const yaw = this.quiet ? 0 : 0.5 * wander(now * 0.14, 1) + 0.12 * wander(now * 0.5, 4);
+    const pitch = this.quiet ? 0 : 0.14 * wander(now * 0.11, 2);
     let tx = hx + Math.sin(yaw) * 0.6;
     let ty = hy + Math.sin(pitch) * 0.6 + 0.02;
     let tz = hz + Math.cos(yaw) * 0.6;
     let speed = 1.6;
-    const interest = input.pointer ? clamp(input.attention) * (1 - staring) : 0;
+    const interest = input.pointer && !this.quiet ? clamp(input.attention) * (1 - staring) : 0;
     if (input.pointer && interest > 0) {
       tx = lerp(tx, input.pointer[0], interest);
       ty = lerp(ty, input.pointer[1], interest);
@@ -566,7 +571,9 @@ export class CatMotion {
     // Following something is quick and wants every frame; the idle wander is slow and does not.
     if ((interest > 0.02 || staring > 0.02) && Math.abs(this.look[0] + this.look[1] + this.look[2] - before) > 0.0006) busy = true;
 
-    const gaze = pose.ch[CH.gaze];
+    // Quiet, the head and eyes stay as the pose has them (unless an emote is played by hand).
+    const held = this.quiet && staring < 0.01 && !clip.busy;
+    const gaze = held ? 0 : pose.ch[CH.gaze];
     if (gaze > 0.001) {
       this.aim(B.neck, 0.4 * gaze, 0.6, this.look[0], this.look[1], this.look[2]);
       this.aim(B.head, gaze, 0.75, this.look[0], this.look[1], this.look[2]);
@@ -579,8 +586,9 @@ export class CatMotion {
     // Into the head's own frame: the inverse turn is the same quaternion with its axis flipped.
     const hq = [-w.q[B.head * 4], -w.q[B.head * 4 + 1], -w.q[B.head * 4 + 2], w.q[B.head * 4 + 3]];
     qRotate(local, 0, hq, 0, lx / ll, ly / ll, lz / ll);
-    const eyeYaw = clamp(Math.atan2(local[0], Math.max(0.05, local[2])), -0.42, 0.42) * 0.9 * Math.max(gaze, 0.25);
-    const eyePitch = clamp(-Math.asin(clamp(local[1], -1, 1)), -0.3, 0.3) * 0.9 * Math.max(gaze, 0.25);
+    const eyes = held ? 0 : Math.max(gaze, 0.25);
+    const eyeYaw = clamp(Math.atan2(local[0], Math.max(0.05, local[2])), -0.42, 0.42) * 0.9 * eyes;
+    const eyePitch = clamp(-Math.asin(clamp(local[1], -1, 1)), -0.3, 0.3) * 0.9 * eyes;
     const quick = 1 - Math.exp(-dt * 16);
     this.eyeYaw += (eyeYaw - this.eyeYaw) * quick;
     this.eyePitch += (eyePitch - this.eyePitch) * quick;
