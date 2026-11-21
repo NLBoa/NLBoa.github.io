@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { CatBrain, TRICKS } from "./brain";
+import { CatBrain, REPERTOIRE, TRICKS } from "./brain";
 import { CatMotion, EMOTES, plan, route } from "./motion";
 import { CH, buildPose, layTail, lowest, makeWorld, settle, solve } from "./pose";
 import { BONE_COUNT, TAIL_BONES, bone } from "./rig";
@@ -221,6 +221,22 @@ describe("what it decides", () => {
     expect(did).toContain("loaf");
   });
 
+  test("it stays in the loaf: it never chooses to clean or roll over, by itself or when clicked", () => {
+    const brain = new CatBrain(dice(11));
+    const did = new Set<string>();
+    let t = 0;
+    for (let n = 0; n < 80; n++) {
+      let next: string | null = null;
+      while (!next) next = brain.think((t += 0.25), true, "loaf", "loaf");
+      did.add(next);
+      brain.think((t += 0.25), false, "loaf", next);
+    }
+    for (let n = 0; n < 6; n++) did.add(brain.poke());
+    expect([...did].sort()).toEqual(["loaf", "purr", "stare"]);
+    // And none of those leaves the loaf.
+    for (const emote of REPERTOIRE) expect(plan(emote, "loaf").every((clip) => clip.stance === "loaf")).toBe(true);
+  });
+
   test("a stroke is the pointer resting on it; it answers with a purr", () => {
     const brain = new CatBrain(dice(1));
     brain.think(2.5, true, "loaf", "loaf");
@@ -248,7 +264,7 @@ describe("what it decides", () => {
 
   test("clicks go through its tricks in turn", () => {
     const brain = new CatBrain(dice(1));
-    expect([brain.poke(), brain.poke(), brain.poke(), brain.poke(), brain.poke()]).toEqual([...TRICKS, TRICKS[0]]);
+    expect([brain.poke(), brain.poke(), brain.poke(), brain.poke(), brain.poke()]).toEqual(Array.from({ length: 5 }, (_, i) => TRICKS[i % TRICKS.length]));
   });
 
   test("a pointer that comes back after a long quiet gets a look", () => {

@@ -6,6 +6,8 @@ Noah sent a photo of his cat, a grey tabby Siberian, and asked for it to live on
 
 ## What it does
 
+**Since 2026-11-21 the cat stays in the loaf** (Noah: "keep the cat only in loaf mode"). Of what is described below it now does only what a loafing cat does: it settles itself, purrs and stares. Cleaning and rolling over are still built, tested and playable from `window.__cat.play(...)`, but the cat never chooses them and a click never asks for them. To bring them back, add them to `REPERTOIRE` in `src/scene/cat/brain.ts`.
+
 A long-haired grey tabby rests on the desk's right end, turned a little toward the middle. Nothing about it is downloaded: body, coat and motion are all made in code.
 
 - **On its own.** It mostly rests in a loaf, breathing, blinking, an ear flicking now and then, the tail's tip moving. About 2.5 seconds after it appears it looks up at the visitor. After that, every 11 to 24 seconds, it does one of its emotes of its own accord, never the same one twice running.
@@ -37,7 +39,8 @@ It is decoration: it opens nothing, has no label and no place in the Tab order. 
 - **Colors are cooler than the photo** on purpose: the room's fill light is warm, and lit by it the coat comes out the brown-grey of the photo.
 - Its place and facing are `CAT` in `src/scene/layout.ts`. On a narrow screen the desk's right end is out of frame, so it sits 10 cm further in (`phonePosition`).
 - **Noah's first notes, 2026-11-21, while it was being built:** the eyes were "a little creepy" and should be more open; the paws needed to be more defined; the face should be fluffier and closer to the real cat. Done the same day: lids open wider with almost no slant, pupils rounder, a darker iris shaded by the upper lid; four toes on each paw with the lines between them; longer fur on the forehead, brows, cheeks and jowls, longer ear tufts, a visible nose and mouth, and a muzzle that is pale grey, not white. He has not yet said whether that is enough.
-- **No drawn lines on the head** (Noah, 2026-11-21: "instead of lines on the cat's head make it more fluffy like and less lines. In actuality cats don't have lines like that"). The tabby "M" on the forehead and the two stripes across each cheek are gone. The crown is a soft, uneven, slightly darker grey, and the head's fur is longer (27 mm) and stands out more, drawn in 17 layers. The body's stripes and the tail's rings are still there, and faint at desk size; he was speaking of the head. Do not bring crisp markings back on the face.
+- **No drawn lines on the head** (Noah, 2026-11-21: "instead of lines on the cat's head make it more fluffy like and less lines. In actuality cats don't have lines like that"). The tabby "M" on the forehead and the two stripes across each cheek are gone. The crown is a soft, uneven, slightly darker grey, and the head's fur is longer (27 mm) and stands out more, drawn in 17 layers. Do not bring crisp markings back on the face.
+- **No drawn stripes on the body either** (Noah, the same day: "Yes, soften them"). The stripes down the flanks, the line along the spine, the rings on the legs and the tail are now only a faint, broad, uneven darkening, about a third as strong as before with no edges; the tail still darkens toward its tip. The coat's character now comes from the fur, not from a pattern.
 
 ## Measured (2026-11-21, M3 Pro MacBook on mains power)
 

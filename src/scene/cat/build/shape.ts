@@ -278,18 +278,19 @@ export function describe(p: Vec3, n: Vec3): Described {
   let color = mix3(COAT.ground, COAT.saddle, saddle * 0.55);
   color = mix3(color, COAT.light, Math.min(1, under * 0.85 * body + ruff * 0.8 + m("cheek") * 0.35));
 
-  // Mackerel stripes down the flanks, a little bent and broken.
+  // No drawn stripes anywhere: the tabby pattern is only a soft, uneven darkening that comes and
+  // goes along the flanks, down the legs and along the tail, the way it shows through long fur.
   const flank = (m("torso") + m("thigh")) * smooth(-0.55, 0.05, n[1]);
-  const bodyBand = smooth(0.52, 0.8, 0.5 + 0.5 * Math.sin(2 * Math.PI * (z / 0.047 + fbm(x * 13, y * 13, z * 13) * 1.1 + Math.abs(x) * 2.2 - y * 1.5)));
+  const bodyBand = smooth(0.15, 0.95, 0.5 + 0.5 * Math.sin(2 * Math.PI * (z / 0.062 + fbm(x * 11, y * 11, z * 11) * 1.6 + Math.abs(x) * 2.2 - y * 1.5))) * (0.55 + 0.45 * smooth(0.25, 0.8, fbm(x * 34, y * 34, z * 34)));
   // A dark line along the spine.
-  const spine = Math.exp(-((x / 0.016) ** 2)) * smooth(0.6, 0.95, n[1]) * m("torso");
+  const spine = Math.exp(-((x / 0.034) ** 2)) * smooth(0.45, 0.95, n[1]) * m("torso");
   // Rings round the legs and the tail.
-  const legBand = smooth(0.5, 0.78, 0.5 + 0.5 * Math.sin(2 * Math.PI * (y / 0.034 + grain * 0.6 + z * 4)));
-  const tailBand = smooth(0.45, 0.75, 0.5 + 0.5 * Math.sin(2 * Math.PI * (z / 0.058 + grain * 0.35)));
-  const tailTip = smooth(-0.415, -0.455, z) * m("tail");
+  const legBand = smooth(0.15, 0.95, 0.5 + 0.5 * Math.sin(2 * Math.PI * (y / 0.04 + grain * 1.1 + z * 4)));
+  const tailBand = smooth(0.1, 0.95, 0.5 + 0.5 * Math.sin(2 * Math.PI * (z / 0.07 + grain * 0.8)));
+  const tailTip = smooth(-0.36, -0.47, z) * m("tail");
   const legs = m("arm") * 0.75 + m("leg");
 
-  let stripe = Math.max(bodyBand * flank * 0.78, spine * 0.85, legBand * legs * 0.7, tailBand * m("tail") * 0.72, tailTip);
+  let stripe = Math.max(bodyBand * flank * 0.26, spine * 0.3, legBand * legs * 0.2, tailBand * m("tail") * 0.24, tailTip * 0.55);
   // The tail is darker than the body all over.
   color = mix3(color, COAT.saddle, m("tail") * 0.5);
 

@@ -216,6 +216,7 @@ assets-src/      keyboard.glb, textures/                — git-ignored
 - 2026-11-21 — **Smooth motion is a test** (`src/scene/cat/cat.test.ts`): a minute of emotes at 60 frames a second, with cuts from one into another, fails if a joint turns more than 8 degrees or the body's height moves more than 7 mm in one frame. A new emote or stance must pass it.
 - 2026-11-21 — **Plugged in, Safari's engine runs at 60 frames a second.** `npm run frames` in DuckDuckGo and Safari with the MacBook on mains power: 17 ms a frame resting and with the pointer moving, none late. That settles the open question of 2026-11-18: the steady 30 was Low Power Mode on battery.
 - 2026-11-21 — **`npm run flows` has `ONLY`**: `ONLY=desk-cat npm run flows` runs just the feature checks whose file name contains that. The hand-off timing checks (`ONLY=handoff`) are only reliable against the production build (`BASE_URL=http://localhost:3200` after a build with `NEXT_PUBLIC_SCENE_STATS=1` and `npm run preview`); against the dev server three of them fail by a frame or two, with or without the cat.
+- 2026-11-21 — **Noah's rulings on the cat, after seeing it:** no drawn lines or stripes anywhere on it ("cats don't have lines like that"): the coat is soft, uneven shading only. And it **stays in the loaf**: it settles, purrs and stares, and never cleans or rolls over (both are still in the code; `REPERTOIRE` in `src/scene/cat/brain.ts` decides). Do not bring stripes or the other stances back without asking.
 
 ## Open questions for Noah
 

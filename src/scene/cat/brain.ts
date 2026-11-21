@@ -10,8 +10,15 @@ import type { EmoteName } from "./motion";
 
 type Stance = "sit" | "loaf" | "side";
 
+/**
+ * What the cat will do. Noah asked for it to stay in the loaf (2026-11-21), so only the things a
+ * loafing cat does: settle itself, purr, stare. Cleaning (which sits it up) and rolling over
+ * (which lays it on its side) are still built and tested; put them back here to bring them back.
+ */
+export const REPERTOIRE: readonly EmoteName[] = ["loaf", "purr", "stare"];
+
 /** What a click asks for, in turn. */
-export const TRICKS: EmoteName[] = ["stare", "clean", "roll", "loaf"];
+export const TRICKS: EmoteName[] = (["stare", "clean", "roll", "loaf"] as EmoteName[]).filter((emote) => REPERTOIRE.includes(emote));
 
 /** Seconds of quiet between things it does unasked. */
 const GAP = { min: 11, max: 24 };
@@ -110,11 +117,12 @@ export class CatBrain {
     const choices: [EmoteName, number][] = [
       ["clean", 3],
       ["roll", stance === "side" ? 0 : 2],
-      ["loaf", stance === "loaf" ? 0 : 4],
-      ["stare", 2],
-      ["purr", 1],
+      // Already loafing, this is only a small shuffle to get comfortable again.
+      ["loaf", stance === "loaf" ? 2 : 4],
+      ["stare", 3],
+      ["purr", 2],
     ];
-    const open = choices.filter(([name, weight]) => weight > 0 && name !== this.last);
+    const open = choices.filter(([name, weight]) => weight > 0 && name !== this.last && REPERTOIRE.includes(name));
     let pick = this.random() * open.reduce((sum, [, weight]) => sum + weight, 0);
     for (const [name, weight] of open) {
       pick -= weight;
